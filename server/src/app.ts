@@ -14,6 +14,11 @@ app.use((req, res, next) => {
     next();
     return;
   }
+  const expiresAt = process.env.ACCESS_CODE_EXPIRES_AT;
+  if (expiresAt && Date.now() > new Date(expiresAt).getTime()) {
+    res.status(403).json({ error: "This shared link has expired." });
+    return;
+  }
   const provided = req.header("x-access-code");
   if (provided !== required) {
     res.status(401).json({ error: "Access code required." });

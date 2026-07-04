@@ -18,15 +18,19 @@ async function postJson<TResponse>(url: string, body: unknown): Promise<TRespons
   });
   const data = await res.json();
   if (!res.ok) {
-    if (res.status === 401) throw new AccessCodeError(data?.error ?? "Access code required.");
+    if (res.status === 401 || res.status === 403) throw new AccessCodeError(data?.error ?? "Access code required.");
     throw new Error(data?.error ?? `Request failed with status ${res.status}`);
   }
   return data as TResponse;
 }
 
-export async function checkAccess(): Promise<boolean> {
+export type AccessState = "ok" | "locked" | "expired";
+
+export async function checkAccess(): Promise<AccessState> {
   const res = await fetch("/api/health", { headers: { "X-Access-Code": getAccessCode() } });
-  return res.status !== 401;
+  if (res.status === 403) return "expired";
+  if (res.status === 401) return "locked";
+  return "ok";
 }
 
 export function generateItinerary(input: GenerateItineraryRequest): Promise<Itinerary> {

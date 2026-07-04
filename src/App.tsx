@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useActiveTrip } from "./hooks/useActiveTrip";
 import { useSavedTrips, type SavedTrip } from "./hooks/useSavedTrips";
-import { checkAccess, generateItinerary, sendChatMessage } from "./api/itineraryApi";
+import { checkAccess, generateItinerary, sendChatMessage, type AccessState } from "./api/itineraryApi";
 import { setAccessCode } from "./api/accessCode";
 import type { ChatMessage, GenerateItineraryRequest } from "./types";
 import { TripSetupForm } from "./components/TripSetupForm";
@@ -19,28 +19,33 @@ function App() {
   const { savedTrips, saveTrip, deleteTrip, isSaved } = useSavedTrips();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [access, setAccess] = useState<"checking" | "locked" | "ok">("checking");
+  const [access, setAccess] = useState<"checking" | AccessState>("checking");
   const [accessError, setAccessError] = useState<string | null>(null);
 
   useEffect(() => {
     checkAccess()
-      .then((ok) => setAccess(ok ? "ok" : "locked"))
+      .then(setAccess)
       .catch(() => setAccess("ok"));
   }, []);
 
   async function handleAccessSubmit(code: string) {
     setAccessCode(code);
     setAccessError(null);
-    const ok = await checkAccess().catch(() => true);
-    if (ok) {
-      setAccess("ok");
-    } else {
+    const result = await checkAccess().catch(() => "ok" as AccessState);
+    setAccess(result);
+    if (result === "locked") {
       setAccessError("That access code isn't right.");
     }
   }
 
   if (access !== "ok") {
-    return <AccessGate checking={access === "checking"} error={accessError} onSubmit={handleAccessSubmit} />;
+    return (
+      <AccessGate
+        status={access}
+        error={accessError}
+        onSubmit={handleAccessSubmit}
+      />
+    );
   }
 
   async function handleGenerate(input: GenerateItineraryRequest) {
