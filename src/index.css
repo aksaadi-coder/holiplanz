@@ -1194,6 +1194,9 @@ body {
   .map-panel {
     height: 45vh;
     min-height: 300px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
   }
   .place-detail-card {
     width: 220px;
@@ -1211,6 +1214,13 @@ body {
   .trip-header {
     flex-wrap: wrap;
     gap: 0.5rem;
+  }
+  .trip-header-actions {
+    flex-wrap: wrap;
+  }
+  .day-selector {
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
   }
   .hero {
     min-height: 420px;
