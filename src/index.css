@@ -1250,7 +1250,7 @@ body {
   }
   .hero {
     min-height: 420px;
-    padding: 1.25rem;
+    padding: 1.25rem 0;
     align-items: flex-end;
   }
   .hero-card {
