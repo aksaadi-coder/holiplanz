@@ -363,7 +363,7 @@ body {
   overflow-y: auto;
   background: var(--panel-bg);
   border-radius: 14px;
-  padding: 1.5rem;
+  padding: 2.25rem 1.5rem 1.5rem;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 .modal-card h3 {
@@ -376,8 +376,8 @@ body {
 }
 .modal-close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 1.25rem;
+  right: 1.25rem;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 50%;
