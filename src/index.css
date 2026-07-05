@@ -359,6 +359,7 @@ body {
   width: 100%;
   max-width: 440px;
   max-height: 85vh;
+  max-height: 85dvh;
   overflow-y: auto;
   background: var(--panel-bg);
   border-radius: 14px;
@@ -1056,6 +1057,7 @@ body {
   display: flex;
   flex-direction: column;
   max-height: 40vh;
+  max-height: 40dvh;
 }
 .chat-panel h3 {
   margin: 0 0 0.5rem;
