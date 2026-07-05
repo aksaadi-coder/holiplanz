@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Itinerary } from "../types";
 import { BrandLogo } from "./BrandLogo";
 
@@ -23,6 +24,13 @@ export function Header({
   onAddAccommodation,
 }: Props) {
   const hasAccommodation = (itinerary.accommodations?.length ?? 0) > 0;
+  const [showMore, setShowMore] = useState(false);
+
+  function handleSecondary(action: () => void) {
+    setShowMore(false);
+    action();
+  }
+
   return (
     <header className="trip-header">
       <div>
@@ -34,53 +42,6 @@ export function Header({
         <p className="trip-destination">{itinerary.destination}</p>
       </div>
       <div className="trip-header-actions">
-        <button className="trip-info-button" onClick={onShowDestinationInfo}>
-          <svg
-            className="trip-info-icon"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="11" x2="12" y2="16" />
-            <circle cx="12" cy="7.2" r="1.4" fill="currentColor" stroke="none" />
-          </svg>
-          Trip info
-        </button>
-        {!hasAccommodation && (
-          <button className="trip-info-button" onClick={onAddAccommodation}>
-            <svg
-              className="accommodation-add-icon"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M2 20v-7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7" />
-              <path d="M2 13V7a2 2 0 0 1 2-2h6v6" />
-              <path d="M12 13h10" />
-            </svg>
-            Add accommodation
-          </button>
-        )}
-        <button className={saved ? "save-trip saved" : "save-trip"} onClick={onToggleSave}>
-          {saved ? "Saved ✓" : "Save trip"}
-        </button>
-        <button className="print-trip" onClick={onPreviewPdf}>
-          Preview PDF
-        </button>
-        <button className="print-trip" onClick={onSharePdf}>
-          Share PDF
-        </button>
         <button className="start-over" onClick={onStartOver}>
           <svg
             width="14"
@@ -96,6 +57,63 @@ export function Header({
           </svg>
           Home
         </button>
+        <button className={saved ? "save-trip saved" : "save-trip"} onClick={onToggleSave}>
+          {saved ? "Saved ✓" : "Save trip"}
+        </button>
+        <button
+          className="trip-header-more-toggle trip-info-button"
+          onClick={() => setShowMore((s) => !s)}
+          aria-label="More actions"
+          aria-expanded={showMore}
+        >
+          &#8943;
+        </button>
+        <div className={showMore ? "trip-header-secondary open" : "trip-header-secondary"}>
+          <button className="trip-info-button" onClick={() => handleSecondary(onShowDestinationInfo)}>
+            <svg
+              className="trip-info-icon"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="11" x2="12" y2="16" />
+              <circle cx="12" cy="7.2" r="1.4" fill="currentColor" stroke="none" />
+            </svg>
+            Trip info
+          </button>
+          {!hasAccommodation && (
+            <button className="trip-info-button" onClick={() => handleSecondary(onAddAccommodation)}>
+              <svg
+                className="accommodation-add-icon"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2 20v-7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7" />
+                <path d="M2 13V7a2 2 0 0 1 2-2h6v6" />
+                <path d="M12 13h10" />
+              </svg>
+              Add accommodation
+            </button>
+          )}
+          <button className="print-trip" onClick={() => handleSecondary(onPreviewPdf)}>
+            Preview PDF
+          </button>
+          <button className="print-trip" onClick={() => handleSecondary(onSharePdf)}>
+            Share PDF
+          </button>
+        </div>
       </div>
     </header>
   );
