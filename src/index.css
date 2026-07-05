@@ -483,6 +483,9 @@ body {
   font-size: 0.85rem;
   color: var(--text);
 }
+.print-trip {
+  text-align: left;
+}
 .start-over {
   display: inline-flex;
   align-items: center;
