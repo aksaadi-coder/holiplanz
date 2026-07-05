@@ -1203,11 +1203,10 @@ body {
   }
   .place-detail-card {
     width: 220px;
-    top: 0.5rem;
-    right: 0.5rem;
+    max-height: 220px;
   }
   .place-detail-card img {
-    height: 100px;
+    height: 70px;
   }
   .side-panel {
     max-width: none;
