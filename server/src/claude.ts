@@ -34,7 +34,6 @@ export async function generateItinerary(input: {
   startDate?: string;
   preferences?: string;
   includeAccommodation?: boolean;
-  bookedAccommodation?: string;
 }): Promise<Itinerary> {
   const userMessage = [
     `Plan a trip to ${input.destination}.`,
@@ -43,11 +42,9 @@ export async function generateItinerary(input: {
       : `Use your judgement for a sensible trip length if not specified (default to 3-5 days).`,
     input.startDate ? `Start date: ${input.startDate}.` : "",
     input.preferences ? `Preferences: ${input.preferences}.` : "",
-    input.bookedAccommodation
-      ? `The user has already booked their accommodation for this trip: "${input.bookedAccommodation}". Add it as a single confirmed accommodation option (style "Confirmed") covering the appropriate days per the accommodation rules - do not suggest alternatives.`
-      : input.includeAccommodation
-        ? `Also suggest accommodation: include an "accommodations" array covering the full trip, with 3 distinct options (budget, mid-range, boutique/luxury) per city/area.`
-        : "",
+    input.includeAccommodation
+      ? `Also suggest accommodation: include an "accommodations" array covering the full trip, with 3 distinct options (budget, mid-range, boutique/luxury) per city/area.`
+      : "",
   ]
     .filter(Boolean)
     .join(" ");

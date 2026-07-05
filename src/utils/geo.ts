@@ -26,6 +26,18 @@ export function googleMapsUrl(stop: { lat: number; lng: number }): string {
   return `https://www.google.com/maps/search/?api=1&query=${stop.lat},${stop.lng}`;
 }
 
+export function directionsUrl(
+  destination: { lat: number; lng: number },
+  origin?: { lat: number; lng: number },
+): string {
+  const params = new URLSearchParams({
+    api: "1",
+    destination: `${destination.lat},${destination.lng}`,
+  });
+  if (origin) params.set("origin", `${origin.lat},${origin.lng}`);
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+
 export function googleSearchUrl(stopName: string, destination: string): string {
   return `https://www.google.com/search?q=${encodeURIComponent(`${stopName} ${destination}`)}`;
 }
@@ -36,4 +48,8 @@ export function tripAdvisorSearchUrl(stopName: string, destination: string): str
 
 export function bookingSearchUrl(name: string, destination: string): string {
   return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${name}, ${destination}`)}`;
+}
+
+export function airbnbSearchUrl(name: string, destination: string): string {
+  return `https://www.airbnb.com/s/homes?query=${encodeURIComponent(`${name}, ${destination}`)}`;
 }

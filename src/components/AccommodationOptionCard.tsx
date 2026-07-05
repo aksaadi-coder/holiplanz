@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { AccommodationOption, StopDetails } from "../types";
 import { fetchPlaceInfo, type PlaceInfo } from "../api/wikipediaApi";
-import { bookingSearchUrl, googleSearchUrl } from "../utils/geo";
+import { airbnbSearchUrl, bookingSearchUrl, googleSearchUrl } from "../utils/geo";
 
 interface Props {
   option: AccommodationOption;
@@ -121,14 +121,24 @@ export function AccommodationOptionCard({
         <p className="accommodation-option-description">{option.description}</p>
         <span className="accommodation-card-price">{option.estimatedPricePerNight} (approx.)</span>
         <div className="accommodation-option-actions">
-          <a
-            href={bookingSearchUrl(option.name, destination)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            Search on Booking.com &rarr;
-          </a>
+          <div className="accommodation-option-links">
+            <a
+              href={bookingSearchUrl(option.name, destination)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Search on Booking.com &rarr;
+            </a>
+            <a
+              href={airbnbSearchUrl(option.name, destination)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Search on Airbnb &rarr;
+            </a>
+          </div>
           {onConfirm && (
             <button
               className="accommodation-confirm-button"

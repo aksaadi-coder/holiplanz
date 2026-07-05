@@ -27,8 +27,7 @@ function errorMessage(err: unknown): { status: number; message: string } {
 
 router.post("/generate", async (req, res) => {
   try {
-    const { destination, numDays, startDate, preferences, includeAccommodation, bookedAccommodation } =
-      req.body ?? {};
+    const { destination, numDays, startDate, preferences, includeAccommodation } = req.body ?? {};
     if (!isValidString(destination, MAX_SHORT_TEXT)) {
       res.status(400).json({ error: "destination is required" });
       return;
@@ -37,17 +36,12 @@ router.post("/generate", async (req, res) => {
       res.status(400).json({ error: "preferences is too long" });
       return;
     }
-    if (bookedAccommodation !== undefined && !isValidString(bookedAccommodation, MAX_SHORT_TEXT)) {
-      res.status(400).json({ error: "bookedAccommodation is too long" });
-      return;
-    }
     const itinerary = await generateItinerary({
       destination,
       numDays,
       startDate,
       preferences,
       includeAccommodation,
-      bookedAccommodation,
     });
     res.json(itinerary);
   } catch (err) {

@@ -1,12 +1,13 @@
 import type { Stop, StopDetails } from "../../types";
 import type { PlaceInfo } from "../../api/wikipediaApi";
-import { googleMapsUrl, googleSearchUrl, isFlaggedLocation, tripAdvisorSearchUrl } from "../../utils/geo";
+import { directionsUrl, googleMapsUrl, googleSearchUrl, isFlaggedLocation, tripAdvisorSearchUrl } from "../../utils/geo";
 
 interface Props {
   stop: Stop;
   index: number;
   destination: string;
   destinationCenter: { lat: number; lng: number };
+  origin?: { lat: number; lng: number };
   highlighted: boolean;
   expanded: boolean;
   placeInfo: PlaceInfo | null;
@@ -23,6 +24,7 @@ export function StopCard({
   index,
   destination,
   destinationCenter,
+  origin,
   highlighted,
   expanded,
   placeInfo,
@@ -76,15 +78,27 @@ export function StopCard({
           <span className="tag">{stop.category}</span>
           {flagged && <span className="tag tag-warning">unverified location</span>}
         </div>
-        <a
-          className="stop-link"
-          href={googleMapsUrl(stop)}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-        >
-          View on map &#8599;
-        </a>
+        {stop.howToGetThere && <p className="stop-getting-there">&#128663; {stop.howToGetThere}</p>}
+        <div className="stop-links">
+          <a
+            className="stop-link"
+            href={googleMapsUrl(stop)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            View on map &#8599;
+          </a>
+          <a
+            className="stop-link"
+            href={directionsUrl(stop, origin)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Get directions &#8599;
+          </a>
+        </div>
 
         {expanded && (
           <div className="stop-expanded" onClick={(e) => e.stopPropagation()}>

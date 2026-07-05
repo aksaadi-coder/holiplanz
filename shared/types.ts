@@ -21,6 +21,7 @@ export interface Stop {
   durationMinutes?: number;
   lat: number;
   lng: number;
+  howToGetThere?: string;
 }
 
 export interface Day {
@@ -76,7 +77,6 @@ export interface GenerateItineraryRequest {
   startDate?: string;
   preferences?: string;
   includeAccommodation?: boolean;
-  bookedAccommodation?: string;
 }
 
 export interface ChatItineraryRequest {

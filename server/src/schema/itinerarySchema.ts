@@ -24,6 +24,7 @@ export const stopSchema = z.object({
   durationMinutes: z.number().optional(),
   lat: z.number(),
   lng: z.number(),
+  howToGetThere: z.string().optional(),
 });
 
 export const daySchema = z.object({

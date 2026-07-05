@@ -8,7 +8,7 @@ import { Header } from "./Header";
 import { DaySelector } from "./DaySelector";
 import { MapView } from "./MapPanel/MapView";
 import { DestinationInfoModal } from "./DestinationInfoModal";
-import { AddAccommodationModal, type AddAccommodationInput } from "./AddAccommodationModal";
+import { AddAccommodationModal } from "./AddAccommodationModal";
 import { ItineraryPanel } from "./ItineraryPanel/ItineraryPanel";
 import { PrintItinerary } from "./ItineraryPanel/PrintItinerary";
 import { ChatPanel } from "./ChatPanel/ChatPanel";
@@ -200,12 +200,11 @@ export function TripView({
     });
   }
 
-  function handleAddAccommodation(input: AddAccommodationInput) {
+  function handleAddAccommodation() {
     setShowAddAccommodation(false);
-    const message = input.bookedAccommodation
-      ? `We already booked "${input.bookedAccommodation}" for our stay, please add it as our confirmed accommodation.`
-      : "Please suggest accommodation options for this trip - include 3 distinct options (budget, mid-range, boutique/luxury) covering the whole stay.";
-    onSendChat(message);
+    onSendChat(
+      "Please suggest accommodation options for this trip - include 3 distinct options (budget, mid-range, boutique/luxury) covering the whole stay.",
+    );
   }
 
   function handleShowDestinationInfo() {

@@ -818,6 +818,11 @@ body {
   flex-wrap: wrap;
   gap: 0.4rem 0.75rem;
 }
+.accommodation-option-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+}
 .accommodation-confirm-button {
   font: inherit;
   font-size: 0.75rem;
@@ -939,9 +944,19 @@ body {
   background: #fef3c7;
   color: #92400e;
 }
+.stop-getting-there {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.stop-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  margin-top: 0.5rem;
+}
 .stop-link {
   display: inline-block;
-  margin-top: 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--accent);

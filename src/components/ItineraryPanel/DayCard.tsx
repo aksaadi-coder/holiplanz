@@ -47,6 +47,12 @@ export function DayCard({
   onConfirmAccommodationOption = noop,
   showPrintMap = false,
 }: Props) {
+  const accommodationForDay = itinerary.accommodations?.find(
+    (acc) => acc.startDay <= day.dayNumber && acc.endDay >= day.dayNumber,
+  );
+  const firstStopOrigin =
+    accommodationForDay?.options.length === 1 ? accommodationForDay.options[0] : undefined;
+
   return (
     <div className="day-card">
       <h3>
@@ -90,6 +96,7 @@ export function DayCard({
       <div className="stop-list">
         {day.stops.map((stop, i) => {
           const expanded = expandedStopId === stop.id;
+          const origin = i > 0 ? day.stops[i - 1] : firstStopOrigin;
           return (
             <StopCard
               key={stop.id}
@@ -97,6 +104,7 @@ export function DayCard({
               index={i}
               destination={itinerary.destination}
               destinationCenter={itinerary.destinationCenter}
+              origin={origin}
               highlighted={highlightedStopId === stop.id}
               expanded={expanded}
               placeInfo={expanded ? placeInfo : null}

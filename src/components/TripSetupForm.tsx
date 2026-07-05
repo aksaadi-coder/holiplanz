@@ -56,17 +56,6 @@ export function TripSetupForm({
   const [startDate, setStartDate] = useState("");
   const [preferences, setPreferences] = useState("");
   const [includeAccommodation, setIncludeAccommodation] = useState(false);
-  const [bookedAccommodation, setBookedAccommodation] = useState("");
-
-  function handleIncludeAccommodationChange(checked: boolean) {
-    setIncludeAccommodation(checked);
-    if (checked) setBookedAccommodation("");
-  }
-
-  function handleBookedAccommodationChange(value: string) {
-    setBookedAccommodation(value);
-    if (value.trim()) setIncludeAccommodation(false);
-  }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -77,7 +66,6 @@ export function TripSetupForm({
       startDate: startDate || undefined,
       preferences: preferences.trim() || undefined,
       includeAccommodation: includeAccommodation || undefined,
-      bookedAccommodation: bookedAccommodation.trim() || undefined,
     });
   }
 
@@ -145,20 +133,10 @@ export function TripSetupForm({
               <input
                 type="checkbox"
                 checked={includeAccommodation}
-                onChange={(e) => handleIncludeAccommodationChange(e.target.checked)}
-                disabled={loading || !!bookedAccommodation.trim()}
+                onChange={(e) => setIncludeAccommodation(e.target.checked)}
+                disabled={loading}
               />
               Include accommodation suggestions
-            </label>
-            <label>
-              Already booked a hotel? (optional)
-              <input
-                type="text"
-                placeholder="e.g. Hotel Alfonso XIII"
-                value={bookedAccommodation}
-                onChange={(e) => handleBookedAccommodationChange(e.target.value)}
-                disabled={loading || includeAccommodation}
-              />
             </label>
             {error && <p className="error-text">{error}</p>}
             <button type="submit" disabled={loading || !destination.trim()}>
