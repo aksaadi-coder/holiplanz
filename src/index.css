@@ -339,9 +339,6 @@ body {
 .trip-info-icon {
   color: #dc2626;
 }
-.accommodation-add-icon {
-  color: #2563eb;
-}
 
 /* Destination info modal */
 .modal-backdrop {
@@ -483,10 +480,8 @@ body {
   font-size: 0.85rem;
   color: var(--text);
 }
+.start-over,
 .print-trip {
-  text-align: left;
-}
-.start-over {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
