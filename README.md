@@ -7,7 +7,7 @@ Tell it where your next holiday is, and it sketches a day-by-day itinerary on an
 - **Frontend**: React + Vite, with an interactive Leaflet/OpenStreetMap view showing numbered stops and routes per day.
 - **Backend**: A small Express server that proxies requests to the Claude API. Your Anthropic API key lives only on the server (`server/.env`) and never reaches the browser.
 - **AI**: Claude generates the itinerary as structured data (not just prose), so it can be rendered on the map and edited turn-by-turn via chat.
-- **Storage**: The app always opens on the landing page - it never auto-resumes an in-progress trip. Click **Save trip** to keep one; saved trips are stored in your browser's `localStorage` and shown at the bottom of the landing page. There's no account system and no database - saved trips live only on this machine.
+- **Storage**: Your current trip (and chat history) persists in the browser's `localStorage`, so refreshing or reopening the tab picks up right where you left off. Use **Home** to explicitly clear it and return to the landing page. Click **Save trip** to keep a trip permanently under "Saved trips" on the landing page even after starting a new one. There's no account system and no database - everything lives only on this machine/browser.
 
 ## Prerequisites
 
