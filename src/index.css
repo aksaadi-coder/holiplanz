@@ -1219,6 +1219,8 @@ body {
   }
   .trip-header-actions {
     flex-wrap: wrap;
+    flex-shrink: 1;
+    width: 100%;
   }
   .day-selector {
     mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
