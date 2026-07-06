@@ -1,7 +1,10 @@
+import { useState } from "react";
 import type { AccommodationOption, Itinerary, StopDetails } from "../../types";
 import type { PlaceInfo } from "../../api/wikipediaApi";
 import { DayCard } from "./DayCard";
 import { TripOverview } from "./TripOverview";
+
+const EDIT_HINT_KEY = "holidayPlanner.editHintDismissed.v1";
 
 interface Props {
   itinerary: Itinerary;
@@ -46,8 +49,27 @@ export function ItineraryPanel({
   onSelectDay,
   onDeleteStop,
 }: Props) {
+  const [hintDismissed, setHintDismissed] = useState(
+    () => localStorage.getItem(EDIT_HINT_KEY) === "1",
+  );
+
+  function dismissHint() {
+    localStorage.setItem(EDIT_HINT_KEY, "1");
+    setHintDismissed(true);
+  }
+
   return (
     <div className="itinerary-panel">
+      {selectedDay !== "all" && !hintDismissed && (
+        <div className="edit-hint">
+          <span>
+            Tip: hold &amp; drag a card to move it &middot; swipe left (or tap the trash) to delete
+          </span>
+          <button onClick={dismissHint} aria-label="Dismiss tip">
+            &times;
+          </button>
+        </div>
+      )}
       {selectedDay === "all" ? (
         <TripOverview itinerary={itinerary} onSelectDay={onSelectDay} />
       ) : (

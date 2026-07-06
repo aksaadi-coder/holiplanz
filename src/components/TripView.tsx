@@ -5,10 +5,11 @@ import {
   MouseSensor,
   TouchSensor,
   closestCenter,
+  pointerWithin,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import type { CollisionDetection, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import type { AccommodationOption, ChatMessage, DestinationInfo, Itinerary, Stop, StopDetails } from "../types";
 import { fetchDestinationInfo, fetchStopDetails } from "../api/itineraryApi";
 import { fetchPlaceInfo, type PlaceInfo } from "../api/wikipediaApi";
@@ -17,6 +18,7 @@ import { previewItineraryPdf, shareItineraryPdf } from "../utils/pdf";
 import { deleteStop, findStop, moveStopToDay, reorderStopWithinDay } from "../utils/itineraryEdit";
 import { Header } from "./Header";
 import { DaySelector, DAY_TAB_PREFIX } from "./DaySelector";
+import { DropDock, DOCK_PREFIX } from "./DropDock";
 import { MapView } from "./MapPanel/MapView";
 import { DestinationInfoModal } from "./DestinationInfoModal";
 import { AddAccommodationModal } from "./AddAccommodationModal";
@@ -35,6 +37,19 @@ interface Props {
   onToggleSave: () => void;
   onConfirmAccommodationOption: (accommodationId: string, optionId: string) => void;
   onUpdateItinerary: (next: Itinerary) => void;
+}
+
+// Prefer whatever is directly under the pointer (day tabs, dock chips, cards);
+// fall back to nearest-center so gaps between cards still resolve to a target.
+const dndCollisions: CollisionDetection = (args) => {
+  const within = pointerWithin(args);
+  return within.length > 0 ? within : closestCenter(args);
+};
+
+function dropTargetDay(overId: string): number | null {
+  if (overId.startsWith(DAY_TAB_PREFIX)) return Number(overId.slice(DAY_TAB_PREFIX.length));
+  if (overId.startsWith(DOCK_PREFIX)) return Number(overId.slice(DOCK_PREFIX.length));
+  return null;
 }
 
 function dayListLabel(days: Set<number>): string {
@@ -265,10 +280,13 @@ export function TripView({
     if (!over || selectedDay === "all") return;
     const stopId = String(active.id);
     const overId = String(over.id);
+    const found = findStop(itinerary, stopId);
+    if (!found) return;
 
-    if (overId.startsWith(DAY_TAB_PREFIX)) {
-      const targetDay = Number(overId.slice(DAY_TAB_PREFIX.length));
+    const targetDay = dropTargetDay(overId);
+    if (targetDay !== null) {
       if (targetDay !== selectedDay) {
+        showUndo(itinerary, `Moved ${found.stop.name} to day ${targetDay}`);
         onUpdateItinerary(moveStopToDay(itinerary, stopId, targetDay));
         markDirty([selectedDay, targetDay]);
       }
@@ -280,6 +298,7 @@ export function TripView({
     const from = day.stops.findIndex((s) => s.id === stopId);
     const to = day.stops.findIndex((s) => s.id === overId);
     if (from === -1 || to === -1 || from === to) return;
+    showUndo(itinerary, `Moved ${found.stop.name}`);
     onUpdateItinerary(reorderStopWithinDay(itinerary, day.dayNumber, from, to));
     markDirty([day.dayNumber]);
   }
@@ -356,7 +375,7 @@ export function TripView({
       />
       <DndContext
         sensors={dndSensors}
-        collisionDetection={closestCenter}
+        collisionDetection={dndCollisions}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragCancel={() => setActiveDragStop(null)}
@@ -425,6 +444,7 @@ export function TripView({
           </div>
         )}
       </DragOverlay>
+      {activeDragStop && <DropDock days={itinerary.days} currentDay={selectedDay} />}
       </DndContext>
       {undo && <UndoToast message={undo.message} onUndo={handleUndo} />}
       <PrintItinerary itinerary={itinerary} />

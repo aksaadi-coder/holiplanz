@@ -1951,3 +1951,124 @@ body {
     animation: none;
   }
 }
+
+/* Drag affordance: grip handle */
+.stop-grip {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  opacity: 0.55;
+  cursor: grab;
+  padding: 0.15rem 0.1rem;
+}
+.stop-card:hover .stop-grip {
+  opacity: 0.9;
+}
+
+/* One-time editing hint */
+.edit-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.6rem 0.5rem 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.edit-hint button {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.edit-hint button:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* Floating move-to-day dock (visible only while dragging) */
+.drop-dock {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  z-index: 2500;
+  max-width: calc(100vw - 1.5rem);
+  animation: drop-dock-in 0.2s ease;
+}
+@keyframes drop-dock-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+.drop-dock-label {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.drop-dock-chips {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+}
+.drop-dock-chip {
+  flex-shrink: 0;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px dashed var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.drop-dock-chip.current {
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.drop-dock-chip.over {
+  background: var(--accent);
+  border-style: solid;
+  border-color: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .drop-dock-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop-dock {
+    animation: none;
+  }
+}
