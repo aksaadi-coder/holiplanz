@@ -54,13 +54,17 @@ export function StopCard({
           </div>
           {onDelete && (
             <span className="stop-grip" aria-hidden="true" title="Hold and drag to move">
-              <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor">
-                <circle cx="3" cy="3" r="1.3" />
-                <circle cx="7" cy="3" r="1.3" />
-                <circle cx="3" cy="8" r="1.3" />
-                <circle cx="7" cy="8" r="1.3" />
-                <circle cx="3" cy="13" r="1.3" />
-                <circle cx="7" cy="13" r="1.3" />
+              <svg
+                width="14"
+                height="10"
+                viewBox="0 0 14 10"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              >
+                <line x1="2" y1="3.5" x2="12" y2="3.5" />
+                <line x1="2" y1="6.5" x2="12" y2="6.5" />
               </svg>
             </span>
           )}

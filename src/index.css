@@ -921,6 +921,8 @@ body {
   align-items: baseline;
   gap: 0.5rem;
   flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 .stop-time {
   font-size: 0.75rem;
@@ -1957,13 +1959,12 @@ body {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  color: var(--text-muted);
-  opacity: 0.55;
+  color: #c9ced6;
   cursor: grab;
-  padding: 0.15rem 0.1rem;
+  padding: 0.2rem 0.1rem;
 }
 .stop-card:hover .stop-grip {
-  opacity: 0.9;
+  color: var(--text-muted);
 }
 
 /* One-time editing hint */
