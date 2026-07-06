@@ -2073,3 +2073,59 @@ body {
     animation: none;
   }
 }
+
+/* Mark-as-done */
+.stop-card.done .stop-header-text strong {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: rgba(31, 41, 55, 0.45);
+}
+.stop-card.done .stop-body > p,
+.stop-card.done .stop-tags,
+.stop-card.done .stop-getting-there,
+.stop-card.done .stop-links,
+.stop-card.done .stop-time {
+  opacity: 0.55;
+}
+.stop-card.done .stop-number {
+  background: #16a34a;
+}
+.stop-done-toggle {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0.15rem;
+  cursor: pointer;
+  color: #c9ced6;
+  line-height: 1;
+}
+.stop-done-toggle:hover {
+  color: #16a34a;
+}
+.stop-done-toggle.done {
+  color: #16a34a;
+}
+.stop-swipe-backdrop.stop-swipe-done {
+  justify-content: flex-start;
+  padding-left: 1.25rem;
+  background: #16a34a;
+}
+.day-progress {
+  margin-left: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.day-progress.all-done {
+  color: #fff;
+  background: #16a34a;
+  border-color: #16a34a;
+}

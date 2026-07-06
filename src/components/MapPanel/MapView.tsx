@@ -25,6 +25,7 @@ interface Props {
   selectedAccommodationOptionId: string | null;
   onAccommodationOptionClick: (option: AccommodationOption) => void;
   onConfirmAccommodationOption: (accommodationId: string, optionId: string) => void;
+  completedStopIds?: Set<string>;
 }
 
 function FitBounds({
@@ -92,6 +93,7 @@ export function MapView({
   selectedAccommodationOptionId,
   onAccommodationOptionClick,
   onConfirmAccommodationOption,
+  completedStopIds,
 }: Props) {
   const visibleDays =
     selectedDay === "all" ? itinerary.days : itinerary.days.filter((d) => d.dayNumber === selectedDay);
@@ -218,7 +220,12 @@ export function MapView({
                     }
                   }}
                   position={[stop.lat, stop.lng]}
-                  icon={numberedIcon(i + 1, highlightedStopId === stop.id, flagged)}
+                  icon={numberedIcon(
+                    i + 1,
+                    highlightedStopId === stop.id,
+                    flagged,
+                    completedStopIds?.has(stop.id) ?? false,
+                  )}
                   eventHandlers={{ click: () => onStopClick(stop.id) }}
                 >
                   <Tooltip direction="top" offset={[0, -14]} opacity={1}>

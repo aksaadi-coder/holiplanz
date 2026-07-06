@@ -5,18 +5,21 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Stop } from "../../types";
 
 const SWIPE_ENGAGE_PX = 14;
-const SWIPE_DELETE_PX = 96;
+const SWIPE_ACTION_PX = 96;
 
 interface Props {
   stop: Stop;
+  done: boolean;
   onDelete: () => void;
+  onToggleDone: () => void;
   children: ReactNode;
 }
 
-// Wraps a StopCard with the two edit gestures:
+// Wraps a StopCard with the edit gestures:
 // - hold ~300ms then drag to reorder (dnd-kit sortable; mouse drags need 8px movement)
 // - swipe left (touch only) to reveal a delete zone; past the threshold, release deletes
-export function StopCardShell({ stop, onDelete, children }: Props) {
+// - swipe right (touch only) to reveal a done zone; past the threshold, release toggles done
+export function StopCardShell({ stop, done, onDelete, onToggleDone, children }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: stop.id,
   });
@@ -47,7 +50,7 @@ export function StopCardShell({ stop, onDelete, children }: Props) {
         swipeRef.current = null;
         return;
       }
-      if (dx > 0 || Math.abs(dx) < SWIPE_ENGAGE_PX) return;
+      if (Math.abs(dx) < SWIPE_ENGAGE_PX) return;
       swipe.engaged = true;
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
@@ -55,7 +58,7 @@ export function StopCardShell({ stop, onDelete, children }: Props) {
         // pointer may no longer be active (e.g. synthetic events); tracking still works
       }
     }
-    setSwipeX(Math.min(0, dx));
+    setSwipeX(dx);
   }
 
   function handlePointerEnd(e: ReactPointerEvent<HTMLDivElement>) {
@@ -63,13 +66,16 @@ export function StopCardShell({ stop, onDelete, children }: Props) {
     swipeRef.current = null;
     if (!swipe?.engaged) return;
     suppressClickRef.current = true;
-    if (e.type !== "pointercancel" && swipeX < -SWIPE_DELETE_PX) {
+    if (e.type !== "pointercancel" && swipeX < -SWIPE_ACTION_PX) {
       setRemoving(true);
       setSwipeX(-window.innerWidth);
       setTimeout(onDelete, 180);
-    } else {
-      setSwipeX(0);
+      return;
     }
+    if (e.type !== "pointercancel" && swipeX > SWIPE_ACTION_PX) {
+      onToggleDone();
+    }
+    setSwipeX(0);
   }
 
   function handleClickCapture(e: ReactMouseEvent<HTMLDivElement>) {
@@ -88,6 +94,8 @@ export function StopCardShell({ stop, onDelete, children }: Props) {
     transition,
   };
 
+  const swipingRight = swipeX > 0;
+
   return (
     <div
       ref={setNodeRef}
@@ -101,8 +109,11 @@ export function StopCardShell({ stop, onDelete, children }: Props) {
       onPointerCancel={handlePointerEnd}
       onClickCapture={handleClickCapture}
     >
-      <div className="stop-swipe-backdrop" aria-hidden="true">
-        <span>Delete</span>
+      <div
+        className={`stop-swipe-backdrop${swipingRight ? " stop-swipe-done" : ""}`}
+        aria-hidden="true"
+      >
+        <span>{swipingRight ? (done ? "Not done" : "Done ✓") : "Delete"}</span>
       </div>
       <div
         className={`stop-shell-inner${swipeRef.current?.engaged ? "" : " stop-shell-settle"}`}

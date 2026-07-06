@@ -8,6 +8,7 @@ export interface SavedTrip {
   itinerary: Itinerary;
   chatHistory: ChatMessage[];
   savedAt: string;
+  completedStopIds?: string[];
 }
 
 function loadInitial(): SavedTrip[] {
@@ -29,9 +30,14 @@ export function useSavedTrips() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, trips: savedTrips }));
   }, [savedTrips]);
 
-  function saveTrip(itinerary: Itinerary, chatHistory: ChatMessage[]) {
+  function saveTrip(itinerary: Itinerary, chatHistory: ChatMessage[], completedStopIds?: string[]) {
     setSavedTrips((prev) => {
-      const entry: SavedTrip = { itinerary, chatHistory, savedAt: new Date().toISOString() };
+      const entry: SavedTrip = {
+        itinerary,
+        chatHistory,
+        savedAt: new Date().toISOString(),
+        completedStopIds,
+      };
       const existingIndex = prev.findIndex((t) => t.itinerary.id === itinerary.id);
       if (existingIndex >= 0) {
         const copy = [...prev];

@@ -37,6 +37,8 @@ interface Props {
   onToggleSave: () => void;
   onConfirmAccommodationOption: (accommodationId: string, optionId: string) => void;
   onUpdateItinerary: (next: Itinerary) => void;
+  completedStopIds: Set<string>;
+  onToggleStopDone: (stopId: string) => void;
 }
 
 // Prefer whatever is directly under the pointer (day tabs, dock chips, cards);
@@ -68,6 +70,8 @@ export function TripView({
   onToggleSave,
   onConfirmAccommodationOption,
   onUpdateItinerary,
+  completedStopIds,
+  onToggleStopDone,
 }: Props) {
   const [selectedDay, setSelectedDay] = useState<number | "all">("all");
   const [highlightedStopId, setHighlightedStopId] = useState<string | null>(null);
@@ -402,6 +406,7 @@ export function TripView({
             selectedAccommodationOptionId={selectedAccommodationOptionId}
             onAccommodationOptionClick={handleAccommodationOptionClick}
             onConfirmAccommodationOption={handleConfirmAccommodationOption}
+            completedStopIds={completedStopIds}
           />
         </div>
         <div className="side-panel">
@@ -425,6 +430,8 @@ export function TripView({
             onConfirmAccommodationOption={handleConfirmAccommodationOption}
             onSelectDay={handleDaySelect}
             onDeleteStop={handleDeleteStop}
+            completedStopIds={completedStopIds}
+            onToggleStopDone={onToggleStopDone}
           />
           <ChatPanel
             messages={chatHistory}

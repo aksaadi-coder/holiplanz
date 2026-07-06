@@ -27,6 +27,8 @@ interface Props {
   showPrintMap?: boolean;
   editable?: boolean;
   onDeleteStop?: (stopId: string) => void;
+  completedStopIds?: Set<string>;
+  onToggleStopDone?: (stopId: string) => void;
 }
 
 function noop() {}
@@ -52,17 +54,27 @@ export function DayCard({
   showPrintMap = false,
   editable = false,
   onDeleteStop,
+  completedStopIds,
+  onToggleStopDone,
 }: Props) {
   const accommodationForDay = itinerary.accommodations?.find(
     (acc) => acc.startDay <= day.dayNumber && acc.endDay >= day.dayNumber,
   );
   const firstStopOrigin =
     accommodationForDay?.options.length === 1 ? accommodationForDay.options[0] : undefined;
+  const doneCount = completedStopIds
+    ? day.stops.filter((s) => completedStopIds.has(s.id)).length
+    : 0;
 
   return (
     <div className="day-card">
       <h3>
         Day {day.dayNumber}: {day.title}
+        {doneCount > 0 && (
+          <span className={doneCount === day.stops.length ? "day-progress all-done" : "day-progress"}>
+            {doneCount}/{day.stops.length} done
+          </span>
+        )}
       </h3>
       <p className="day-summary">{day.summary}</p>
       {itinerary.accommodations
@@ -104,6 +116,7 @@ export function DayCard({
           const cards = day.stops.map((stop, i) => {
             const expanded = expandedStopId === stop.id;
             const origin = i > 0 ? day.stops[i - 1] : firstStopOrigin;
+            const stopDone = completedStopIds?.has(stop.id) ?? false;
             const card = (
               <StopCard
                 key={editable ? undefined : stop.id}
@@ -122,11 +135,21 @@ export function DayCard({
                 onHover={onHover}
                 onClick={onClick}
                 onDelete={editable && onDeleteStop ? () => onDeleteStop(stop.id) : undefined}
+                done={stopDone}
+                onToggleDone={
+                  editable && onToggleStopDone ? () => onToggleStopDone(stop.id) : undefined
+                }
               />
             );
-            if (!editable || !onDeleteStop) return card;
+            if (!editable || !onDeleteStop || !onToggleStopDone) return card;
             return (
-              <StopCardShell key={stop.id} stop={stop} onDelete={() => onDeleteStop(stop.id)}>
+              <StopCardShell
+                key={stop.id}
+                stop={stop}
+                done={stopDone}
+                onDelete={() => onDeleteStop(stop.id)}
+                onToggleDone={() => onToggleStopDone(stop.id)}
+              >
                 {card}
               </StopCardShell>
             );

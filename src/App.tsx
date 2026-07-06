@@ -15,7 +15,16 @@ function newChatMessage(role: ChatMessage["role"], content: string): ChatMessage
 }
 
 function App() {
-  const { itinerary, setItinerary, chatHistory, setChatHistory, startOver } = useActiveTrip();
+  const {
+    itinerary,
+    setItinerary,
+    chatHistory,
+    setChatHistory,
+    completedStopIds,
+    setCompletedStopIds,
+    toggleStopDone,
+    startOver,
+  } = useActiveTrip();
   const { savedTrips, saveTrip, deleteTrip, isSaved } = useSavedTrips();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +64,7 @@ function App() {
       const result = await generateItinerary(input);
       setItinerary(result);
       setChatHistory([]);
+      setCompletedStopIds(new Set());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong planning your trip.");
     } finally {
@@ -102,13 +112,14 @@ function App() {
     if (isSaved(itinerary.id)) {
       deleteTrip(itinerary.id);
     } else {
-      saveTrip(itinerary, chatHistory);
+      saveTrip(itinerary, chatHistory, [...completedStopIds]);
     }
   }
 
   function handleOpenSaved(trip: SavedTrip) {
     setItinerary(trip.itinerary);
     setChatHistory(trip.chatHistory);
+    setCompletedStopIds(new Set(trip.completedStopIds ?? []));
   }
 
   return (
@@ -125,6 +136,8 @@ function App() {
           onToggleSave={handleToggleSave}
           onConfirmAccommodationOption={handleConfirmAccommodationOption}
           onUpdateItinerary={setItinerary}
+          completedStopIds={completedStopIds}
+          onToggleStopDone={toggleStopDone}
         />
       ) : (
         <TripSetupForm

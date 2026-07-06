@@ -26,6 +26,8 @@ interface Props {
   onConfirmAccommodationOption: (accommodationId: string, optionId: string) => void;
   onSelectDay: (day: number) => void;
   onDeleteStop: (stopId: string) => void;
+  completedStopIds: Set<string>;
+  onToggleStopDone: (stopId: string) => void;
 }
 
 export function ItineraryPanel({
@@ -48,6 +50,8 @@ export function ItineraryPanel({
   onConfirmAccommodationOption,
   onSelectDay,
   onDeleteStop,
+  completedStopIds,
+  onToggleStopDone,
 }: Props) {
   const [hintDismissed, setHintDismissed] = useState(
     () => localStorage.getItem(EDIT_HINT_KEY) === "1",
@@ -97,6 +101,8 @@ export function ItineraryPanel({
               onConfirmAccommodationOption={onConfirmAccommodationOption}
               editable
               onDeleteStop={onDeleteStop}
+              completedStopIds={completedStopIds}
+              onToggleStopDone={onToggleStopDone}
             />
           ))
       )}

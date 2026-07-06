@@ -18,6 +18,8 @@ interface Props {
   onHover: (stopId: string | null) => void;
   onClick: (stopId: string) => void;
   onDelete?: () => void;
+  done?: boolean;
+  onToggleDone?: () => void;
 }
 
 export function StopCard({
@@ -36,22 +38,51 @@ export function StopCard({
   onHover,
   onClick,
   onDelete,
+  done = false,
+  onToggleDone,
 }: Props) {
   const flagged = isFlaggedLocation(stop, destinationCenter);
   return (
     <div
-      className={`stop-card${highlighted ? " highlighted" : ""}${expanded ? " expanded" : ""}`}
+      className={`stop-card${highlighted ? " highlighted" : ""}${expanded ? " expanded" : ""}${done ? " done" : ""}`}
       onMouseEnter={() => onHover(stop.id)}
       onMouseLeave={() => onHover(null)}
       onClick={() => onClick(stop.id)}
     >
-      <div className="stop-number">{index + 1}</div>
+      <div className="stop-number">{done ? "✓" : index + 1}</div>
       <div className="stop-body">
         <div className="stop-header">
           <div className="stop-header-text">
             <strong>{stop.name}</strong>
             <span className="stop-time">{stop.timeOfDay}</span>
           </div>
+          {onToggleDone && (
+            <button
+              className={done ? "stop-done-toggle done" : "stop-done-toggle"}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleDone();
+              }}
+              aria-label={done ? `Mark ${stop.name} as not done` : `Mark ${stop.name} as done`}
+              aria-pressed={done}
+              title={done ? "Mark as not done" : "Mark as done"}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="8" cy="8" r="6.7" fill={done ? "currentColor" : "none"} />
+                <path d="M5.4 8.2l1.8 1.8 3.4-3.7" stroke={done ? "#fff" : "currentColor"} />
+              </svg>
+            </button>
+          )}
           {onDelete && (
             <span className="stop-grip" aria-hidden="true" title="Hold and drag to move">
               <svg
