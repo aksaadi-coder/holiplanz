@@ -17,6 +17,7 @@ interface Props {
   stopDetailsError: string | null;
   onHover: (stopId: string | null) => void;
   onClick: (stopId: string) => void;
+  onDelete?: () => void;
 }
 
 export function StopCard({
@@ -34,6 +35,7 @@ export function StopCard({
   stopDetailsError,
   onHover,
   onClick,
+  onDelete,
 }: Props) {
   const flagged = isFlaggedLocation(stop, destinationCenter);
   return (
@@ -50,6 +52,34 @@ export function StopCard({
             <strong>{stop.name}</strong>
             <span className="stop-time">{stop.timeOfDay}</span>
           </div>
+          {onDelete && (
+            <button
+              className="stop-delete-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              aria-label={`Remove ${stop.name}`}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 6h18" />
+                <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
+            </button>
+          )}
           <button
             className="stop-expand-toggle"
             onClick={(e) => {

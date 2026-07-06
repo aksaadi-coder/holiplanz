@@ -1748,3 +1748,206 @@ body {
     transition: none;
   }
 }
+
+/* Itinerary editing: swipe-to-delete, drag-to-reorder */
+.stop-shell {
+  position: relative;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.stop-shell-dragging {
+  opacity: 0.35;
+  z-index: 10;
+}
+.stop-shell-removing {
+  pointer-events: none;
+}
+.stop-swipe-backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 1.25rem;
+  background: #dc2626;
+  border-radius: 8px;
+}
+.stop-swipe-backdrop span {
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.stop-shell-inner {
+  position: relative;
+}
+.stop-shell-inner .stop-card {
+  background: var(--panel-bg);
+}
+.stop-shell-settle {
+  transition: transform 0.2s ease;
+}
+.stop-delete-btn {
+  display: none;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0.15rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  line-height: 1;
+}
+.stop-delete-btn:hover {
+  color: #dc2626;
+}
+@media (hover: hover) {
+  .stop-card:hover .stop-delete-btn {
+    display: inline-flex;
+  }
+}
+.drag-overlay-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+  transform: scale(1.02);
+  cursor: grabbing;
+}
+.drag-overlay-card strong {
+  font-size: 0.88rem;
+}
+.drag-overlay-card span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+.day-selector button.drop-ready {
+  border-style: dashed;
+  border-color: var(--accent);
+  animation: drop-ready-pulse 1.2s ease-in-out infinite;
+}
+.day-selector button.drop-over {
+  background: var(--accent);
+  border-color: var(--accent);
+  border-style: solid;
+  color: #fff;
+  animation: none;
+}
+@keyframes drop-ready-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(26, 26, 26, 0.18); }
+  50% { box-shadow: 0 0 0 5px rgba(26, 26, 26, 0.08); }
+}
+
+/* Undo toast */
+.undo-toast {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.6rem 0.75rem 0.6rem 1.15rem;
+  font-size: 0.85rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 3000;
+  max-width: calc(100vw - 2rem);
+  animation: undo-toast-in 0.25s ease;
+}
+.undo-toast span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.undo-toast button {
+  flex-shrink: 0;
+  background: #fff;
+  color: var(--accent);
+  border: none;
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+@keyframes undo-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Tidy-up suggestion chip */
+.tidy-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  animation: tidy-chip-in 0.25s ease;
+}
+@keyframes tidy-chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.tidy-chip-action {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: var(--bg);
+  border: 1px dashed var(--accent);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--text);
+  cursor: pointer;
+  line-height: 1.35;
+}
+.tidy-chip-action:hover {
+  background: var(--panel-bg);
+  border-style: solid;
+}
+.tidy-chip-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stop-shell-settle {
+    transition: none;
+  }
+  .undo-toast,
+  .tidy-chip {
+    animation: none;
+  }
+  .day-selector button.drop-ready {
+    animation: none;
+  }
+}

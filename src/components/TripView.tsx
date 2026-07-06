@@ -1,17 +1,29 @@
 import { useMemo, useRef, useState } from "react";
-import type { AccommodationOption, ChatMessage, DestinationInfo, Itinerary, StopDetails } from "../types";
+import {
+  DndContext,
+  DragOverlay,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import type { AccommodationOption, ChatMessage, DestinationInfo, Itinerary, Stop, StopDetails } from "../types";
 import { fetchDestinationInfo, fetchStopDetails } from "../api/itineraryApi";
 import { fetchPlaceInfo, type PlaceInfo } from "../api/wikipediaApi";
 import { fetchWeather, type WeatherInfo } from "../api/weatherApi";
 import { previewItineraryPdf, shareItineraryPdf } from "../utils/pdf";
+import { deleteStop, findStop, moveStopToDay, reorderStopWithinDay } from "../utils/itineraryEdit";
 import { Header } from "./Header";
-import { DaySelector } from "./DaySelector";
+import { DaySelector, DAY_TAB_PREFIX } from "./DaySelector";
 import { MapView } from "./MapPanel/MapView";
 import { DestinationInfoModal } from "./DestinationInfoModal";
 import { AddAccommodationModal } from "./AddAccommodationModal";
 import { ItineraryPanel } from "./ItineraryPanel/ItineraryPanel";
 import { PrintItinerary } from "./ItineraryPanel/PrintItinerary";
 import { ChatPanel } from "./ChatPanel/ChatPanel";
+import { UndoToast } from "./UndoToast";
 
 interface Props {
   itinerary: Itinerary;
@@ -22,6 +34,13 @@ interface Props {
   onSendChat: (message: string) => void;
   onToggleSave: () => void;
   onConfirmAccommodationOption: (accommodationId: string, optionId: string) => void;
+  onUpdateItinerary: (next: Itinerary) => void;
+}
+
+function dayListLabel(days: Set<number>): string {
+  const sorted = [...days].sort((a, b) => a - b);
+  if (sorted.length === 1) return `day ${sorted[0]}`;
+  return `days ${sorted.slice(0, -1).join(", ")} and ${sorted[sorted.length - 1]}`;
 }
 
 export function TripView({
@@ -33,6 +52,7 @@ export function TripView({
   onSendChat,
   onToggleSave,
   onConfirmAccommodationOption,
+  onUpdateItinerary,
 }: Props) {
   const [selectedDay, setSelectedDay] = useState<number | "all">("all");
   const [highlightedStopId, setHighlightedStopId] = useState<string | null>(null);
@@ -57,6 +77,17 @@ export function TripView({
   const [destinationInfoError, setDestinationInfoError] = useState<string | null>(null);
   const [showAddAccommodation, setShowAddAccommodation] = useState(false);
   const requestIdRef = useRef(0);
+  const [activeDragStop, setActiveDragStop] = useState<Stop | null>(null);
+  const [undo, setUndo] = useState<{ snapshot: Itinerary; message: string; prevDirty: Set<number> } | null>(
+    null,
+  );
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [dirtyDays, setDirtyDays] = useState<Set<number>>(new Set());
+
+  const dndSensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 300, tolerance: 8 } }),
+  );
 
   const selectedStop = useMemo(() => {
     if (!selectedStopId) return null;
@@ -189,6 +220,88 @@ export function TripView({
     setFitSignal((n) => n + 1);
   }
 
+  function markDirty(dayNumbers: number[]) {
+    setDirtyDays((prev) => {
+      const next = new Set(prev);
+      dayNumbers.forEach((d) => next.add(d));
+      return next;
+    });
+  }
+
+  function showUndo(snapshot: Itinerary, message: string) {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndo({ snapshot, message, prevDirty: dirtyDays });
+    undoTimerRef.current = setTimeout(() => setUndo(null), 6000);
+  }
+
+  function handleDeleteStop(stopId: string) {
+    const result = deleteStop(itinerary, stopId);
+    if (!result) return;
+    if (selectedStopId === stopId) handleCloseDetail();
+    showUndo(itinerary, `${result.removed.name} removed`);
+    onUpdateItinerary(result.itinerary);
+    markDirty([result.dayNumber]);
+  }
+
+  function handleUndo() {
+    if (!undo) return;
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    onUpdateItinerary(undo.snapshot);
+    setDirtyDays(undo.prevDirty);
+    setUndo(null);
+  }
+
+  function handleDragStart(event: DragStartEvent) {
+    const found = findStop(itinerary, String(event.active.id));
+    if (!found) return;
+    handleCloseDetail();
+    handleCloseAccommodationDetail();
+    setActiveDragStop(found.stop);
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveDragStop(null);
+    const { active, over } = event;
+    if (!over || selectedDay === "all") return;
+    const stopId = String(active.id);
+    const overId = String(over.id);
+
+    if (overId.startsWith(DAY_TAB_PREFIX)) {
+      const targetDay = Number(overId.slice(DAY_TAB_PREFIX.length));
+      if (targetDay !== selectedDay) {
+        onUpdateItinerary(moveStopToDay(itinerary, stopId, targetDay));
+        markDirty([selectedDay, targetDay]);
+      }
+      return;
+    }
+
+    const day = itinerary.days.find((d) => d.dayNumber === selectedDay);
+    if (!day) return;
+    const from = day.stops.findIndex((s) => s.id === stopId);
+    const to = day.stops.findIndex((s) => s.id === overId);
+    if (from === -1 || to === -1 || from === to) return;
+    onUpdateItinerary(reorderStopWithinDay(itinerary, day.dayNumber, from, to));
+    markDirty([day.dayNumber]);
+  }
+
+  const tidySuggestion =
+    dirtyDays.size > 0
+      ? `You've rearranged ${dayListLabel(dirtyDays)} — want me to smooth out timings and flow?`
+      : null;
+
+  function handleTidyAccept() {
+    const label = dayListLabel(dirtyDays);
+    handleSendChat(
+      `I manually rearranged ${label} (reordered, moved or removed stops myself). Please tidy up the affected day(s): adjust the timeOfDay labels, durations and how-to-get-there hints so they match the new order, keep the stops and their descriptions unchanged, and don't change any other days.`,
+    );
+  }
+
+  function handleSendChat(message: string) {
+    setDirtyDays(new Set());
+    setUndo(null);
+    onSendChat(message);
+  }
+
   function handlePreviewPdf() {
     previewItineraryPdf(itinerary);
   }
@@ -202,7 +315,7 @@ export function TripView({
 
   function handleAddAccommodation() {
     setShowAddAccommodation(false);
-    onSendChat(
+    handleSendChat(
       "Please suggest accommodation options for this trip - include 3 distinct options (budget, mid-range, boutique/luxury) covering the whole stay.",
     );
   }
@@ -241,7 +354,19 @@ export function TripView({
         onShowDestinationInfo={handleShowDestinationInfo}
         onAddAccommodation={() => setShowAddAccommodation(true)}
       />
-      <DaySelector days={itinerary.days} selectedDay={selectedDay} onSelect={handleDaySelect} />
+      <DndContext
+        sensors={dndSensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveDragStop(null)}
+      >
+      <DaySelector
+        days={itinerary.days}
+        selectedDay={selectedDay}
+        onSelect={handleDaySelect}
+        dragActive={activeDragStop !== null}
+      />
       <div className="trip-body">
         <div className="map-panel">
           <MapView
@@ -280,10 +405,28 @@ export function TripView({
             onAccommodationOptionClick={handleAccommodationOptionClick}
             onConfirmAccommodationOption={handleConfirmAccommodationOption}
             onSelectDay={handleDaySelect}
+            onDeleteStop={handleDeleteStop}
           />
-          <ChatPanel messages={chatHistory} loading={chatLoading} onSend={onSendChat} />
+          <ChatPanel
+            messages={chatHistory}
+            loading={chatLoading}
+            onSend={handleSendChat}
+            tidySuggestion={tidySuggestion}
+            onTidyAccept={handleTidyAccept}
+            onTidyDismiss={() => setDirtyDays(new Set())}
+          />
         </div>
       </div>
+      <DragOverlay>
+        {activeDragStop && (
+          <div className="drag-overlay-card">
+            <strong>{activeDragStop.name}</strong>
+            <span>{activeDragStop.timeOfDay}</span>
+          </div>
+        )}
+      </DragOverlay>
+      </DndContext>
+      {undo && <UndoToast message={undo.message} onUndo={handleUndo} />}
       <PrintItinerary itinerary={itinerary} />
       {showDestinationInfo && (
         <DestinationInfoModal

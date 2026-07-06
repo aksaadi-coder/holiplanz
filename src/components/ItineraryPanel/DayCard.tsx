@@ -1,6 +1,8 @@
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { AccommodationOption, Day, Itinerary, StopDetails } from "../../types";
 import type { PlaceInfo } from "../../api/wikipediaApi";
 import { StopCard } from "./StopCard";
+import { StopCardShell } from "./StopCardShell";
 import { MapView } from "../MapPanel/MapView";
 import { AccommodationCard } from "../AccommodationCard";
 
@@ -23,6 +25,8 @@ interface Props {
   onAccommodationOptionClick?: (option: AccommodationOption) => void;
   onConfirmAccommodationOption?: (accommodationId: string, optionId: string) => void;
   showPrintMap?: boolean;
+  editable?: boolean;
+  onDeleteStop?: (stopId: string) => void;
 }
 
 function noop() {}
@@ -46,6 +50,8 @@ export function DayCard({
   onAccommodationOptionClick = noop,
   onConfirmAccommodationOption = noop,
   showPrintMap = false,
+  editable = false,
+  onDeleteStop,
 }: Props) {
   const accommodationForDay = itinerary.accommodations?.find(
     (acc) => acc.startDay <= day.dayNumber && acc.endDay >= day.dayNumber,
@@ -94,29 +100,45 @@ export function DayCard({
         </div>
       )}
       <div className="stop-list">
-        {day.stops.map((stop, i) => {
-          const expanded = expandedStopId === stop.id;
-          const origin = i > 0 ? day.stops[i - 1] : firstStopOrigin;
-          return (
-            <StopCard
-              key={stop.id}
-              stop={stop}
-              index={i}
-              destination={itinerary.destination}
-              destinationCenter={itinerary.destinationCenter}
-              origin={origin}
-              highlighted={highlightedStopId === stop.id}
-              expanded={expanded}
-              placeInfo={expanded ? placeInfo : null}
-              placeInfoLoading={expanded && placeInfoLoading}
-              stopDetails={expanded ? stopDetails : null}
-              stopDetailsLoading={expanded && stopDetailsLoading}
-              stopDetailsError={expanded ? stopDetailsError : null}
-              onHover={onHover}
-              onClick={onClick}
-            />
+        {(() => {
+          const cards = day.stops.map((stop, i) => {
+            const expanded = expandedStopId === stop.id;
+            const origin = i > 0 ? day.stops[i - 1] : firstStopOrigin;
+            const card = (
+              <StopCard
+                key={editable ? undefined : stop.id}
+                stop={stop}
+                index={i}
+                destination={itinerary.destination}
+                destinationCenter={itinerary.destinationCenter}
+                origin={origin}
+                highlighted={highlightedStopId === stop.id}
+                expanded={expanded}
+                placeInfo={expanded ? placeInfo : null}
+                placeInfoLoading={expanded && placeInfoLoading}
+                stopDetails={expanded ? stopDetails : null}
+                stopDetailsLoading={expanded && stopDetailsLoading}
+                stopDetailsError={expanded ? stopDetailsError : null}
+                onHover={onHover}
+                onClick={onClick}
+                onDelete={editable && onDeleteStop ? () => onDeleteStop(stop.id) : undefined}
+              />
+            );
+            if (!editable || !onDeleteStop) return card;
+            return (
+              <StopCardShell key={stop.id} stop={stop} onDelete={() => onDeleteStop(stop.id)}>
+                {card}
+              </StopCardShell>
+            );
+          });
+          return editable ? (
+            <SortableContext items={day.stops.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+              {cards}
+            </SortableContext>
+          ) : (
+            cards
           );
-        })}
+        })()}
       </div>
     </div>
   );

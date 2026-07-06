@@ -124,6 +124,7 @@ function App() {
           onSendChat={handleSendChat}
           onToggleSave={handleToggleSave}
           onConfirmAccommodationOption={handleConfirmAccommodationOption}
+          onUpdateItinerary={setItinerary}
         />
       ) : (
         <TripSetupForm

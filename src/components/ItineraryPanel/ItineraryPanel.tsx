@@ -22,6 +22,7 @@ interface Props {
   onAccommodationOptionClick: (option: AccommodationOption) => void;
   onConfirmAccommodationOption: (accommodationId: string, optionId: string) => void;
   onSelectDay: (day: number) => void;
+  onDeleteStop: (stopId: string) => void;
 }
 
 export function ItineraryPanel({
@@ -43,6 +44,7 @@ export function ItineraryPanel({
   onAccommodationOptionClick,
   onConfirmAccommodationOption,
   onSelectDay,
+  onDeleteStop,
 }: Props) {
   return (
     <div className="itinerary-panel">
@@ -71,6 +73,8 @@ export function ItineraryPanel({
               onClick={onClick}
               onAccommodationOptionClick={onAccommodationOptionClick}
               onConfirmAccommodationOption={onConfirmAccommodationOption}
+              editable
+              onDeleteStop={onDeleteStop}
             />
           ))
       )}
