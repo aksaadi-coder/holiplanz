@@ -49,56 +49,28 @@ export function StopCard({
       onMouseLeave={() => onHover(null)}
       onClick={() => onClick(stop.id)}
     >
-      <div className="stop-number">{done ? "✓" : index + 1}</div>
+      {onToggleDone ? (
+        <button
+          className="stop-number stop-number-toggle"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleDone();
+          }}
+          aria-pressed={done}
+          aria-label={done ? `Mark ${stop.name} as not done` : `Mark ${stop.name} as done`}
+          title={done ? "Mark as not done" : "Mark as done"}
+        >
+          <span>{done ? "✓" : index + 1}</span>
+        </button>
+      ) : (
+        <div className="stop-number">{done ? "✓" : index + 1}</div>
+      )}
       <div className="stop-body">
         <div className="stop-header">
           <div className="stop-header-text">
             <strong>{stop.name}</strong>
             <span className="stop-time">{stop.timeOfDay}</span>
           </div>
-          {onToggleDone && (
-            <button
-              className={done ? "stop-done-toggle done" : "stop-done-toggle"}
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleDone();
-              }}
-              aria-label={done ? `Mark ${stop.name} as not done` : `Mark ${stop.name} as done`}
-              aria-pressed={done}
-              title={done ? "Mark as not done" : "Mark as done"}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="8" cy="8" r="6.7" fill={done ? "currentColor" : "none"} />
-                <path d="M5.4 8.2l1.8 1.8 3.4-3.7" stroke={done ? "#fff" : "currentColor"} />
-              </svg>
-            </button>
-          )}
-          {onDelete && (
-            <span className="stop-grip" aria-hidden="true" title="Hold and drag to move">
-              <svg
-                width="14"
-                height="10"
-                viewBox="0 0 14 10"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-              >
-                <line x1="2" y1="3.5" x2="12" y2="3.5" />
-                <line x1="2" y1="6.5" x2="12" y2="6.5" />
-              </svg>
-            </span>
-          )}
           {onDelete && (
             <button
               className="stop-delete-btn"

@@ -67,7 +67,8 @@ export function ItineraryPanel({
       {selectedDay !== "all" && !hintDismissed && (
         <div className="edit-hint">
           <span>
-            Tip: hold &amp; drag a card to move it &middot; swipe left (or tap the trash) to delete
+            Tip: hold &amp; drag a card to move it &middot; tap its number to mark it done &middot; swipe
+            left to delete
           </span>
           <button onClick={dismissHint} aria-label="Dismiss tip">
             &times;

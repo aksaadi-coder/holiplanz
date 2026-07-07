@@ -1954,19 +1954,6 @@ body {
   }
 }
 
-/* Drag affordance: grip handle */
-.stop-grip {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  color: #c9ced6;
-  cursor: grab;
-  padding: 0.2rem 0.1rem;
-}
-.stop-card:hover .stop-grip {
-  color: var(--text-muted);
-}
-
 /* One-time editing hint */
 .edit-hint {
   display: flex;
@@ -2090,22 +2077,26 @@ body {
 .stop-card.done .stop-number {
   background: #16a34a;
 }
-.stop-done-toggle {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  background: none;
+.stop-number-toggle {
   border: none;
-  padding: 0.15rem;
+  padding: 0;
+  font-family: inherit;
+  font-weight: inherit;
   cursor: pointer;
-  color: #c9ced6;
-  line-height: 1;
 }
-.stop-done-toggle:hover {
-  color: #16a34a;
-}
-.stop-done-toggle.done {
-  color: #16a34a;
+@media (hover: hover) {
+  .stop-card:not(.done) .stop-number-toggle:hover {
+    background: #16a34a;
+  }
+  .stop-card:not(.done) .stop-number-toggle:hover span {
+    display: none;
+  }
+  .stop-card:not(.done) .stop-number-toggle:hover::after {
+    content: "✓";
+  }
+  .stop-card.done .stop-number-toggle:hover {
+    background: #15803d;
+  }
 }
 .stop-swipe-backdrop.stop-swipe-done {
   justify-content: flex-start;
