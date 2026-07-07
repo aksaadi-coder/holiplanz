@@ -15,8 +15,8 @@ const SPOTLIGHTS: Record<SpotlightFeature, { title: string; caption: string }> =
     caption: "Every stop is plotted with numbered pins and the day's route drawn in.",
   },
   chat: {
-    title: "Tailor by chatting",
-    caption: "Ask for changes in plain words and watch the plan update alongside the conversation.",
+    title: "Tailor it your way",
+    caption: "Ask for changes in plain words — or rearrange the plan directly with your hands.",
   },
   save: {
     title: "Save & revisit",
