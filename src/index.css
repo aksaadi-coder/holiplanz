@@ -2240,3 +2240,136 @@ body {
   background: #16a34a;
   border-color: #16a34a;
 }
+
+/* Trip Passport */
+.passport-card {
+  max-width: 560px;
+  background: var(--panel-bg);
+}
+.passport-page {
+  background: #fbf6ec;
+  border: 2px solid #d8c9a8;
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem 1rem;
+  box-shadow: inset 0 0 0 5px #fbf6ec, inset 0 0 0 6px #e4d7ba;
+}
+.passport-head {
+  text-align: center;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px dashed #d8c9a8;
+}
+.passport-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a7a57;
+}
+.passport-head h3 {
+  margin: 0.45rem 0 0.15rem;
+  padding: 0;
+  font-size: 1.15rem;
+  color: #3f352e;
+}
+.passport-sub {
+  font-size: 0.82rem;
+  color: #8a7a57;
+}
+.passport-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px dashed #d8c9a8;
+}
+.passport-stats > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+.passport-stats strong {
+  font-size: 1.05rem;
+  color: #453a25;
+}
+.passport-stats span {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8a7a57;
+}
+.passport-stamps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  padding: 1rem 0.25rem;
+}
+.passport-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: 92px;
+  padding: 0.5rem 0.4rem;
+  border: 2px dashed #cfc0a0;
+  border-radius: 10px;
+  text-align: center;
+  color: #b0a487;
+  transform: rotate(var(--stamp-rot, 0deg));
+  opacity: 0.55;
+}
+.passport-stamp.earned {
+  border: 2.5px double var(--stamp-ink);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+  color: var(--stamp-ink);
+  background: rgba(255, 255, 255, 0.45);
+  opacity: 1;
+}
+.passport-stamp-emoji {
+  font-size: 1.2rem;
+  filter: grayscale(0.5);
+  opacity: 0.6;
+}
+.passport-stamp.earned .passport-stamp-emoji {
+  filter: none;
+  opacity: 1;
+}
+.passport-stamp-name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.passport-stamp-day {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.passport-foot {
+  margin: 0.25rem 0 0;
+  text-align: center;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: #8a7a57;
+}
+.passport-save {
+  margin-top: 0.9rem;
+}
+.passport-save:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+@media (max-width: 480px) {
+  .passport-stamps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

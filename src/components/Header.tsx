@@ -11,6 +11,7 @@ interface Props {
   onSharePdf: () => void;
   onShowDestinationInfo: () => void;
   onAddAccommodation: () => void;
+  onShowPassport: () => void;
 }
 
 export function Header({
@@ -22,6 +23,7 @@ export function Header({
   onSharePdf,
   onShowDestinationInfo,
   onAddAccommodation,
+  onShowPassport,
 }: Props) {
   const hasAccommodation = (itinerary.accommodations?.length ?? 0) > 0;
   const [showMore, setShowMore] = useState(false);
@@ -107,6 +109,24 @@ export function Header({
               Add accommodation
             </button>
           )}
+          <button className="trip-info-button" onClick={() => handleSecondary(onShowPassport)}>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="5" y="3" width="14" height="18" rx="2" />
+              <circle cx="12" cy="10" r="3" />
+              <line x1="9" y1="16.5" x2="15" y2="16.5" />
+            </svg>
+            Passport
+          </button>
           <button className="print-trip" onClick={() => handleSecondary(onPreviewPdf)}>
             <svg
               width="14"

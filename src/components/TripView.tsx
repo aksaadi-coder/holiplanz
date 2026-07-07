@@ -26,6 +26,7 @@ import { ItineraryPanel } from "./ItineraryPanel/ItineraryPanel";
 import { PrintItinerary } from "./ItineraryPanel/PrintItinerary";
 import { ChatPanel } from "./ChatPanel/ChatPanel";
 import { UndoToast } from "./UndoToast";
+import { PassportModal } from "./PassportModal";
 
 interface Props {
   itinerary: Itinerary;
@@ -95,6 +96,7 @@ export function TripView({
   const [destinationInfoLoading, setDestinationInfoLoading] = useState(false);
   const [destinationInfoError, setDestinationInfoError] = useState<string | null>(null);
   const [showAddAccommodation, setShowAddAccommodation] = useState(false);
+  const [showPassport, setShowPassport] = useState(false);
   const requestIdRef = useRef(0);
   const [activeDragStop, setActiveDragStop] = useState<Stop | null>(null);
   const [undo, setUndo] = useState<{ snapshot: Itinerary; message: string; prevDirty: Set<number> } | null>(
@@ -376,6 +378,7 @@ export function TripView({
         onSharePdf={handleSharePdf}
         onShowDestinationInfo={handleShowDestinationInfo}
         onAddAccommodation={() => setShowAddAccommodation(true)}
+        onShowPassport={() => setShowPassport(true)}
       />
       <DndContext
         sensors={dndSensors}
@@ -470,6 +473,13 @@ export function TripView({
           loading={chatLoading}
           onSubmit={handleAddAccommodation}
           onClose={() => setShowAddAccommodation(false)}
+        />
+      )}
+      {showPassport && (
+        <PassportModal
+          itinerary={itinerary}
+          completedStopIds={completedStopIds}
+          onClose={() => setShowPassport(false)}
         />
       )}
     </div>
