@@ -137,8 +137,10 @@ export function MapView({
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        attribution="&copy; <a href='https://carto.com/attributions'>CARTO</a> &copy; OpenStreetMap contributors"
+        subdomains="abcd"
+        maxZoom={19}
       />
       <FitBounds days={itinerary.days} selectedDay={selectedDay} fitSignal={fitSignal} />
       <FlyToStop stop={flyToStop} />
@@ -153,7 +155,7 @@ export function MapView({
             acc.endDay !== acc.startDay ? `-${acc.endDay}` : ""
           } (${nights} night${nights === 1 ? "" : "s"})`;
           const canConfirm = acc.options.length > 1;
-          return acc.options.map((option, i) => {
+          return acc.options.map((option) => {
             const expanded = option.id === selectedAccommodationOptionId;
             return (
               <Marker
@@ -166,7 +168,7 @@ export function MapView({
                   }
                 }}
                 position={[option.lat, option.lng]}
-                icon={accommodationIcon(String.fromCharCode(65 + i), expanded)}
+                icon={accommodationIcon("H", expanded)}
                 eventHandlers={{ click: () => onAccommodationOptionClick(option) }}
               >
                 <Tooltip direction="top" offset={[0, -14]} opacity={1}>
@@ -205,7 +207,10 @@ export function MapView({
         return (
           <Fragment key={day.dayNumber}>
             {showRoutes && positions.length > 1 && (
-              <Polyline positions={positions} pathOptions={{ color: MARKER_COLOR, weight: 3, opacity: 0.7 }} />
+              <Polyline
+                positions={positions}
+                pathOptions={{ color: MARKER_COLOR, weight: 3, opacity: 0.6, dashArray: "2 10", lineCap: "round" }}
+              />
             )}
             {day.stops.map((stop, i) => {
               const flagged = isFlaggedLocation(stop, itinerary.destinationCenter);
@@ -242,6 +247,7 @@ export function MapView({
                     <Popup className="place-detail-popup" closeButton={false} minWidth={280} maxWidth={300}>
                       <PlaceDetailCard
                         stopName={stop.name}
+                        destination={itinerary.destination}
                         loading={placeInfoLoading}
                         place={placeInfo}
                         flagged={flagged}

@@ -1,0 +1,419 @@
+/* Holiplanz entry / onboarding flow (Splash → Login → Email → Verify → Onboarding).
+   Simulated auth — see useSession / EntryFlow. Loaded after app.css. */
+
+.hp-entry {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.hp-entry-coral {
+  background: var(--coral-vivid);
+}
+.hp-entry-paper {
+  background: var(--paper);
+}
+.hp-entry-fade {
+  animation: hp-fade 0.3s ease both;
+}
+
+/* ---- shared paper-screen scaffolding (email / verify) ---- */
+.hp-entry-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 66px 24px 96px;
+  box-sizing: border-box;
+}
+.hp-entry-back {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+.hp-entry-h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 18px 0 6px;
+  color: var(--ink);
+}
+.hp-entry-sub {
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 0 24px;
+  line-height: 1.4;
+}
+.hp-entry-sub b {
+  color: var(--ink);
+}
+.hp-entry-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: inset 0 0 0 1px var(--stone);
+  transition: box-shadow 0.15s ease;
+}
+.hp-entry-field:focus-within {
+  box-shadow: inset 0 0 0 1.5px var(--coral);
+}
+.hp-entry-field.is-error {
+  box-shadow: inset 0 0 0 1.5px var(--coral);
+}
+.hp-entry-field-icon {
+  color: rgba(0, 0, 0, 0.5);
+  flex: none;
+}
+.hp-entry-field input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  color: var(--ink);
+}
+.hp-entry-error {
+  font-size: 14px;
+  color: var(--coral);
+  margin: 8px 2px 0;
+  animation: hp-fade 0.2s ease both;
+}
+.hp-entry-note {
+  font-size: 14.5px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 24px 0 0;
+  line-height: 1.45;
+}
+.hp-entry-note b {
+  color: var(--ink);
+  cursor: pointer;
+}
+.hp-entry-demo {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.35);
+  margin: 16px 0 0;
+}
+
+/* Bottom full-width CTA shared by email / verify / onboarding */
+.hp-entry-cta {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 32px;
+  height: 48px;
+  border-radius: 40px;
+  border: none;
+  cursor: pointer;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 700;
+}
+.hp-entry-cta:disabled {
+  background: var(--disabled);
+  cursor: default;
+}
+
+.hp-entry-skip {
+  position: absolute;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* ---- Verify: six-cell code entry ---- */
+.hp-code-row {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 4px;
+  cursor: text;
+}
+.hp-code-cell {
+  flex: 1;
+  height: 62px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--stone);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.hp-code-cell.is-active {
+  box-shadow: inset 0 0 0 2px var(--coral);
+}
+.hp-code-cell.is-filled {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+/* Off-screen real input that captures the digits. */
+.hp-code-input {
+  position: absolute;
+  opacity: 0.01;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+
+/* ---- Splash ---- */
+.hp-splash-motif {
+  position: absolute;
+  left: -236px;
+  top: -163px;
+  width: 441px;
+  height: 441px;
+}
+.hp-splash-grow {
+  animation: hp-circle 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+/* Login "paper wipe": two discs grow from the splash disc's exact position
+   (441px at -236,-163) out to ~1994px, sweeping paper across the coral. */
+.hp-login-disc-a,
+.hp-login-disc-b {
+  position: absolute;
+  border-radius: 50%;
+}
+.hp-login-disc-a {
+  background: #f5f5f5;
+  animation: hp-grow-a 0.8s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+}
+.hp-login-disc-b {
+  background: var(--paper);
+  outline: 1px dashed var(--coral-vivid);
+  outline-offset: -1px;
+  animation: hp-grow-b 0.8s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+}
+/* The disc starts at the splash disc's position (top-left, seamless) but its
+   centre drifts up toward the top-CENTRE as it grows, so the trailing edge
+   flattens into an even DOWNWARD sweep — the coral exits along the bottom, both
+   corners together, instead of leaving a wedge clinging to the left edge. End
+   size (centre x = 201 ≈ half of 402) is large enough to cover any phone
+   height by ~90% of the animation. disc-b sits ~80px inside disc-a so its
+   dashed edge reads as the sweeping arc. */
+@keyframes hp-grow-a {
+  from {
+    left: -236px;
+    top: -163px;
+    width: 441px;
+    height: 441px;
+  }
+  to {
+    left: -1399px;
+    top: -2160px;
+    width: 3200px;
+    height: 3200px;
+  }
+}
+@keyframes hp-grow-b {
+  from {
+    left: -219px;
+    top: -146px;
+    width: 406px;
+    height: 406px;
+  }
+  to {
+    left: -1319px;
+    top: -2080px;
+    width: 3040px;
+    height: 3040px;
+  }
+}
+.hp-splash-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+.hp-splash-disc-inner {
+  position: absolute;
+  left: 17px;
+  top: 17px;
+  width: 406px;
+  height: 406px;
+  border-radius: 50%;
+  background: var(--paper);
+  outline: 1px dashed var(--coral-vivid);
+  outline-offset: -1px;
+}
+.hp-splash-wordmark {
+  position: absolute;
+  left: 24px;
+  top: 98px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--coral-vivid);
+}
+.hp-splash-headline {
+  position: absolute;
+  left: 24px;
+  top: 40%;
+  width: 307px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 1;
+  color: #fff;
+}
+.hp-splash-headline i {
+  font-weight: 700;
+  color: #000;
+}
+.hp-splash-arrow {
+  position: absolute;
+  right: 24px;
+  /* Design places it at top:601 in the 874px frame → ~203px (23%) up from bottom. */
+  bottom: 23%;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: #f5f5f5;
+  box-shadow: inset 0 0 0 2.5px var(--disabled);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+}
+
+/* ---- Login ---- */
+.hp-login-head {
+  position: absolute;
+  left: 24px;
+  top: 88px;
+  width: 294px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1;
+  animation: hp-up 0.4s ease 0.55s both;
+}
+.hp-login-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1;
+  color: #000;
+}
+.hp-login-sub {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+}
+.hp-login-skip {
+  right: 24px;
+  top: 88px;
+  z-index: 1;
+  animation: hp-up 0.4s ease 0.7s both;
+}
+.hp-login-buttons {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 176px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 1;
+}
+.hp-auth-btn {
+  height: 48px;
+  border-radius: 48px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 5px 12px;
+  box-sizing: border-box;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  animation: hp-up 0.4s ease both;
+}
+.hp-login-buttons .hp-auth-btn:nth-child(1) {
+  animation-delay: 0.75s;
+}
+.hp-login-buttons .hp-auth-btn:nth-child(2) {
+  animation-delay: 0.87s;
+}
+.hp-login-buttons .hp-auth-btn:nth-child(3) {
+  animation-delay: 0.99s;
+}
+.hp-auth-btn.is-apple {
+  background: var(--ink);
+  color: #fff;
+}
+.hp-auth-btn.is-light {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--stone);
+}
+
+/* ---- Onboarding ---- */
+.hp-onboard-skip {
+  right: 24px;
+  top: 70px;
+}
+.hp-onboard-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40px;
+  text-align: center;
+}
+.hp-onboard-ring {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--coral);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: hp-circle 0.6s ease both;
+}
+.hp-onboard-pin {
+  color: var(--coral);
+}
+.hp-onboard-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 44px;
+  color: var(--ink);
+  margin: 40px 0 0;
+}
+.hp-onboard-sub {
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 14px 0 0;
+}
+
+@keyframes hp-circle {
+  from {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

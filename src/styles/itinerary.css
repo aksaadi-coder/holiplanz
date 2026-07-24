@@ -1,0 +1,1615 @@
+/* Itinerary screen — built to the shared design snapshot.
+   Header is bold sans (not serif), stop rows are time + title + grip only. */
+
+.hp-itin {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---- Header: "Japan · 7 days"  +  ⓘ Trip info ---- */
+.hp-itin-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(26px + env(safe-area-inset-top)) 22px 0;
+}
+.hp-itin-head h1 {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-ui);
+  /* Shrinks on long city names rather than wrapping to a second line. */
+  font-size: clamp(20px, 6.7vw, 27px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hp-itin-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.hp-itin-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
+}
+.hp-itin-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  color: rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
+}
+.hp-itin-save.is-saved {
+  color: var(--coral);
+}
+
+/* ---- Day chips ---- */
+.hp-itin-days {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 10px;
+  padding: 18px 22px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.hp-itin-days::-webkit-scrollbar {
+  display: none;
+}
+.hp-itin-days .hp-chip {
+  flex-shrink: 0;
+  padding: 12px 24px;
+  font-size: 16px;
+  background: var(--panel);
+}
+.hp-itin-days .hp-chip.is-selected {
+  background: #000;
+  color: #fff;
+}
+
+/* ---- Scroll area ---- */
+.hp-itin-scroll {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 22px 8px;
+}
+
+/* ---- Collapsed map card ---- */
+.hp-map-card {
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--stone);
+  border-radius: 18px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.hp-map-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 20px 18px;
+  color: rgba(0, 0, 0, 0.45);
+}
+.hp-map-card-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-ui);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.hp-rot180 {
+  transform: rotate(180deg);
+}
+/* Inline preview: inert thumbnail, tap opens the full-screen map. */
+.hp-map-card-body {
+  margin: 0 14px 14px;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+.hp-map-card-body .leaflet-container {
+  height: 100%;
+  pointer-events: none;
+}
+.hp-map-card-body .leaflet-control-container {
+  display: none;
+}
+
+/* ---- Stop rows: time, title, grip ---- */
+/* Outer wrap owns the dnd-kit reorder transform + clips the swipe-to-delete
+   reveal (see .hp-swipe-wrap in app.css); the inner .hp-stop-row carries its
+   own translateX for the swipe. */
+.hp-stop-row-wrap {
+  border-radius: 18px;
+}
+.hp-stop-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--stone);
+  border-radius: 18px;
+  padding: 16px 18px;
+  cursor: pointer;
+}
+.hp-stop-row.is-dragging {
+  opacity: 0.35;
+}
+/* The floating copy under the pointer */
+.hp-stop-row-overlay {
+  cursor: grabbing;
+  box-shadow:
+    inset 0 0 0 1px var(--stone),
+    0 12px 28px rgba(0, 0, 0, 0.16);
+  transform: scale(1.02);
+}
+.hp-stop-row.is-updated {
+  box-shadow: inset 0 0 0 1.5px var(--coral);
+}
+.hp-stop-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.hp-stop-row-time {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.45);
+}
+.hp-updated-tag {
+  color: var(--coral);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.hp-stop-row-text strong {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.hp-grip {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 4px;
+  cursor: grab;
+  color: rgba(0, 0, 0, 0.3);
+  touch-action: none;
+}
+.hp-grip:active {
+  cursor: grabbing;
+}
+
+/* ---- Add accommodation (dashed) ---- */
+.hp-add-accom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px dashed var(--stone);
+  background: transparent;
+  border-radius: 18px;
+  padding: 20px 18px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  color: rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+/* ---- Trip budget row ---- */
+.hp-budget-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: none;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--stone);
+  border-radius: 18px;
+  padding: 16px 18px;
+  cursor: pointer;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+.hp-budget-row > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hp-budget-row .hp-label {
+  margin: 0;
+}
+.hp-budget-row strong {
+  font-family: var(--font-ui);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ---- Assistant note above the chat bar ---- */
+.hp-assistant-note {
+  position: relative;
+  z-index: 1;
+  margin: 0 22px 10px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--stone);
+}
+
+/* ---- Full-screen overlay pattern (Map view, Budget, …) ---- */
+.hp-fullscreen {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  z-index: 12;
+  animation: hp-fade 0.3s ease both;
+  display: flex;
+  flex-direction: column;
+}
+.hp-back-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Map view */
+.hp-mapscreen-top {
+  padding: calc(26px + env(safe-area-inset-top)) 22px 12px;
+  background: var(--paper);
+  z-index: 2;
+}
+.hp-mapscreen-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.hp-mapscreen-head b {
+  font-family: var(--font-ui);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.hp-mapscreen-top .hp-itin-days {
+  padding: 0;
+}
+.hp-mapscreen-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.hp-mapscreen-body .leaflet-container {
+  height: 100%;
+}
+.hp-mapscreen-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Clear the Leaflet attribution bar. */
+  bottom: calc(30px + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  z-index: 500;
+  pointer-events: none;
+  text-shadow: 0 1px 3px var(--paper);
+}
+
+/* Budget */
+.hp-budget-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(26px + env(safe-area-inset-top)) 24px calc(40px + env(safe-area-inset-bottom));
+}
+.hp-budget h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 14px 0 2px;
+  color: var(--ink);
+}
+.hp-budget-total {
+  font-family: var(--font-display);
+  font-size: 52px;
+  line-height: 1.1;
+  margin: 14px 0 2px;
+  color: var(--ink);
+}
+.hp-budget-summary {
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 0 26px;
+  line-height: 1.5;
+}
+.hp-budget-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.hp-budget-line-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15.5px;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.hp-budget-line-head span {
+  color: rgba(0, 0, 0, 0.5);
+}
+.hp-budget-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--stone);
+  overflow: hidden;
+}
+.hp-budget-fill {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--ink);
+}
+.hp-budget-note {
+  border-top: 1px solid var(--stone);
+  margin-top: 26px;
+  padding-top: 16px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(0, 0, 0, 0.45);
+}
+.hp-budget-prefs {
+  border: none;
+  background: transparent;
+  padding: 12px 0;
+  margin-top: 6px;
+  color: #000;
+  font-family: var(--font-ui);
+  font-size: 15.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Preferences */
+.hp-prefs-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(26px + env(safe-area-inset-top)) 24px 24px;
+}
+.hp-prefs h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 14px 0 20px;
+  color: var(--ink);
+}
+.hp-prefs .hp-label {
+  margin: 0 0 12px;
+}
+.hp-prefs-gap {
+  margin-top: 24px !important;
+}
+.hp-prefs-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 2px;
+  border-bottom: 1px solid var(--stone);
+  font-size: 17px;
+  color: var(--ink);
+}
+.hp-prefs-row:first-of-type {
+  margin-top: 12px;
+}
+.hp-prefs-apply {
+  flex-shrink: 0;
+  margin: 0 24px calc(24px + env(safe-area-inset-bottom));
+  height: 48px;
+  border: none;
+  border-radius: 40px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Toggle */
+.hp-toggle {
+  width: 52px;
+  height: 30px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--stone);
+  cursor: pointer;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  transition: background 0.18s ease;
+}
+.hp-toggle.is-on {
+  background: var(--ink);
+}
+.hp-toggle-knob {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.18s ease;
+}
+.hp-toggle.is-on .hp-toggle-knob {
+  transform: translateX(22px);
+}
+
+/* Hotels (full screen) */
+.hp-hotels-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(26px + env(safe-area-inset-top)) 24px 24px;
+}
+.hp-hotels h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 14px 0 4px;
+  color: var(--ink);
+}
+.hp-hotels-sub {
+  margin: 0 0 16px;
+}
+.hp-hotels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.hp-hotel-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: var(--panel);
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: inset 0 0 0 1px var(--stone);
+  cursor: pointer;
+}
+.hp-hotel-row.is-selected {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+.hp-hotel-thumb {
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--stone);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.4);
+}
+.hp-hotel-info {
+  flex: 1;
+  min-width: 0;
+}
+.hp-hotel-info > b {
+  font-family: var(--font-ui);
+  font-size: 17px;
+  color: var(--ink);
+  display: block;
+}
+.hp-hotel-sub {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  display: block;
+  margin-top: 2px;
+}
+.hp-hotel-price {
+  font-size: 15px;
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+}
+.hp-radio {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--stone);
+}
+.hp-radio.is-on {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  background:
+    radial-gradient(circle, var(--ink) 0 5px, transparent 6px);
+}
+.hp-hotels-note {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 16px 4px 0;
+}
+.hp-hotels-add {
+  flex-shrink: 0;
+  margin: 0 24px calc(24px + env(safe-area-inset-bottom));
+  height: 48px;
+  border: none;
+  border-radius: 40px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hp-hotels-add:disabled {
+  background: var(--disabled);
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Hotel detail (floating card, image header to the edges) */
+.hp-float-card:has(.hp-hd) {
+  padding: 0;
+}
+.hp-hd-hero {
+  height: 190px;
+  border-radius: 28px 28px 0 0;
+  background: var(--stone);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+.hp-hd-hero .hp-close-circle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--paper);
+}
+.hp-hd-body {
+  padding: 20px 24px 26px;
+}
+.hp-hd-title b {
+  font-family: var(--font-ui);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.hp-hd-title div {
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 4px;
+  text-transform: capitalize;
+}
+.hp-hd-stats {
+  display: flex;
+  gap: 24px;
+  margin: 14px 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--stone);
+  border-bottom: 1px solid var(--stone);
+}
+.hp-hd-stats .hp-label {
+  display: block;
+  margin: 0 0 4px;
+}
+.hp-hd-stats b {
+  font-family: var(--font-ui);
+  font-size: 17px;
+  color: var(--ink);
+}
+.hp-hd-blurb {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0 0 14px;
+  color: #222;
+}
+/* Interactive preview map — same CARTO Positron tiles, pan/zoom, and ink
+   pin style as the itinerary map. "Show on map" below still opens Google
+   Maps for directions. */
+.hp-hd-loc {
+  height: 130px;
+  background: var(--stone);
+  border-radius: 14px;
+  position: relative;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.hp-hd-loc .leaflet-container {
+  height: 100%;
+}
+.hp-hd-maplink {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+}
+.hp-hd-cta {
+  width: 100%;
+  margin-top: 18px;
+  height: 48px;
+  border: none;
+  border-radius: 40px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hp-hd-cta:disabled {
+  background: var(--disabled);
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* "Trip over?" ghost link on the itinerary */
+.hp-trip-over {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 10px 6px 2px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+
+/* Confirm (full screen) */
+.hp-confirm-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(26px + env(safe-area-inset-top)) 24px 24px;
+}
+.hp-confirm-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.hp-confirm h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 40px;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+.hp-confirm-head .hp-close-circle {
+  margin-top: 4px;
+}
+.hp-confirm-sub {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 17px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 0 22px;
+  line-height: 1.4;
+}
+.hp-confirm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.hp-confirm-item {
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: inset 0 0 0 1px var(--stone);
+}
+.hp-confirm-item b {
+  font-family: var(--font-ui);
+  font-size: 19px;
+  color: var(--ink);
+}
+.hp-confirm-choices {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.hp-choice {
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 500;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 0 0 1px var(--stone);
+}
+.hp-choice.is-on {
+  background: #000;
+  color: #fff;
+  box-shadow: none;
+  font-weight: 600;
+}
+.hp-confirm-note {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 16px 4px 0;
+  line-height: 1.5;
+}
+.hp-confirm-cta {
+  flex-shrink: 0;
+  margin: 0 24px calc(24px + env(safe-area-inset-bottom));
+  height: 48px;
+  border: none;
+  border-radius: 40px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---- Floating card overlay (Trip info, Card detail) ---- */
+/* Above the full-screen overlays (z-index 12) so Card/Hotel detail can open
+   from Hotels, Map view, etc. */
+.hp-float-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  z-index: 20;
+  animation: hp-fade 0.2s ease both;
+}
+.hp-float-card {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 64px;
+  bottom: 64px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--stone);
+  border-radius: 28px;
+  padding: 26px 24px;
+  overflow-y: auto;
+  z-index: 21;
+  animation: hp-sheet 0.3s ease both;
+}
+.hp-close-circle {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--stone);
+  background: transparent;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Card detail */
+.hp-cd-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.hp-cd-num {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 17px;
+}
+.hp-cd-title {
+  flex: 1;
+  min-width: 0;
+}
+.hp-cd-title b {
+  font-family: var(--font-ui);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.hp-cd-title div {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 4px;
+  text-transform: capitalize;
+}
+.hp-cd-photo {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin-top: 16px;
+  display: block;
+}
+.hp-cd-blurb {
+  font-size: 17px;
+  line-height: 1.45;
+  margin: 14px 0;
+  color: var(--ink);
+}
+.hp-cd-transit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  color: #222;
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: inset 0 0 0 1px var(--stone);
+}
+/* Stacked, not side-by-side: cost copy can run long and shouldn't dominate. */
+.hp-cd-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 18px;
+}
+.hp-cd-stat b {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.hp-cd-stat .hp-label {
+  margin: 0;
+}
+.hp-cd-list {
+  margin: 0 0 4px;
+  padding-left: 1.1rem;
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.7);
+}
+.hp-cd-list li {
+  margin-bottom: 6px;
+}
+.hp-cd-loading {
+  font-size: 15px;
+  margin-top: 14px;
+}
+.hp-cd-error {
+  color: var(--coral);
+  font-size: 15px;
+}
+.hp-cd-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 18px;
+}
+.hp-cd-links a {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--coral);
+  text-decoration: none;
+}
+
+/* Trip info */
+.hp-ti-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.hp-ti-head b {
+  font-family: var(--font-ui);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.hp-ti-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.hp-ti-tile {
+  border: 1px solid var(--stone);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.hp-ti-tile .hp-label {
+  margin: 0 0 8px;
+}
+.hp-ti-tile b {
+  font-family: var(--font-ui);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.hp-ti-tile > div {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 6px;
+}
+.hp-ti-wide {
+  margin-top: 12px;
+}
+.hp-ti-week {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.55);
+  margin-top: 0;
+}
+.hp-ti-week span {
+  display: flex;
+  flex-direction: column;
+}
+.hp-ti-week b {
+  color: #000;
+  font-size: 16px;
+}
+
+/* ---- Passport tab ---- */
+.hp-passport {
+  position: relative;
+}
+.hp-passport-empty {
+  padding: 26px 24px;
+  gap: 8px;
+}
+.hp-passport-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(26px + env(safe-area-inset-top)) 24px 120px;
+}
+/* Fade so the MRZ scrolls under the action buttons rather than colliding. */
+.hp-passport-actions::before {
+  content: "";
+  position: absolute;
+  left: -24px;
+  right: -24px;
+  bottom: calc(-24px - env(safe-area-inset-bottom));
+  top: -20px;
+  background: linear-gradient(to top, var(--paper) 55%, rgba(246, 244, 241, 0));
+  z-index: -1;
+}
+.hp-passport-back {
+  display: block;
+  margin-bottom: 14px;
+}
+.hp-passport-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.hp-passport-head b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.hp-passport-pin {
+  color: var(--coral);
+}
+.hp-passport-head span {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 14px;
+}
+
+/* Stamp collage */
+.hp-passport-stamps {
+  position: relative;
+  height: 380px;
+  margin-top: 10px;
+}
+/* Each stamp is placed by inline top/left/right/rotate from stampPlacementsFor
+   — scattered per-trip, not a tidy grid — so only positioning shared across
+   all of them (box, absolute) lives here. */
+.hp-cat-stamp {
+  position: absolute;
+  min-width: 110px;
+  padding: 14px 18px;
+  border: 1.5px dashed rgba(22, 20, 16, 0.28);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--paper);
+}
+.hp-cat-stamp b {
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: rgba(0, 0, 0, 0.55);
+}
+.hp-cat-stamp span {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Wrapper carries the per-trip static tilt (inline transform); the inner
+   element keeps its own entrance-animation transform so the two don't fight
+   over the `transform` property. */
+.hp-dest-stamp-wrap {
+  position: absolute;
+  left: 50%;
+  top: 120px;
+  width: 282px;
+  height: 176px;
+}
+.hp-dest-stamp {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed var(--coral);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  animation: hp-press 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.25s both;
+}
+.hp-dest-top,
+.hp-dest-date {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--coral);
+}
+.hp-dest-name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--coral);
+}
+@keyframes hp-press {
+  0% { transform: scale(1.6); opacity: 0; }
+  55% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Details */
+.hp-passport-divider {
+  border-top: 1px dashed var(--stone);
+  padding-top: 16px;
+  margin: 0 0 14px;
+}
+.hp-passport-info {
+  display: flex;
+  gap: 16px;
+}
+.hp-passport-photo {
+  width: 110px;
+  height: 130px;
+  flex-shrink: 0;
+  border: 1px dashed var(--stone);
+  border-radius: 14px;
+  background: var(--panel);
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  padding: 8px;
+}
+.hp-passport-photo:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.hp-passport-photo-icon {
+  font-size: 22px;
+  color: rgba(0, 0, 0, 0.3);
+  margin-bottom: 4px;
+}
+.hp-passport-photo-sub {
+  text-decoration: underline;
+}
+.hp-passport-fields {
+  flex: 1;
+  min-width: 0;
+}
+.hp-passport-fields .hp-label {
+  margin: 10px 0 0;
+}
+.hp-passport-fields .hp-label:first-child {
+  margin-top: 0;
+}
+.hp-passport-trip {
+  font-family: var(--font-ui);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.hp-passport-type {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  color: var(--coral);
+}
+.hp-passport-durrow {
+  display: flex;
+  gap: 28px;
+  margin-top: 10px;
+}
+.hp-passport-durrow .hp-label {
+  display: block;
+  margin: 0 0 2px;
+}
+.hp-passport-durrow b {
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+.hp-passport-route {
+  border-top: 1px solid var(--stone);
+  border-bottom: 1px solid var(--stone);
+  margin: 18px 0;
+  padding: 12px 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+.hp-passport-mrz {
+  background: var(--stone);
+  padding: 14px 16px;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+  margin: 0 -24px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ---- Mini passport (compact export alternative) ----
+   Photo + info are one card (see MiniPassportCard) — the outer element owns
+   the border/radius/clip, the photo is a plain borderless block inside it. */
+.hp-mini-card {
+  background: #fff;
+  border-radius: 16px;
+  /* A real border, not an inset box-shadow: html2canvas (the PDF/PNG export
+     capture) rasterises inset box-shadows as a solid fill across the whole
+     element instead of a thin ring, which painted the card's lower half
+     stone-beige in exports while looking fine on screen. */
+  border: 1px solid var(--stone);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.hp-mini-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 260px;
+  border: none;
+  background: var(--panel);
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.5);
+}
+.hp-mini-photo:disabled {
+  cursor: default;
+}
+.hp-mini-photo-icon {
+  font-size: 26px;
+  color: rgba(0, 0, 0, 0.3);
+  margin-bottom: 4px;
+}
+.hp-mini-photo-sub {
+  font-weight: 400;
+  text-decoration: underline;
+}
+.hp-mini-info {
+  padding: 20px;
+}
+.hp-mini-head {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0, 0.4);
+}
+.hp-mini-title {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--ink);
+  margin: 8px 0 6px;
+}
+.hp-mini-meta {
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.45);
+  margin: 0 0 18px;
+  line-height: 1.4;
+}
+.hp-mini-stamp {
+  width: 200px;
+  height: 68px;
+  border: 1.5px dashed var(--coral);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.hp-mini-stamp-top,
+.hp-mini-stamp-date {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--coral);
+}
+.hp-mini-stamp-name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--coral);
+}
+.hp-mini-mrz {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 18px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Bottom actions */
+.hp-passport-actions {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 12px;
+}
+.hp-passport-share,
+.hp-passport-export {
+  flex: 1;
+  height: 48px;
+  border-radius: 40px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 16px;
+}
+.hp-passport-share {
+  border: none;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 700;
+}
+.hp-passport-export {
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---- Undo toast ---- */
+.hp-undo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 22px 10px;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 14px;
+  padding: 13px 16px;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  animation: hp-up 0.25s ease both;
+}
+.hp-undo button {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--coral);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+@keyframes hp-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- Chat bar with coral send ----
+   One pill (panel bg + stone inset border) containing both the borderless
+   input and the coral send button, matching the design — not two separate
+   floating shapes. */
+.hp-chat-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 22px calc(14px + env(safe-area-inset-bottom));
+  padding: 6px 6px 6px 20px;
+  background: var(--panel);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--stone);
+}
+.hp-chat-bar input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 12px 0;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  color: var(--ink);
+}
+.hp-chat-send {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: var(--coral);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.hp-chat-send:disabled {
+  /* Stays solid coral even when idle/empty, matching the design — no dimming,
+     which read as "blurred" against the destination photo behind it. */
+  cursor: default;
+}
+
+/* =====================================================================
+   Passport — Share sheet, Export screen, toast, and off-screen capture
+   ===================================================================== */
+
+/* Off-screen print-ready card used as the html2canvas capture target. */
+.hp-capture-host {
+  position: fixed;
+  left: -99999px;
+  top: 0;
+  width: 380px;
+  pointer-events: none;
+}
+
+/* ---- Share sheet (bottom sheet) ---- */
+.hp-sheet-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.28);
+  animation: hp-fade 0.2s ease both;
+}
+.hp-share-sheet {
+  width: 100%;
+  background: var(--paper);
+  border-radius: 28px 28px 0 0;
+  padding: 14px 24px calc(30px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  animation: hp-sheet 0.3s ease both;
+}
+.hp-share-grip {
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--stone);
+  margin: 0 auto 18px;
+}
+.hp-share-title {
+  font-size: 22px;
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.hp-share-sub {
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 0 14px;
+  line-height: 1.4;
+}
+.hp-share-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 15px 2px;
+  border: none;
+  border-top: 1px solid var(--stone);
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.hp-share-row.is-strong {
+  font-weight: 600;
+}
+.hp-share-row-icon {
+  width: 26px;
+  text-align: center;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.55);
+  flex: none;
+}
+
+/* ---- Export screen (full screen) ---- */
+.hp-export-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  animation: hp-fade 0.3s ease both;
+}
+.hp-export-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 66px 24px 24px;
+  box-sizing: border-box;
+}
+.hp-export-back {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+.hp-export-h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 14px 0 6px;
+  color: var(--ink);
+}
+.hp-export-lead {
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 0 20px;
+}
+.hp-export-actions {
+  padding: 12px 24px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hp-export-primary,
+.hp-export-secondary {
+  height: 48px;
+  border-radius: 40px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 17px;
+}
+.hp-export-primary {
+  border: none;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 700;
+}
+.hp-export-secondary {
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-weight: 600;
+}
+.hp-export-primary:disabled,
+.hp-export-secondary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---- Off-screen capture page (Export screen preview + PDF/PNG capture) ----
+   Both render MiniPassportCard, so what's shown here and what gets captured
+   are pixel-identical, uploaded photo included. No padding/background here —
+   the exported file should be just the white card itself, not the app's
+   beige screen backdrop around it. */
+.hp-capture-page {
+  width: 402px;
+  box-sizing: border-box;
+}
+
+/* ---- Toast ---- */
+.hp-passport-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 110px;
+  transform: translateX(-50%);
+  z-index: 60;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  white-space: nowrap;
+  animation: hp-up 0.25s ease both;
+}

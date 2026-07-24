@@ -1,14 +1,16 @@
 import type { PlaceInfo } from "../../api/wikipediaApi";
+import { tripAdvisorSearchUrl } from "../../utils/geo";
 
 interface Props {
   stopName: string;
+  destination: string;
   loading: boolean;
   place: PlaceInfo | null;
   flagged: boolean;
   onClose: () => void;
 }
 
-export function PlaceDetailCard({ stopName, loading, place, flagged, onClose }: Props) {
+export function PlaceDetailCard({ stopName, destination, loading, place, flagged, onClose }: Props) {
   return (
     <div className="place-detail-card">
       <button className="place-detail-close" onClick={onClose} aria-label="Close">
@@ -20,8 +22,8 @@ export function PlaceDetailCard({ stopName, loading, place, flagged, onClose }: 
           {place.thumbnailUrl && <img src={place.thumbnailUrl} alt={place.title} />}
           <h4>{place.title}</h4>
           <p>{place.extract}</p>
-          <a href={place.pageUrl} target="_blank" rel="noopener noreferrer">
-            Read more &rarr;
+          <a href={tripAdvisorSearchUrl(stopName, destination)} target="_blank" rel="noopener noreferrer">
+            TripAdvisor reviews &rarr;
           </a>
         </>
       )}

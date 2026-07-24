@@ -1,7 +1,15 @@
+export interface DailyForecast {
+  /** ISO date, e.g. "2026-07-23" */
+  date: string;
+  maxTempC: number;
+}
+
 export interface WeatherInfo {
   temperatureC: number;
   description: string;
   emoji: string;
+  /** Next 7 days — powers the "This week" row on the Trip info card. */
+  daily: DailyForecast[];
 }
 
 const WEATHER_CODE_MAP: Record<number, { description: string; emoji: string }> = {
@@ -33,6 +41,9 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherInf
     latitude: String(lat),
     longitude: String(lng),
     current_weather: "true",
+    daily: "temperature_2m_max",
+    forecast_days: "7",
+    timezone: "auto",
   });
 
   const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
@@ -42,10 +53,16 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherInf
   const current = data?.current_weather;
   if (!current) return null;
 
+  const dates: string[] = data?.daily?.time ?? [];
+  const maxima: number[] = data?.daily?.temperature_2m_max ?? [];
+  const daily: DailyForecast[] = dates.map((date, i) => ({ date, maxTempC: maxima[i] }))
+    .filter((d) => typeof d.maxTempC === "number");
+
   const mapped = WEATHER_CODE_MAP[current.weathercode] ?? { description: "Unknown", emoji: "\u{1F321}️" };
   return {
     temperatureC: current.temperature,
     description: mapped.description,
     emoji: mapped.emoji,
+    daily,
   };
 }

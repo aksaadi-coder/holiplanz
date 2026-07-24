@@ -41,6 +41,10 @@ export interface AccommodationOption {
   lat: number;
   lng: number;
   estimatedPricePerNight: string;
+  /** e.g. "4.5 / 5" — shown on the hotel detail. */
+  rating?: string;
+  /** e.g. "6 min" walk to the nearest station. */
+  walkToStation?: string;
 }
 
 export interface Accommodation {
@@ -48,6 +52,25 @@ export interface Accommodation {
   startDay: number;
   endDay: number;
   options: AccommodationOption[];
+}
+
+export interface BudgetLine {
+  /** e.g. "Accommodation", "Food & drink" */
+  label: string;
+  /** Local-currency figure, e.g. "¥168,000" */
+  amount: string;
+  /** Percentage of the total, 0-100 — drives the bar width. */
+  share: number;
+}
+
+export interface TripBudget {
+  /** Headline figure in local currency, e.g. "¥412,000" */
+  total: string;
+  /** e.g. "for 2 adults · 7 days · ≈ €2,430" */
+  summary: string;
+  lines: BudgetLine[];
+  /** Caveat shown under the breakdown. */
+  note?: string;
 }
 
 export interface Itinerary {
@@ -60,6 +83,8 @@ export interface Itinerary {
   destinationCenter: { lat: number; lng: number };
   days: Day[];
   accommodations?: Accommodation[];
+  /** Rough all-in cost breakdown for the trip — powers the Budget screen. */
+  budget?: TripBudget;
   createdAt: string;
   updatedAt: string;
 }

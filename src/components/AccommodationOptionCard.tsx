@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { AccommodationOption, StopDetails } from "../types";
 import { fetchPlaceInfo, type PlaceInfo } from "../api/wikipediaApi";
-import { airbnbSearchUrl, bookingSearchUrl, googleSearchUrl } from "../utils/geo";
+import { StayFeatureIcon } from "./ui/icons";
+import { airbnbSearchUrl, bookingSearchUrl, googleSearchUrl, tripAdvisorSearchUrl } from "../utils/geo";
 
 interface Props {
   option: AccommodationOption;
@@ -72,15 +73,7 @@ export function AccommodationOptionCard({
         <img className="accommodation-option-photo" src={placeInfo.thumbnailUrl} alt={option.name} />
       ) : (
         <div className="accommodation-option-photo accommodation-option-photo-placeholder">
-          {!placeInfoLoading && (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <path d="M2 20v-7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7" />
-              <path d="M2 13V7a2 2 0 0 1 2-2h6v6" />
-              <path d="M12 13h10" />
-              <path d="M2 20v-3" />
-              <path d="M22 20v-3" />
-            </svg>
-          )}
+          <StayFeatureIcon size={22} />
         </div>
       )}
       <div className="accommodation-option-body">
@@ -185,11 +178,9 @@ export function AccommodationOptionCard({
             )}
 
             <div className="stop-expanded-links">
-              {placeInfo?.pageUrl && (
-                <a href={placeInfo.pageUrl} target="_blank" rel="noopener noreferrer">
-                  Wikipedia &rarr;
-                </a>
-              )}
+              <a href={tripAdvisorSearchUrl(option.name, destination)} target="_blank" rel="noopener noreferrer">
+                TripAdvisor reviews &rarr;
+              </a>
               <a href={googleSearchUrl(option.name, destination)} target="_blank" rel="noopener noreferrer">
                 Search the web &rarr;
               </a>

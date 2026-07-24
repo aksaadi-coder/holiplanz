@@ -52,9 +52,17 @@ export function useSavedTrips() {
     setSavedTrips((prev) => prev.filter((t) => t.itinerary.id !== itineraryId));
   }
 
+  /** Re-insert a previously-deleted entry as-is (savedAt and all) — for
+   *  undoing a swipe-to-delete, as opposed to `saveTrip`'s fresh timestamp. */
+  function restoreTrip(entry: SavedTrip) {
+    setSavedTrips((prev) =>
+      prev.some((t) => t.itinerary.id === entry.itinerary.id) ? prev : [entry, ...prev],
+    );
+  }
+
   function isSaved(itineraryId: string) {
     return savedTrips.some((t) => t.itinerary.id === itineraryId);
   }
 
-  return { savedTrips, saveTrip, deleteTrip, isSaved };
+  return { savedTrips, saveTrip, deleteTrip, restoreTrip, isSaved };
 }

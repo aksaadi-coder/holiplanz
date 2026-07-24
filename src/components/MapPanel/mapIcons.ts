@@ -1,8 +1,12 @@
 import L from "leaflet";
+import { INK, CORAL } from "../../styles/palette";
 
-export const MARKER_COLOR = "#dc2626";
-export const DONE_COLOR = "#16a34a";
-export const ACCOMMODATION_COLOR = "#2563eb";
+// Brand palette for map pins/route — ink is the default stop color, coral is
+// reserved for "earned" moments (a visited stop is an earned checkmark, same
+// as the passport stamp), matching the rest of the design system.
+export const MARKER_COLOR = INK;
+export const DONE_COLOR = CORAL;
+export const ACCOMMODATION_COLOR = INK;
 
 export function numberedIcon(
   number: number,
@@ -11,8 +15,8 @@ export function numberedIcon(
   done = false,
 ): L.DivIcon {
   const size = highlighted ? 34 : 28;
-  const border = flagged ? "dashed 2px #666" : "solid 2px white";
-  const background = done ? DONE_COLOR : flagged ? "#999" : MARKER_COLOR;
+  const border = flagged ? "dashed 2px rgba(22,20,16,0.4)" : "solid 2px white";
+  const background = done ? DONE_COLOR : flagged ? "rgba(22,20,16,0.4)" : MARKER_COLOR;
   const label = done ? "&#10003;" : String(number);
   return L.divIcon({
     className: "stop-marker",

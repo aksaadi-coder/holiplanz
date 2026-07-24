@@ -1,0 +1,162 @@
+// Shared UI primitives for the Holiplanz design system.
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useEffect } from "react";
+import { CloseIcon } from "./icons";
+
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: "primary" | "secondary" | "ghost" | "coral";
+};
+
+/** Pill button. Primary = Ink fill; coral is reserved for highlight moments. */
+export function PillButton({ variant = "primary", className = "", ...props }: ButtonProps) {
+  return <button className={`hp-btn hp-btn-${variant} ${className}`.trim()} {...props} />;
+}
+
+/** Full-width bottom call-to-action, one primary action per screen. */
+export function BottomCta({ variant = "primary", className = "", ...props }: ButtonProps) {
+  return (
+    <div className="hp-bottom-cta">
+      <PillButton variant={variant} className={className} {...props} />
+    </div>
+  );
+}
+
+interface ChipProps {
+  label: string;
+  selected?: boolean;
+  onClick?: () => void;
+}
+
+/** Selection chip. Selected = solid black pill / white text (identity change). */
+export function Chip({ label, selected, onClick }: ChipProps) {
+  return (
+    <button
+      type="button"
+      className={`hp-chip ${selected ? "is-selected" : ""}`.trim()}
+      aria-pressed={selected}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+interface StampRingProps {
+  size?: number;
+  spinning?: boolean;
+  children?: ReactNode;
+}
+
+/** Dashed passport-stamp ring — the brand's repeating graphic device. */
+export function StampRing({ size = 120, spinning = false, children }: StampRingProps) {
+  return (
+    <div className="hp-stamp-ring" style={{ width: size, height: size }}>
+      <div className={`hp-stamp-ring-dash ${spinning ? "is-spinning" : ""}`.trim()} />
+      {children != null && <div className="hp-stamp-ring-body">{children}</div>}
+    </div>
+  );
+}
+
+interface SheetProps {
+  open: boolean;
+  onClose: () => void;
+  title?: ReactNode;
+  children: ReactNode;
+}
+
+/** Bottom sheet used for detail overlays (stop detail, trip info, hotel, share). */
+export function Sheet({ open, onClose, title, children }: SheetProps) {
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <div className="hp-sheet-backdrop" onClick={onClose}>
+      <div className="hp-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className="hp-sheet-grip" />
+        {title != null && (
+          <div className="hp-sheet-head">
+            <div className="hp-sheet-title">{title}</div>
+            <button type="button" className="hp-icon-btn" aria-label="Close" onClick={onClose}>
+              <CloseIcon size={20} />
+            </button>
+          </div>
+        )}
+        <div className="hp-sheet-body">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/** 13px uppercase section label. */
+export function Label({ children }: { children: ReactNode }) {
+  return <p className="hp-label">{children}</p>;
+}
+
+interface FloatingCardProps {
+  open: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}
+
+/**
+ * Inset floating card overlay — the design's pattern for Trip info and Card
+ * detail (sits 20px from the sides, 64px top/bottom, over a dimmed backdrop).
+ * Distinct from the bottom `Sheet`.
+ */
+export function FloatingCard({ open, onClose, children }: FloatingCardProps) {
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <div className="hp-float-backdrop" onClick={onClose}>
+      <div className="hp-float-card" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+interface ToggleProps {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  label: string;
+}
+
+/** 52×30 switch used on the Preferences rows. */
+export function Toggle({ checked, onChange, label }: ToggleProps) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      className={`hp-toggle ${checked ? "is-on" : ""}`.trim()}
+      onClick={() => onChange(!checked)}
+    >
+      <span className="hp-toggle-knob" />
+    </button>
+  );
+}
+
+/** Circular ✕ used in the design's card headers and full-screen headers. */
+export function CloseCircle({ onClose, label = "Close" }: { onClose: () => void; label?: string }) {
+  return (
+    <button type="button" className="hp-close-circle" onClick={onClose} aria-label={label}>
+      <CloseIcon size={17} />
+    </button>
+  );
+}

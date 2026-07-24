@@ -1,0 +1,406 @@
+/* Holiplanz Account tab — profile, Premium upsell, past trips, settings.
+   Loaded after itinerary.css (shares .hp-fullscreen / .hp-back-link / .hp-chip-group). */
+
+.hp-account {
+  position: relative;
+}
+.hp-acct-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(26px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom));
+}
+
+/* Generic sub-screen scaffolding (Upgrade, Notifications, Payments, Language,
+   Help, Past trips) */
+.hp-acct-sub-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(26px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom));
+}
+.hp-acct-sub h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 14px 0 20px;
+  color: var(--ink);
+}
+.hp-acct-gap {
+  margin-top: 24px !important;
+}
+.hp-acct-note {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 16px 4px 0;
+}
+
+/* ---- Profile ---- */
+.hp-acct-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.hp-acct-avatar {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-size: 26px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.hp-acct-profile b {
+  font-family: var(--font-ui);
+  font-size: 22px;
+  display: block;
+  color: var(--ink);
+}
+.hp-acct-email {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* ---- Upgrade banner (Account root) ---- */
+.hp-acct-upgrade-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  background: rgba(249, 92, 75, 0.12);
+  border: none;
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin: 22px 0;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-ui);
+}
+.hp-acct-upgrade-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--coral);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--coral);
+}
+.hp-acct-upgrade-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.hp-acct-upgrade-text b {
+  font-size: 20px;
+  color: var(--coral);
+}
+.hp-acct-upgrade-text span {
+  font-size: 15px;
+  color: var(--coral);
+  opacity: 0.85;
+}
+.hp-acct-upgrade-chevron {
+  color: var(--coral);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* ---- Section head ("Past trips" · See all) ---- */
+.hp-acct-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 12px;
+}
+.hp-acct-section-head .hp-label {
+  margin: 0;
+}
+.hp-acct-seeall {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+/* ---- Trip rows (Account root preview + Past trips full list) ---- */
+.hp-acct-trip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* Wraps the card for swipe-to-delete (see .hp-swipe-wrap in app.css) —
+   radius matches .hp-acct-trip-row's own so the reveal clips cleanly. */
+.hp-acct-trip-row-wrap {
+  border-radius: 16px;
+}
+.hp-acct-trip-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  background: var(--panel);
+  border: none;
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: inset 0 0 0 1px var(--stone);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+.hp-acct-trip-row img {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.hp-acct-trip-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.hp-acct-trip-info b {
+  font-size: 17px;
+}
+.hp-acct-trip-info span {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+}
+.hp-acct-trip-info .hp-label {
+  margin: 0;
+}
+.hp-acct-trip-chevron {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* ---- Settings list (Account root) ---- */
+.hp-acct-settings {
+  border-top: 1px solid var(--stone);
+  margin-top: 20px;
+  padding-top: 8px;
+}
+.hp-acct-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 2px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+.hp-acct-settings-icon {
+  width: 26px;
+  text-align: center;
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.7);
+}
+.hp-acct-settings-label {
+  flex: 1;
+}
+.hp-acct-settings-chevron {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* ---- Notifications ---- */
+.hp-acct-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 2px;
+  border-bottom: 1px solid var(--stone);
+  font-size: 17px;
+  color: var(--ink);
+}
+.hp-acct-row:first-of-type {
+  margin-top: 12px;
+}
+.hp-acct-row-sub {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  display: block;
+}
+
+/* ---- Payment methods ---- */
+.hp-acct-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+.hp-acct-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: inset 0 0 0 1px var(--stone);
+}
+.hp-acct-card.is-default {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+.hp-acct-card-badge {
+  width: 44px;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.hp-acct-card-badge.is-light {
+  background: var(--stone);
+  color: var(--ink);
+}
+.hp-acct-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.hp-acct-card-info b {
+  font-size: 16.5px;
+}
+.hp-acct-card-info span {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+}
+.hp-acct-card-default {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--coral);
+  border: 1px dashed var(--coral);
+  border-radius: 999px;
+  padding: 4px 10px;
+  flex-shrink: 0;
+}
+.hp-acct-card-chevron {
+  color: rgba(0, 0, 0, 0.4);
+}
+.hp-acct-add-card {
+  border: 1.5px dashed var(--stone);
+  border-radius: 16px;
+  padding: 16px 18px;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 16px;
+  cursor: pointer;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-ui);
+}
+
+/* ---- Help & support (FAQ) ---- */
+.hp-acct-faq {
+  border-bottom: 1px solid var(--stone);
+  padding: 15px 2px;
+  cursor: pointer;
+}
+.hp-acct-faq-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.hp-acct-faq-head b {
+  font-size: 16.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.hp-acct-faq-head span {
+  color: rgba(0, 0, 0, 0.4);
+}
+.hp-acct-faq-answer {
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 10px 0 0;
+  animation: hp-fade 0.25s ease both;
+}
+.hp-acct-version {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 20px 4px 0;
+}
+
+/* ---- Upgrade screen ---- */
+.hp-acct-upgrade-lead {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0 0 26px;
+}
+.hp-acct-upgrade-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 17px;
+}
+.hp-acct-upgrade-item {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  color: var(--ink);
+}
+.hp-acct-upgrade-item > span:first-child {
+  color: var(--coral);
+  font-weight: 700;
+}
+.hp-acct-upgrade-item b {
+  font-weight: 700;
+}
+.hp-acct-upgrade-footnote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 28px 0 0;
+  line-height: 1.5;
+}
+.hp-acct-upgrade-cta {
+  flex-shrink: 0;
+  margin: 0 24px 10px;
+  height: 48px;
+  border: none;
+  border-radius: 40px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hp-acct-upgrade-later {
+  flex-shrink: 0;
+  margin: 0 24px calc(24px + env(safe-area-inset-bottom));
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.4);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  cursor: pointer;
+}
