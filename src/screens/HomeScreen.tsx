@@ -71,7 +71,7 @@ export function HomeScreen({ loading, onSubmit }: Props) {
 
   return (
     <div className="hp-screen hp-home">
-      <DestinationBackground destination={destDone ? destination : null} intensity={destDone ? 0.6 : 0} />
+      <DestinationBackground destination={destDone ? destination : null} intensity={destDone ? 0.72 : 0} />
 
       <div className="hp-home-scroll">
         <div className="hp-wordmark">holiplanz</div>

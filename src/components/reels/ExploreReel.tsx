@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { useReel } from "../../hooks/useReel";
 import { ReelShell } from "./ReelShell";
+import { fetchPlaceInfo } from "../../api/wikipediaApi";
 
 interface Props {
   open: boolean;
@@ -7,6 +9,9 @@ interface Props {
 }
 
 const FRAME_COUNT = 3;
+
+const SAMPLE_STOP = "Senso-ji Temple";
+const SAMPLE_DESTINATION = "Tokyo, Japan";
 
 const INFO_TILES = [
   { label: "Timezone", value: "GMT+9", sub: "9 hrs ahead" },
@@ -16,12 +21,28 @@ const INFO_TILES = [
 ];
 
 /**
- * "Explore" feature reel — the real stop-detail card layout (photo + blurb),
- * the real Trip-info tile grid, and the real map/directions link row, all
- * with sample data.
+ * "Explore" feature reel — the real stop-detail card layout (real Wikipedia
+ * photo lookup + blurb), the real Trip-info tile grid, and the real
+ * map/directions link row, all with sample data.
  */
 export function ExploreReel({ open, onClose }: Props) {
   const { frame, progress, handleTap } = useReel({ open, frameCount: FRAME_COUNT, onClose });
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    fetchPlaceInfo(SAMPLE_STOP, SAMPLE_DESTINATION)
+      .then((info) => {
+        if (!cancelled) setPhoto(info?.thumbnailUrl ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setPhoto(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   return (
     <ReelShell
@@ -36,10 +57,14 @@ export function ExploreReel({ open, onClose }: Props) {
       {frame === 0 && (
         <div className="hp-reel-frame" key="0">
           <div className="hp-reel-stop-detail">
-            <div className="hp-reel-photo" aria-hidden>
-              ▦
+            <div
+              className="hp-reel-photo"
+              style={photo ? { backgroundImage: `url(${photo})` } : undefined}
+              aria-hidden
+            >
+              {!photo && "▦"}
             </div>
-            <b>Senso-ji Temple</b>
+            <b>{SAMPLE_STOP}</b>
             <p>
               Tokyo's oldest temple, founded in 645 — a lantern-lit gate opens onto a busy market street
               leading to the main hall.

@@ -47,14 +47,14 @@ export function GenerationScreen({ destination, error, onCancel, onRetry }: Prop
 
   useEffect(() => {
     if (error) return;
-    const id = setInterval(() => setFactIx((i) => (i + 1) % facts.length), 3200);
+    const id = setInterval(() => setFactIx((i) => (i + 1) % facts.length), 8000);
     return () => clearInterval(id);
   }, [error, facts]);
 
   if (error) {
     return (
       <div className="hp-screen hp-generation is-error">
-        <DestinationBackground destination={destination} intensity={0.6} />
+        <DestinationBackground destination={destination} intensity={0.72} />
         <div className="hp-gen-error-top">
           <StampRing size={150}>
             <CloseIcon className="hp-gen-error-x" size={30} />
@@ -78,7 +78,7 @@ export function GenerationScreen({ destination, error, onCancel, onRetry }: Prop
 
   return (
     <div className="hp-screen hp-generation">
-      <DestinationBackground destination={destination} intensity={0.6} />
+      <DestinationBackground destination={destination} intensity={0.72} />
       <div className="hp-generation-body">
         <StampRing size={132} spinning>
           <PinIcon size={34} filled className="hp-generation-pin" />

@@ -23,7 +23,7 @@ export function TabBar({ active, onSelect }: Props) {
           className={`hp-tab ${active === tab ? "is-active" : ""}`.trim()}
           onClick={() => onSelect(tab)}
         >
-          <Icon size={22} />
+          <Icon size={24} />
           <span>{label}</span>
         </button>
       ))}

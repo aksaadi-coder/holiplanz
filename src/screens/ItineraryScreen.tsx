@@ -152,7 +152,7 @@ export function ItineraryScreen({
 
   return (
     <div className="hp-screen hp-itin">
-      <DestinationBackground destination={itinerary.destination} intensity={0.6} />
+      <DestinationBackground destination={itinerary.destination} intensity={0.72} />
 
       <header className="hp-itin-head">
         <h1>

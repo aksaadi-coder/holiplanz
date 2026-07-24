@@ -14,8 +14,19 @@ interface WikiPage {
 
 const cache = new Map<string, PlaceInfo | null>();
 
+// Matches combining diacritical marks left behind by NFD decomposition
+// (Unicode general category Mn — "Mark, nonspacing").
+const DIACRITIC_MARKS = /\p{Mn}/gu;
+
+// Strips diacritics (e -> e, o -> o, ...) via Unicode decomposition before
+// dropping non-ASCII characters, so romanized titles with macrons/accents
+// (e.g. Wikipedia's "Senso-ji") still match plain-ASCII stop names.
 function normalize(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9\s]/g, "");
+  return s
+    .normalize("NFD")
+    .replace(DIACRITIC_MARKS, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "");
 }
 
 function isRelevantMatch(stopName: string, pageTitle: string): boolean {
