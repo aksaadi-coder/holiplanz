@@ -225,7 +225,7 @@ export function ItineraryScreen({
           <button type="button" className="hp-itin-next-banner" onClick={() => setConfirmOpen(true)}>
             <span>
               <span className="hp-label">Trip over</span>
-              <strong>How was {cityName(itinerary.destination)}? Confirm what you did</strong>
+              <strong>Generate your {cityName(itinerary.destination)} passport</strong>
             </span>
             <span aria-hidden>→</span>
           </button>
@@ -372,7 +372,7 @@ export function ItineraryScreen({
         </button>
 
         <button type="button" className="hp-trip-over" onClick={() => setConfirmOpen(true)}>
-          Trip over? Confirm what you did →
+          Trip over? Generate your passport →
         </button>
       </div>
 

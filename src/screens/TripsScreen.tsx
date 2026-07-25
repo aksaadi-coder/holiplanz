@@ -116,7 +116,7 @@ function ActiveTripCard({
         >
           <span>
             <span className="hp-label">Trip over</span>
-            <strong>Confirm what you did</strong>
+            <strong>Generate your passport</strong>
           </span>
           <ChevronRightIcon size={18} />
         </button>
