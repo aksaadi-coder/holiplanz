@@ -31,13 +31,13 @@ export function NotificationsScreen({ prefs, update, onBack }: Props) {
         </div>
         <div className="hp-acct-row">
           <span>
-            Booking updates
-            <span className="hp-acct-row-sub">Changes to stays and activities</span>
+            Trip wrap-up reminders
+            <span className="hp-acct-row-sub">Confirm what you did, claim your passport</span>
           </span>
           <Toggle
-            checked={prefs.notifyBooking}
-            onChange={(v) => update({ notifyBooking: v })}
-            label="Booking updates"
+            checked={prefs.notifyWrapUp}
+            onChange={(v) => update({ notifyWrapUp: v })}
+            label="Trip wrap-up reminders"
           />
         </div>
         <div className="hp-acct-row">

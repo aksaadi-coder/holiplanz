@@ -355,6 +355,7 @@ function App() {
                 onToggleChecklistItem={toggleChecklistItem}
                 completedStopIds={completedStopIds}
                 notifyTrip={accountPrefs.prefs.notifyTrip}
+                notifyWrapUp={accountPrefs.prefs.notifyWrapUp}
                 onOpenActive={() => nav.navigate({ name: "itinerary" })}
                 onOpenConfirm={handleOpenConfirm}
                 onDeleteActive={handleDeleteActiveTrip}

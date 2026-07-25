@@ -8,7 +8,11 @@ export const UNIT_OPTIONS = ["Metric", "Imperial"];
 
 interface AccountPrefs {
   notifyTrip: boolean;
-  notifyBooking: boolean;
+  /** Gates the "trip over — generate your passport" nudge on the Trips
+   *  tab's active-trip card, same pattern as notifyTrip gating the prep
+   *  banner. Was "notifyBooking" — the app has no real booking flow, so
+   *  there was nothing for that toggle to actually gate. */
+  notifyWrapUp: boolean;
   notifyPassport: boolean;
   language: string;
   currency: string;
@@ -17,7 +21,7 @@ interface AccountPrefs {
 
 const DEFAULTS: AccountPrefs = {
   notifyTrip: true,
-  notifyBooking: true,
+  notifyWrapUp: true,
   notifyPassport: true,
   language: LANGUAGE_OPTIONS[0],
   currency: CURRENCY_OPTIONS[0],

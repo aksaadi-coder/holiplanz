@@ -20,6 +20,8 @@ interface Props {
   completedStopIds: Set<string>;
   /** Account "notify me about upcoming trips" preference — gates the prep banner. */
   notifyTrip: boolean;
+  /** Account "trip wrap-up reminders" preference — gates the "trip over" nudge. */
+  notifyWrapUp: boolean;
   onOpenActive: () => void;
   /** Opens the itinerary straight to the Confirm sheet, for the "Trip over" nudge. */
   onOpenConfirm: () => void;
@@ -38,12 +40,14 @@ const PREP_REMINDER_WINDOW_DAYS = 3;
 function ActiveTripCard({
   itinerary,
   completedStopIds,
+  notifyWrapUp,
   onOpen,
   onOpenConfirm,
   onDelete,
 }: {
   itinerary: Itinerary;
   completedStopIds: Set<string>;
+  notifyWrapUp: boolean;
   onOpen: () => void;
   onOpenConfirm: () => void;
   onDelete: () => void;
@@ -104,7 +108,7 @@ function ActiveTripCard({
         </button>
       )}
 
-      {tripOver && (
+      {tripOver && notifyWrapUp && (
         <button
           type="button"
           className="hp-trips-prep-row"
@@ -178,6 +182,7 @@ export function TripsScreen({
   onToggleChecklistItem,
   completedStopIds,
   notifyTrip,
+  notifyWrapUp,
   onOpenActive,
   onOpenConfirm,
   onDeleteActive,
@@ -240,6 +245,7 @@ export function TripsScreen({
             <ActiveTripCard
               itinerary={itinerary}
               completedStopIds={completedStopIds}
+              notifyWrapUp={notifyWrapUp}
               onOpen={onOpenActive}
               onOpenConfirm={onOpenConfirm}
               onDelete={onDeleteActive}
