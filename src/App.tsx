@@ -403,7 +403,7 @@ function App() {
   return (
     <div className="app">
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
-      <div className="hp-app-body">{renderScreen()}</div>
+      <div className={showTabBar ? "hp-app-body has-tabbar" : "hp-app-body"}>{renderScreen()}</div>
       {showTabBar && <TabBar active={activeTab} onSelect={handleTabSelect} />}
     </div>
   );

@@ -35,6 +35,13 @@
   flex-direction: column;
   min-height: 0;
 }
+/* Reserves room at the end of the natural page scroll so content doesn't
+   end up hidden underneath the fixed .hp-tabbar (see comment there). Only
+   applied when the tab bar is actually showing (App.tsx toggles this
+   class) — screens without it shouldn't get unrelated bottom padding. */
+.hp-app-body.has-tabbar {
+  padding-bottom: calc(70px + env(safe-area-inset-bottom));
+}
 
 .hp-screen {
   position: relative;
@@ -668,8 +675,25 @@
   width: 100%;
 }
 
-/* ---- Bottom tab bar ---- */
+/* ---- Bottom tab bar ----
+   Most screens (Trips, Itinerary, Passport, ...) have no bounded scroll
+   container of their own — they rely on natural whole-page scroll, per the
+   .app comment above. That means the tab bar can't just be a flex child at
+   the end of .app (its old approach): once a screen's content grows past
+   one viewport, the page scroll carries a plain flex child away with it.
+   position: fixed pins it to the viewport regardless of page scroll height;
+   left/transform re-centers it to match .app's own centered column instead
+   of spanning the full (possibly wider-than-phone) browser viewport. See
+   .hp-app-body.has-tabbar below for the matching bottom-padding reservation
+   so scrolled content doesn't end up hidden underneath it. */
 .hp-tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  z-index: 40;
   display: flex;
   border-top: 1px solid var(--stone);
   background: var(--paper);
@@ -679,6 +703,12 @@
      (this padding + .hp-tab's own bottom padding) should be just that
      cushion — no extra dead space above it. */
   padding-bottom: max(env(safe-area-inset-bottom), 6px);
+}
+@media (min-width: 500px) {
+  .hp-tabbar {
+    border-left: 1px solid var(--stone);
+    border-right: 1px solid var(--stone);
+  }
 }
 .hp-tab {
   flex: 1;
