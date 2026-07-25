@@ -3,20 +3,33 @@
 
 /* ---- App shell layout ----
    The single source of truth for .app — do not add another .app rule to
-   index.css or any other file. A duplicate definition split across two
-   stylesheets previously caused a real iOS bug: index.css's legacy
-   `height: 100%` chain (html/body/#root/.app) and this file's
-   `min-height: 100dvh` don't override each other (different properties),
-   so both applied at once. `height: 100%` doesn't track Safari's dynamic
-   toolbar the way `dvh` does, so the app shell's total height could get
-   stuck at a stale value after the toolbar collapsed/expanded (e.g. during
-   the full-bleed GenerationScreen) — pushing the flex-laid-out TabBar out
-   of place until a full reload recomputed layout from scratch. */
+   index.css or any other file. (A duplicate split across index.css and this
+   file used to cause a real iOS bug: the two rules set different properties,
+   so they merged rather than one overriding the other, and index.css's
+   `height: 100%` survived unnoticed.)
+
+   `height` here must stay DEFINITE, not min-height. Every screen scrolls
+   inside its own container (.hp-itin-scroll, .hp-trips-scroll, ...: `flex: 1`
+   + `overflow-y: auto`), and a flex child can only be bounded — and so only
+   actually scroll internally — if its ancestors have a resolvable height.
+   With `min-height` alone the chain is unbounded: screens grow to fit their
+   content, the inner `overflow-y: auto` never engages, and the whole page
+   scrolls instead, dragging fixed-position furniture (the header, day chips,
+   tab bar) out of view and leaking scroll position between screens.
+
+   It must also be `dvh`, not `%`. A percentage chain (html/body/#root/.app)
+   resolves against the *layout* viewport, which doesn't track Safari's
+   dynamic toolbar; that's what let the shell's height get stuck at a stale
+   value after the toolbar collapsed/expanded (e.g. during the full-bleed
+   GenerationScreen) and shoved the TabBar out of place until a full reload.
+   `dvh` tracks the visual viewport, so it stays correct through those
+   transitions. Definite + dvh is what satisfies both constraints. */
 .app {
   position: relative;
-  min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   /* mobile-only app: single phone-width column, centered on larger screens */
   width: 100%;
   max-width: 430px;
@@ -34,13 +47,6 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-}
-/* Reserves room at the end of the natural page scroll so content doesn't
-   end up hidden underneath the fixed .hp-tabbar (see comment there). Only
-   applied when the tab bar is actually showing (App.tsx toggles this
-   class) — screens without it shouldn't get unrelated bottom padding. */
-.hp-app-body.has-tabbar {
-  padding-bottom: calc(70px + env(safe-area-inset-bottom));
 }
 
 .hp-screen {
@@ -676,24 +682,14 @@
 }
 
 /* ---- Bottom tab bar ----
-   Most screens (Trips, Itinerary, Passport, ...) have no bounded scroll
-   container of their own — they rely on natural whole-page scroll, per the
-   .app comment above. That means the tab bar can't just be a flex child at
-   the end of .app (its old approach): once a screen's content grows past
-   one viewport, the page scroll carries a plain flex child away with it.
-   position: fixed pins it to the viewport regardless of page scroll height;
-   left/transform re-centers it to match .app's own centered column instead
-   of spanning the full (possibly wider-than-phone) browser viewport. See
-   .hp-app-body.has-tabbar below for the matching bottom-padding reservation
-   so scrolled content doesn't end up hidden underneath it. */
+   A plain flex child at the end of .app, which is all it needs to be: .app
+   has a definite height and every screen scrolls inside its own container
+   (see the .app comment above), so page-level scroll never moves this bar.
+   It deliberately does NOT use position: fixed — that was tried while the
+   shell height was unbounded, and it papered over that bug rather than
+   fixing it. Keep .app's height definite and this stays put on its own. */
 .hp-tabbar {
-  position: fixed;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 430px;
-  z-index: 40;
+  flex: none;
   display: flex;
   border-top: 1px solid var(--stone);
   background: var(--paper);
@@ -703,12 +699,6 @@
      (this padding + .hp-tab's own bottom padding) should be just that
      cushion — no extra dead space above it. */
   padding-bottom: max(env(safe-area-inset-bottom), 6px);
-}
-@media (min-width: 500px) {
-  .hp-tabbar {
-    border-left: 1px solid var(--stone);
-    border-right: 1px solid var(--stone);
-  }
 }
 .hp-tab {
   flex: 1;

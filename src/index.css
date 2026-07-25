@@ -27,10 +27,16 @@
   box-sizing: border-box;
 }
 
+/* dvh, not %, all the way down: a percentage chain resolves against the
+   layout viewport, which on iOS Safari stays at its toolbar-hidden size. That
+   left the chain up to ~toolbar-height taller than .app's 100dvh, so the page
+   itself could still scroll by that sliver even though every screen scrolls
+   internally. overflow: hidden on body makes that structural — page-level
+   scroll is never the mechanism here; see .app in styles/app.css. */
 html,
 body,
 #root {
-  height: 100%;
+  height: 100dvh;
   margin: 0;
   overscroll-behavior-y: none;
 }
@@ -39,6 +45,7 @@ body {
   font-family: var(--font-ui);
   background: var(--bg);
   color: var(--text);
+  overflow: hidden;
 }
 
 /* .app now lives entirely in styles/app.css — see the comment there for why
