@@ -4,7 +4,7 @@ import type { SavedTrip } from "../hooks/useSavedTrips";
 import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
 import { resolveBackground } from "../data/destinationBackgrounds";
 import { CHECKLIST_ITEMS } from "../data/checklistItems";
-import { cityName, dayLabel, daysUntilTrip, isDuringTrip, startsInLabel } from "../utils/destination";
+import { cityName, dayLabel, daysUntilTrip, isDuringTrip, isTripOver, startsInLabel } from "../utils/destination";
 import { getNextUp } from "../utils/schedule";
 import { formatDateRange, tripRoute } from "../utils/passport";
 import { TrashIcon, ChevronRightIcon } from "../components/ui/icons";
@@ -59,6 +59,7 @@ function ActiveTripCard({
   const countdown = startsInLabel(itinerary.startDate);
   const prepDone = CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length;
   const duringTrip = isDuringTrip(itinerary.startDate, itinerary.numDays);
+  const tripOver = isTripOver(itinerary.startDate, itinerary.numDays);
   const nextUp = duringTrip ? getNextUp(itinerary, completedStopIds) : null;
 
   return (
@@ -87,43 +88,58 @@ function ActiveTripCard({
           {countdown && <span className="hp-trips-countdown">{countdown}</span>}
         </span>
       </button>
-      {duringTrip
-        ? nextUp && (
-            <button
-              type="button"
-              className="hp-trips-prep-row"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpen();
-              }}
-            >
-              <span>
-                <span className="hp-label">
-                  Happening next{nextUp.time ? ` · ${nextUp.time}` : ""}
-                </span>
-                <strong>{nextUp.stop.name}</strong>
-              </span>
-              <ChevronRightIcon size={18} />
-            </button>
-          )
-        : (
-            <button
-              type="button"
-              className="hp-trips-prep-row"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenChecklist();
-              }}
-            >
-              <span>
-                <span className="hp-label">Before you go</span>
-                <strong>
-                  {prepDone} of {CHECKLIST_ITEMS.length} ready
-                </strong>
-              </span>
-              <ChevronRightIcon size={18} />
-            </button>
-          )}
+      {duringTrip && nextUp && (
+        <button
+          type="button"
+          className="hp-trips-prep-row"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen();
+          }}
+        >
+          <span>
+            <span className="hp-label">Happening next{nextUp.time ? ` · ${nextUp.time}` : ""}</span>
+            <strong>{nextUp.stop.name}</strong>
+          </span>
+          <ChevronRightIcon size={18} />
+        </button>
+      )}
+
+      {tripOver && (
+        <button
+          type="button"
+          className="hp-trips-prep-row"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen();
+          }}
+        >
+          <span>
+            <span className="hp-label">Trip over</span>
+            <strong>Confirm what you did</strong>
+          </span>
+          <ChevronRightIcon size={18} />
+        </button>
+      )}
+
+      {!duringTrip && !tripOver && (
+        <button
+          type="button"
+          className="hp-trips-prep-row"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenChecklist();
+          }}
+        >
+          <span>
+            <span className="hp-label">Before you go</span>
+            <strong>
+              {prepDone} of {CHECKLIST_ITEMS.length} ready
+            </strong>
+          </span>
+          <ChevronRightIcon size={18} />
+        </button>
+      )}
     </div>
   );
 }

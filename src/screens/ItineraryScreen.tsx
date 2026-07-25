@@ -14,7 +14,7 @@ import type { AccommodationOption, ChatMessage, Itinerary, Stop } from "../types
 import { reorderStopWithinDay, deleteStop } from "../utils/itineraryEdit";
 import { scheduleForDay, getNextUp } from "../utils/schedule";
 import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
-import { cityName, dayLabel, isDuringTrip, tripDayIndex } from "../utils/destination";
+import { cityName, dayLabel, isDuringTrip, isTripOver, tripDayIndex } from "../utils/destination";
 import { convertMoney, currencyCodeFromLabel } from "../utils/currency";
 import { StampRing } from "../components/ui/primitives";
 import { DestinationBackground } from "../components/DestinationBackground";
@@ -90,6 +90,7 @@ export function ItineraryScreen({
   onToggleChecklistItem,
 }: Props) {
   const duringTrip = isDuringTrip(itinerary.startDate, itinerary.numDays);
+  const tripOver = isTripOver(itinerary.startDate, itinerary.numDays);
   const [selectedDay, setSelectedDay] = useState(() => {
     if (duringTrip) {
       const todayIndex = tripDayIndex(itinerary.startDate);
@@ -220,6 +221,16 @@ export function ItineraryScreen({
       </div>
 
       <div className="hp-itin-scroll">
+        {tripOver && (
+          <button type="button" className="hp-itin-next-banner" onClick={() => setConfirmOpen(true)}>
+            <span>
+              <span className="hp-label">Trip over</span>
+              <strong>How was {cityName(itinerary.destination)}? Confirm what you did</strong>
+            </span>
+            <span aria-hidden>→</span>
+          </button>
+        )}
+
         {nextUp && (
           <button
             type="button"
@@ -347,7 +358,7 @@ export function ItineraryScreen({
           <ChevronRightIcon size={18} />
         </button>
 
-        {!duringTrip && (
+        {!duringTrip && !tripOver && (
           <button type="button" className="hp-budget-row" onClick={() => setChecklistOpen(true)}>
             <span>
               <span className="hp-label">Before you go</span>

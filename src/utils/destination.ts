@@ -55,3 +55,11 @@ export function isDuringTrip(startDate: string | undefined, numDays: number): bo
   const idx = tripDayIndex(startDate);
   return idx !== null && idx >= 1 && idx <= numDays;
 }
+
+/** True once the trip's last day has passed — nudges the user to confirm
+ *  what they did and generate their passport, since that step is otherwise
+ *  easy to forget. False with no start date (nothing to compare against). */
+export function isTripOver(startDate: string | undefined, numDays: number): boolean {
+  const idx = tripDayIndex(startDate);
+  return idx !== null && idx > numDays;
+}
