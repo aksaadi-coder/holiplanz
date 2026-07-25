@@ -652,8 +652,10 @@
   background: var(--paper);
   /* max() keeps a minimum cushion even on devices/browsers that report 0 for
      the safe-area inset, so the bar never sits flush against a home
-     indicator or on-screen gesture bar. */
-  padding-bottom: max(env(safe-area-inset-bottom), 10px);
+     indicator or on-screen gesture bar. Everything below the icon/label
+     (this padding + .hp-tab's own bottom padding) should be just that
+     cushion — no extra dead space above it. */
+  padding-bottom: max(env(safe-area-inset-bottom), 6px);
 }
 .hp-tab {
   flex: 1;
@@ -664,7 +666,7 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 12px 0 10px;
+  padding: 12px 0 4px;
   color: rgba(0, 0, 0, 0.4);
   font-family: var(--font-ui);
   font-size: 13px;
