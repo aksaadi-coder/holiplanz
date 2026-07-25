@@ -13,7 +13,7 @@ export type ReelFeature = "plan" | "stay" | "personalise" | "explore";
 export type Screen =
   | { name: "tab"; tab: Tab }
   | { name: "generation"; request: GenerateItineraryRequest }
-  | { name: "itinerary" }
+  | { name: "itinerary"; openConfirm?: boolean }
   | { name: "mapFull" }
   | { name: "hotels" }
   | { name: "budget" }

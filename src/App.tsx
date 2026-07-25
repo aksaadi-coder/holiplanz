@@ -319,6 +319,7 @@ function App() {
             onCurrencyChange={(currency) => accountPrefs.update({ currency })}
             checklistDone={checklistDone}
             onToggleChecklistItem={toggleChecklistItem}
+            initialConfirmOpen={screen.openConfirm ?? false}
           />
         ) : (
           <HomeScreen loading={loading} onSubmit={handleGenerate} />
@@ -337,6 +338,7 @@ function App() {
                 completedStopIds={completedStopIds}
                 notifyTrip={accountPrefs.prefs.notifyTrip}
                 onOpenActive={() => nav.navigate({ name: "itinerary" })}
+                onOpenConfirm={() => nav.navigate({ name: "itinerary", openConfirm: true })}
                 onDeleteActive={handleDeleteActiveTrip}
                 onDeleteSaved={handleDeleteSavedTrip}
                 tripUndoMessage={

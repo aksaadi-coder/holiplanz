@@ -66,6 +66,8 @@ interface Props {
   onCurrencyChange: (currency: string) => void;
   checklistDone: Set<string>;
   onToggleChecklistItem: (itemId: string) => void;
+  /** Opens straight to the Confirm sheet — used by the Trips tab's "Trip over" nudge. */
+  initialConfirmOpen?: boolean;
 }
 
 export function ItineraryScreen({
@@ -88,6 +90,7 @@ export function ItineraryScreen({
   onCurrencyChange,
   checklistDone,
   onToggleChecklistItem,
+  initialConfirmOpen = false,
 }: Props) {
   const duringTrip = isDuringTrip(itinerary.startDate, itinerary.numDays);
   const tripOver = isTripOver(itinerary.startDate, itinerary.numDays);
@@ -108,7 +111,7 @@ export function ItineraryScreen({
   const [prefsOpen, setPrefsOpen] = useState(false);
   const [hotelsOpen, setHotelsOpen] = useState(false);
   const [openHotel, setOpenHotel] = useState<AccommodationOption | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(initialConfirmOpen);
   const [checklistOpen, setChecklistOpen] = useState(false);
 
   const day = useMemo(

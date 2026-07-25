@@ -21,6 +21,8 @@ interface Props {
   /** Account "notify me about upcoming trips" preference — gates the prep banner. */
   notifyTrip: boolean;
   onOpenActive: () => void;
+  /** Opens the itinerary straight to the Confirm sheet, for the "Trip over" nudge. */
+  onOpenConfirm: () => void;
   onDeleteActive: () => void;
   onDeleteSaved: (tripId: string) => void;
   tripUndoMessage: string | null;
@@ -37,11 +39,13 @@ function ActiveTripCard({
   itinerary,
   completedStopIds,
   onOpen,
+  onOpenConfirm,
   onDelete,
 }: {
   itinerary: Itinerary;
   completedStopIds: Set<string>;
   onOpen: () => void;
+  onOpenConfirm: () => void;
   onDelete: () => void;
 }) {
   const { swipeX, swiping, suppressClickRef, handlers } = useSwipeToDelete({ onDelete });
@@ -106,7 +110,7 @@ function ActiveTripCard({
           className="hp-trips-prep-row"
           onClick={(e) => {
             e.stopPropagation();
-            onOpen();
+            onOpenConfirm();
           }}
         >
           <span>
@@ -175,6 +179,7 @@ export function TripsScreen({
   completedStopIds,
   notifyTrip,
   onOpenActive,
+  onOpenConfirm,
   onDeleteActive,
   onDeleteSaved,
   tripUndoMessage,
@@ -236,6 +241,7 @@ export function TripsScreen({
               itinerary={itinerary}
               completedStopIds={completedStopIds}
               onOpen={onOpenActive}
+              onOpenConfirm={onOpenConfirm}
               onDelete={onDeleteActive}
             />
           </section>
