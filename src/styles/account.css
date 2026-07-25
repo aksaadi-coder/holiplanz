@@ -68,10 +68,15 @@
   gap: 16px;
 }
 .hp-acct-avatar {
+  position: relative;
   width: 66px;
   height: 66px;
   border-radius: 50%;
-  background: var(--ink);
+  border: none;
+  cursor: pointer;
+  background-color: var(--ink);
+  background-size: cover;
+  background-position: center;
   color: #fff;
   display: flex;
   align-items: center;
@@ -80,6 +85,16 @@
   font-size: 26px;
   font-weight: 700;
   flex-shrink: 0;
+  padding: 0;
+}
+.hp-acct-avatar-edit {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: flex;
+  background: var(--paper);
+  border-radius: 50%;
+  color: var(--ink);
 }
 .hp-acct-profile b {
   font-family: var(--font-ui);

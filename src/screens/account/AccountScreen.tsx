@@ -1,7 +1,8 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import type { useAccountPrefs } from "../../hooks/useAccountPrefs";
 import type { useTravelerProfile } from "../../hooks/useTravelerProfile";
-import { PinIcon } from "../../components/ui/icons";
+import { useProfilePhoto } from "../../hooks/useProfilePhoto";
+import { PinIcon, PlusCircleIcon } from "../../components/ui/icons";
 import { UpgradeScreen } from "./UpgradeScreen";
 import { NotificationsScreen } from "./NotificationsScreen";
 import { PaymentsScreen } from "./PaymentsScreen";
@@ -45,10 +46,23 @@ function nameFromEmail(email: string | null): string {
 export function AccountScreen({ email, prefs, update, profile, updateProfile }: Props) {
   const [view, setView] = useState<View>({ name: "root" });
   const [toast, setToast] = useState<string | null>(null);
+  const { photo, setPhoto } = useProfilePhoto();
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   function showToast(message: string) {
     setToast(message);
     setTimeout(() => setToast(null), 2600);
+  }
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      await setPhoto(file);
+    } catch {
+      showToast("Couldn't use that photo — try a different one");
+    }
   }
 
   let content: ReactNode;
@@ -89,7 +103,25 @@ export function AccountScreen({ email, prefs, update, profile, updateProfile }: 
       <div className="hp-account">
         <div className="hp-acct-scroll">
           <div className="hp-acct-profile">
-            <span className="hp-acct-avatar">{name[0]}</span>
+            <button
+              type="button"
+              className="hp-acct-avatar"
+              style={photo ? { backgroundImage: `url(${photo})` } : undefined}
+              onClick={() => photoInputRef.current?.click()}
+              aria-label={photo ? "Change profile photo" : "Add profile photo"}
+            >
+              {!photo && name[0]}
+              <span className="hp-acct-avatar-edit" aria-hidden>
+                <PlusCircleIcon size={16} />
+              </span>
+            </button>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handlePhotoChange}
+            />
             <span>
               <b>{name}</b>
               <span className="hp-acct-email">{email ?? "Not signed in"}</span>
