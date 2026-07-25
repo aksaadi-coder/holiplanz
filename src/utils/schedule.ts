@@ -1,4 +1,5 @@
-import type { Day, TimeOfDay } from "../types";
+import type { Day, Itinerary, Stop, TimeOfDay } from "../types";
+import { tripDayIndex } from "./destination";
 
 // The itinerary model stores a coarse `timeOfDay` bucket, but the design shows
 // real clock times ("09:00", "11:30"). We derive a plausible schedule: each stop
@@ -43,4 +44,29 @@ export function scheduleForDay(day: Day): Map<string, string> {
   }
 
   return times;
+}
+
+export interface NextUp {
+  dayNumber: number;
+  stop: Stop;
+  time: string;
+}
+
+/**
+ * The next not-yet-visited stop from today onward — powers the "happening
+ * next" highlight shown once the trip is underway (see isDuringTrip). Skips
+ * days before today, so a stop left unchecked on a past day doesn't get
+ * stuck as "next" forever; once today's stops are all done it rolls onto
+ * tomorrow's first one. Null once every remaining stop is checked off.
+ */
+export function getNextUp(itinerary: Itinerary, completedStopIds: Set<string>): NextUp | null {
+  const todayIndex = tripDayIndex(itinerary.startDate);
+  if (todayIndex === null) return null;
+
+  for (const day of itinerary.days) {
+    if (day.dayNumber < todayIndex) continue;
+    const stop = day.stops.find((s) => !completedStopIds.has(s.id));
+    if (stop) return { dayNumber: day.dayNumber, stop, time: scheduleForDay(day).get(stop.id) ?? "" };
+  }
+  return null;
 }

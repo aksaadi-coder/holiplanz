@@ -39,3 +39,19 @@ export function daysUntilTrip(startDate: string | undefined): number | null {
   today.setHours(0, 0, 0, 0);
   return Math.round((start.getTime() - today.getTime()) / 86_400_000);
 }
+
+/** Which trip day today is, 1-indexed (day 1 = start date). Null with no
+ *  start date, negative/zero-or-above numbers are meaningless outside
+ *  [1, numDays] — callers should gate with isDuringTrip. */
+export function tripDayIndex(startDate: string | undefined): number | null {
+  const daysOut = daysUntilTrip(startDate);
+  return daysOut === null ? null : -daysOut + 1;
+}
+
+/** True from the trip's start date through its last day (inclusive) —
+ *  the window where the "before you go" checklist no longer applies and
+ *  the itinerary should highlight what's happening next instead. */
+export function isDuringTrip(startDate: string | undefined, numDays: number): boolean {
+  const idx = tripDayIndex(startDate);
+  return idx !== null && idx >= 1 && idx <= numDays;
+}

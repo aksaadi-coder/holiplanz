@@ -87,6 +87,38 @@
   color: #fff;
 }
 
+/* ---- "Happening next" banner — shown once the trip is underway, replaces
+   the "before you go" checklist entry point (see isDuringTrip). ---- */
+.hp-itin-next-banner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: none;
+  cursor: pointer;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 18px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  text-align: left;
+  font-family: var(--font-ui);
+}
+.hp-itin-next-banner .hp-label {
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 2px;
+}
+.hp-itin-next-banner strong {
+  font-size: 18px;
+  font-weight: 700;
+}
+.hp-itin-next-banner > span:last-child {
+  flex-shrink: 0;
+  color: var(--coral);
+  font-size: 18px;
+}
+
 /* ---- Scroll area ---- */
 .hp-itin-scroll {
   position: relative;
@@ -181,6 +213,9 @@
 .hp-stop-row.is-updated {
   box-shadow: inset 0 0 0 1.5px var(--coral);
 }
+.hp-stop-row.is-next {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
 .hp-stop-row-text {
   display: flex;
   flex-direction: column;
@@ -194,6 +229,12 @@
 }
 .hp-updated-tag {
   color: var(--coral);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.hp-next-tag {
+  color: var(--ink);
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.02em;

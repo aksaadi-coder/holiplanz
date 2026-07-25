@@ -12,9 +12,9 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import type { AccommodationOption, ChatMessage, Itinerary, Stop } from "../types";
 import { reorderStopWithinDay, deleteStop } from "../utils/itineraryEdit";
-import { scheduleForDay } from "../utils/schedule";
+import { scheduleForDay, getNextUp } from "../utils/schedule";
 import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
-import { cityName, dayLabel } from "../utils/destination";
+import { cityName, dayLabel, isDuringTrip, tripDayIndex } from "../utils/destination";
 import { convertMoney, currencyCodeFromLabel } from "../utils/currency";
 import { DestinationBackground } from "../components/DestinationBackground";
 import { MapView } from "../components/MapPanel/MapView";
@@ -88,7 +88,14 @@ export function ItineraryScreen({
   checklistDone,
   onToggleChecklistItem,
 }: Props) {
-  const [selectedDay, setSelectedDay] = useState(itinerary.days[0]?.dayNumber ?? 1);
+  const duringTrip = isDuringTrip(itinerary.startDate, itinerary.numDays);
+  const [selectedDay, setSelectedDay] = useState(() => {
+    if (duringTrip) {
+      const todayIndex = tripDayIndex(itinerary.startDate);
+      if (todayIndex && itinerary.days.some((d) => d.dayNumber === todayIndex)) return todayIndex;
+    }
+    return itinerary.days[0]?.dayNumber ?? 1;
+  });
   const [mapOpen, setMapOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [openStop, setOpenStop] = useState<Stop | null>(null);
@@ -107,6 +114,10 @@ export function ItineraryScreen({
     [itinerary.days, selectedDay],
   );
   const times = useMemo(() => (day ? scheduleForDay(day) : new Map()), [day]);
+  const nextUp = useMemo(
+    () => (duringTrip ? getNextUp(itinerary, completedStopIds) : null),
+    [duringTrip, itinerary, completedStopIds],
+  );
 
   // One pointer sensor covers mouse, touch and pen. Listeners live on the grip
   // handle only, so vertical scrolling of the list still works on touch.
@@ -196,6 +207,26 @@ export function ItineraryScreen({
       </div>
 
       <div className="hp-itin-scroll">
+        {nextUp && (
+          <button
+            type="button"
+            className="hp-itin-next-banner"
+            onClick={() => {
+              setSelectedDay(nextUp.dayNumber);
+              setOpenStop(nextUp.stop);
+            }}
+          >
+            <span>
+              <span className="hp-label">
+                Happening next{nextUp.time ? ` · ${nextUp.time}` : ""}
+                {nextUp.dayNumber !== selectedDay ? ` · Day ${nextUp.dayNumber}` : ""}
+              </span>
+              <strong>{nextUp.stop.name}</strong>
+            </span>
+            <span aria-hidden>→</span>
+          </button>
+        )}
+
         {/* Collapsed map card — expands in place */}
         <div className={`hp-map-card ${mapOpen ? "is-open" : ""}`.trim()}>
           <button type="button" className="hp-map-card-row" onClick={() => setMapOpen((o) => !o)}>
@@ -253,6 +284,7 @@ export function ItineraryScreen({
                 stop={stop}
                 time={times.get(stop.id) ?? ""}
                 updated={updatedStopIds.has(stop.id)}
+                next={nextUp?.dayNumber === day.dayNumber && nextUp.stop.id === stop.id}
                 onOpen={() => setOpenStop(stop)}
                 onRemove={() => handleRemoveStop(stop.id)}
               />
@@ -302,16 +334,18 @@ export function ItineraryScreen({
           <ChevronRightIcon size={18} />
         </button>
 
-        <button type="button" className="hp-budget-row" onClick={() => setChecklistOpen(true)}>
-          <span>
-            <span className="hp-label">Before you go</span>
-            <strong>
-              {CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length} of{" "}
-              {CHECKLIST_ITEMS.length} ready
-            </strong>
-          </span>
-          <ChevronRightIcon size={18} />
-        </button>
+        {!duringTrip && (
+          <button type="button" className="hp-budget-row" onClick={() => setChecklistOpen(true)}>
+            <span>
+              <span className="hp-label">Before you go</span>
+              <strong>
+                {CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length} of{" "}
+                {CHECKLIST_ITEMS.length} ready
+              </strong>
+            </span>
+            <ChevronRightIcon size={18} />
+          </button>
+        )}
 
         <button type="button" className="hp-trip-over" onClick={() => setConfirmOpen(true)}>
           Trip over? Confirm what you did →
@@ -448,12 +482,14 @@ function StopRow({
   stop,
   time,
   updated,
+  next,
   onOpen,
   onRemove,
 }: {
   stop: Stop;
   time: string;
   updated: boolean;
+  next: boolean;
   onOpen: () => void;
   onRemove: () => void;
 }) {
@@ -473,7 +509,7 @@ function StopRow({
         Remove
       </div>
       <div
-        className={`hp-stop-row ${updated ? "is-updated" : ""} ${isDragging ? "is-dragging" : ""}`.trim()}
+        className={`hp-stop-row ${updated ? "is-updated" : ""} ${next ? "is-next" : ""} ${isDragging ? "is-dragging" : ""}`.trim()}
         style={{
           transform: `translateX(${swipeX}px)`,
           transition: swiping ? "none" : "transform 0.2s ease",
@@ -488,6 +524,7 @@ function StopRow({
           <span className="hp-stop-row-time">
             {time}
             {updated && <span className="hp-updated-tag"> · UPDATED</span>}
+            {!updated && next && <span className="hp-next-tag"> · NEXT</span>}
           </span>
           <strong>{stop.name}</strong>
         </div>

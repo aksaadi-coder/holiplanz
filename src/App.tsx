@@ -334,6 +334,7 @@ function App() {
                 savedTrips={savedTrips.savedTrips}
                 checklistDone={checklistDone}
                 onToggleChecklistItem={toggleChecklistItem}
+                completedStopIds={completedStopIds}
                 notifyTrip={accountPrefs.prefs.notifyTrip}
                 onOpenActive={() => nav.navigate({ name: "itinerary" })}
                 onDeleteActive={handleDeleteActiveTrip}

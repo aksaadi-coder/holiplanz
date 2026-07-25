@@ -4,7 +4,8 @@ import type { SavedTrip } from "../hooks/useSavedTrips";
 import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
 import { resolveBackground } from "../data/destinationBackgrounds";
 import { CHECKLIST_ITEMS } from "../data/checklistItems";
-import { cityName, dayLabel, daysUntilTrip, startsInLabel } from "../utils/destination";
+import { cityName, dayLabel, daysUntilTrip, isDuringTrip, startsInLabel } from "../utils/destination";
+import { getNextUp } from "../utils/schedule";
 import { formatDateRange, tripRoute } from "../utils/passport";
 import { TrashIcon, ChevronRightIcon } from "../components/ui/icons";
 import { PassportScreen } from "./PassportScreen";
@@ -15,6 +16,8 @@ interface Props {
   savedTrips: SavedTrip[];
   checklistDone: Set<string>;
   onToggleChecklistItem: (itemId: string) => void;
+  /** Visited stops — used to find what's happening next once the trip is underway. */
+  completedStopIds: Set<string>;
   /** Account "notify me about upcoming trips" preference — gates the prep banner. */
   notifyTrip: boolean;
   onOpenActive: () => void;
@@ -33,12 +36,14 @@ const PREP_REMINDER_WINDOW_DAYS = 3;
 function ActiveTripCard({
   itinerary,
   checklistDone,
+  completedStopIds,
   onOpen,
   onDelete,
   onOpenChecklist,
 }: {
   itinerary: Itinerary;
   checklistDone: Set<string>;
+  completedStopIds: Set<string>;
   onOpen: () => void;
   onDelete: () => void;
   onOpenChecklist: () => void;
@@ -53,6 +58,8 @@ function ActiveTripCard({
     .join(" · ");
   const countdown = startsInLabel(itinerary.startDate);
   const prepDone = CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length;
+  const duringTrip = isDuringTrip(itinerary.startDate, itinerary.numDays);
+  const nextUp = duringTrip ? getNextUp(itinerary, completedStopIds) : null;
 
   return (
     <div className="hp-swipe-wrap hp-trips-hero-wrap">
@@ -80,22 +87,43 @@ function ActiveTripCard({
           {countdown && <span className="hp-trips-countdown">{countdown}</span>}
         </span>
       </button>
-      <button
-        type="button"
-        className="hp-trips-prep-row"
-        onClick={(e) => {
-          e.stopPropagation();
-          onOpenChecklist();
-        }}
-      >
-        <span>
-          <span className="hp-label">Before you go</span>
-          <strong>
-            {prepDone} of {CHECKLIST_ITEMS.length} ready
-          </strong>
-        </span>
-        <ChevronRightIcon size={18} />
-      </button>
+      {duringTrip
+        ? nextUp && (
+            <button
+              type="button"
+              className="hp-trips-prep-row"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpen();
+              }}
+            >
+              <span>
+                <span className="hp-label">
+                  Happening next{nextUp.time ? ` · ${nextUp.time}` : ""}
+                </span>
+                <strong>{nextUp.stop.name}</strong>
+              </span>
+              <ChevronRightIcon size={18} />
+            </button>
+          )
+        : (
+            <button
+              type="button"
+              className="hp-trips-prep-row"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenChecklist();
+              }}
+            >
+              <span>
+                <span className="hp-label">Before you go</span>
+                <strong>
+                  {prepDone} of {CHECKLIST_ITEMS.length} ready
+                </strong>
+              </span>
+              <ChevronRightIcon size={18} />
+            </button>
+          )}
     </div>
   );
 }
@@ -152,6 +180,7 @@ export function TripsScreen({
   savedTrips,
   checklistDone,
   onToggleChecklistItem,
+  completedStopIds,
   notifyTrip,
   onOpenActive,
   onDeleteActive,
@@ -182,6 +211,7 @@ export function TripsScreen({
   const showPrepBanner =
     notifyTrip &&
     itinerary &&
+    !isDuringTrip(itinerary.startDate, itinerary.numDays) &&
     daysOut !== null &&
     daysOut >= 0 &&
     daysOut <= PREP_REMINDER_WINDOW_DAYS &&
@@ -213,6 +243,7 @@ export function TripsScreen({
             <ActiveTripCard
               itinerary={itinerary}
               checklistDone={checklistDone}
+              completedStopIds={completedStopIds}
               onOpen={onOpenActive}
               onDelete={onDeleteActive}
               onOpenChecklist={() => setChecklistOpen(true)}
