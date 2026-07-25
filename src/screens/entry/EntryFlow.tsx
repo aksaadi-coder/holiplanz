@@ -1,9 +1,13 @@
 import { useRef, useState } from "react";
 import { AppleIcon, GoogleIcon, EmailIcon, PinIcon } from "../../components/ui/icons";
+import { ProfileForm } from "../../components/profile/ProfileForm";
+import type { useTravelerProfile } from "../../hooks/useTravelerProfile";
 
-type Step = "splash" | "login" | "email" | "verify" | "onboarding";
+type Step = "splash" | "login" | "email" | "verify" | "onboarding" | "profile";
 
 interface Props {
+  profile: ReturnType<typeof useTravelerProfile>["profile"];
+  updateProfile: ReturnType<typeof useTravelerProfile>["update"];
   /** Called when the entry flow finishes; email is the demo address if given. */
   onDone: (email?: string) => void;
 }
@@ -15,7 +19,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * DEMO ONLY: no password is collected, the six-digit code is never validated
  * (any digits pass), and no email is ever sent. See useSession.
  */
-export function EntryFlow({ onDone }: Props) {
+export function EntryFlow({ profile, updateProfile, onDone }: Props) {
   const [step, setStep] = useState<Step>("splash");
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
@@ -146,8 +150,27 @@ export function EntryFlow({ onDone }: Props) {
             <h1 className="hp-onboard-title">Where to?</h1>
             <p className="hp-onboard-sub">One line from you, a finished trip from us.</p>
           </div>
-          <button type="button" className="hp-entry-cta" onClick={() => onDone(email || undefined)}>
+          <button type="button" className="hp-entry-cta" onClick={() => setStep("profile")}>
             Get started
+          </button>
+        </div>
+      );
+
+    case "profile":
+      return (
+        <div className="hp-entry hp-entry-paper hp-entry-fade">
+          <div className="hp-entry-scroll">
+            <span className="hp-entry-skip hp-profile-skip" onClick={() => onDone(email || undefined)}>
+              Skip
+            </span>
+            <h1 className="hp-entry-h1">Tell us about you</h1>
+            <p className="hp-entry-sub">
+              Helps tailor your trips from the first one — you can change this anytime in Account.
+            </p>
+            <ProfileForm profile={profile} update={updateProfile} />
+          </div>
+          <button type="button" className="hp-entry-cta" onClick={() => onDone(email || undefined)}>
+            Save &amp; continue
           </button>
         </div>
       );

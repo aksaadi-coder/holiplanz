@@ -129,6 +129,16 @@
   z-index: 2;
 }
 
+/* ---- Profile setup step — sits inline at the top of .hp-entry-scroll,
+   right where .hp-entry-back sits on the email/verify steps (same padding,
+   same vertical position), rather than floating in a corner. ---- */
+.hp-profile-skip {
+  position: static;
+  display: block;
+  text-align: right;
+  margin: 0 0 4px;
+}
+
 /* ---- Verify: six-cell code entry ---- */
 .hp-code-row {
   display: flex;

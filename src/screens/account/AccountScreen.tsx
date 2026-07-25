@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import type { SavedTrip } from "../../hooks/useSavedTrips";
 import type { useAccountPrefs } from "../../hooks/useAccountPrefs";
+import type { useTravelerProfile } from "../../hooks/useTravelerProfile";
 import { PinIcon } from "../../components/ui/icons";
 import { PassportScreen } from "../PassportScreen";
 import { UpgradeScreen } from "./UpgradeScreen";
@@ -9,6 +10,7 @@ import { PaymentsScreen } from "./PaymentsScreen";
 import { LanguageScreen } from "./LanguageScreen";
 import { HelpScreen } from "./HelpScreen";
 import { PastTripsScreen } from "./PastTripsScreen";
+import { ProfileScreen } from "./ProfileScreen";
 import { formatDateRange } from "../../utils/passport";
 
 interface Props {
@@ -16,6 +18,8 @@ interface Props {
   savedTrips: SavedTrip[];
   prefs: ReturnType<typeof useAccountPrefs>["prefs"];
   update: ReturnType<typeof useAccountPrefs>["update"];
+  profile: ReturnType<typeof useTravelerProfile>["profile"];
+  updateProfile: ReturnType<typeof useTravelerProfile>["update"];
 }
 
 type View =
@@ -25,6 +29,7 @@ type View =
   | { name: "payments" }
   | { name: "language" }
   | { name: "help" }
+  | { name: "profile" }
   | { name: "pastTrips" }
   | { name: "pastPassport"; trip: SavedTrip };
 
@@ -43,7 +48,7 @@ function nameFromEmail(email: string | null): string {
  * so none of this needs new top-level nav screens. The toast is rendered once,
  * outside the per-view branches below, so it shows no matter which view is active.
  */
-export function AccountScreen({ email, savedTrips, prefs, update }: Props) {
+export function AccountScreen({ email, savedTrips, prefs, update, profile, updateProfile }: Props) {
   const [view, setView] = useState<View>({ name: "root" });
   const [toast, setToast] = useState<string | null>(null);
 
@@ -88,6 +93,10 @@ export function AccountScreen({ email, savedTrips, prefs, update }: Props) {
     content = <LanguageScreen prefs={prefs} update={update} onBack={() => setView({ name: "root" })} />;
   } else if (view.name === "help") {
     content = <HelpScreen onBack={() => setView({ name: "root" })} />;
+  } else if (view.name === "profile") {
+    content = (
+      <ProfileScreen profile={profile} update={updateProfile} onBack={() => setView({ name: "root" })} />
+    );
   } else if (view.name === "pastTrips") {
     content = (
       <PastTripsScreen
@@ -158,6 +167,15 @@ export function AccountScreen({ email, savedTrips, prefs, update }: Props) {
           )}
 
           <div className="hp-acct-settings">
+            <button
+              type="button"
+              className="hp-acct-settings-row"
+              onClick={() => setView({ name: "profile" })}
+            >
+              <span className="hp-acct-settings-icon">◒</span>
+              <span className="hp-acct-settings-label">Profile</span>
+              <span className="hp-acct-settings-chevron">›</span>
+            </button>
             <button
               type="button"
               className="hp-acct-settings-row"

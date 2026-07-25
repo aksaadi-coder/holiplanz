@@ -4,6 +4,7 @@ import { useSavedTrips, type SavedTrip } from "./hooks/useSavedTrips";
 import { useAppNav, type Tab } from "./hooks/useAppNav";
 import { useSession } from "./hooks/useSession";
 import { useAccountPrefs } from "./hooks/useAccountPrefs";
+import { useTravelerProfile, composeProfileNote } from "./hooks/useTravelerProfile";
 import { checkAccess, generateItinerary, sendChatMessage, type AccessState } from "./api/itineraryApi";
 import { setAccessCode } from "./api/accessCode";
 import type { ChatMessage, GenerateItineraryRequest, Itinerary } from "./types";
@@ -65,6 +66,7 @@ function App() {
   const nav = useAppNav();
   const session = useSession();
   const accountPrefs = useAccountPrefs();
+  const travelerProfile = useTravelerProfile();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
@@ -112,7 +114,11 @@ function App() {
     return (
       <div className="app">
         <div className="hp-app-body">
-          <EntryFlow onDone={(email) => session.signIn(email)} />
+          <EntryFlow
+            profile={travelerProfile.profile}
+            updateProfile={travelerProfile.update}
+            onDone={(email) => session.signIn(email)}
+          />
         </div>
       </div>
     );
@@ -138,9 +144,15 @@ function App() {
     }
   }
 
+  // The traveler profile is folded into every new trip's preferences text —
+  // the same free-text field the system prompt already reads — rather than
+  // requiring the user to restate it per trip.
   function handleGenerate(input: GenerateItineraryRequest) {
-    nav.navigate({ name: "generation", request: input });
-    void runGeneration(input);
+    const profileNote = composeProfileNote(travelerProfile.profile);
+    const preferences = [profileNote, input.preferences].filter(Boolean).join(" ") || undefined;
+    const merged: GenerateItineraryRequest = { ...input, preferences };
+    nav.navigate({ name: "generation", request: merged });
+    void runGeneration(merged);
   }
 
   function handleCancelGeneration() {
@@ -376,6 +388,8 @@ function App() {
                 savedTrips={savedTrips.savedTrips}
                 prefs={accountPrefs.prefs}
                 update={accountPrefs.update}
+                profile={travelerProfile.profile}
+                updateProfile={travelerProfile.update}
               />
             );
         }
