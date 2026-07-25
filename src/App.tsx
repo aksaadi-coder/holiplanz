@@ -58,6 +58,8 @@ function App() {
     completedStopIds,
     setCompletedStopIds,
     toggleStopDone,
+    checklistDone,
+    toggleChecklistItem,
   } = useActiveTrip();
   const savedTrips = useSavedTrips();
   const nav = useAppNav();
@@ -315,6 +317,8 @@ function App() {
             onToggleSave={handleToggleSaveTrip}
             currency={accountPrefs.prefs.currency}
             onCurrencyChange={(currency) => accountPrefs.update({ currency })}
+            checklistDone={checklistDone}
+            onToggleChecklistItem={toggleChecklistItem}
           />
         ) : (
           <HomeScreen loading={loading} onSubmit={handleGenerate} />
@@ -328,6 +332,9 @@ function App() {
               <TripsScreen
                 itinerary={itinerary}
                 savedTrips={savedTrips.savedTrips}
+                checklistDone={checklistDone}
+                onToggleChecklistItem={toggleChecklistItem}
+                notifyTrip={accountPrefs.prefs.notifyTrip}
                 onOpenActive={() => nav.navigate({ name: "itinerary" })}
                 onDeleteActive={handleDeleteActiveTrip}
                 onDeleteSaved={handleDeleteSavedTrip}

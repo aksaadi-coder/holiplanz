@@ -8,6 +8,7 @@ interface StoredActiveTrip {
   itinerary: Itinerary;
   chatHistory: ChatMessage[];
   completedStopIds: string[];
+  checklistDone: string[];
 }
 
 function loadInitial(): StoredActiveTrip | null {
@@ -20,6 +21,9 @@ function loadInitial(): StoredActiveTrip | null {
       itinerary: parsed.itinerary,
       chatHistory: parsed.chatHistory ?? [],
       completedStopIds: Array.isArray(parsed.completedStopIds) ? parsed.completedStopIds : [],
+      // Added after v1 shipped; older saved trips just won't have this key,
+      // which is fine — an empty checklist is the correct starting state.
+      checklistDone: Array.isArray(parsed.checklistDone) ? parsed.checklistDone : [],
     };
   } catch {
     return null;
@@ -32,6 +36,9 @@ export function useActiveTrip() {
   const [completedStopIds, setCompletedStopIds] = useState<Set<string>>(
     () => new Set(loadInitial()?.completedStopIds ?? []),
   );
+  const [checklistDone, setChecklistDone] = useState<Set<string>>(
+    () => new Set(loadInitial()?.checklistDone ?? []),
+  );
 
   useEffect(() => {
     if (itinerary) {
@@ -42,12 +49,13 @@ export function useActiveTrip() {
           itinerary,
           chatHistory,
           completedStopIds: [...completedStopIds],
+          checklistDone: [...checklistDone],
         }),
       );
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  }, [itinerary, chatHistory, completedStopIds]);
+  }, [itinerary, chatHistory, completedStopIds, checklistDone]);
 
   function toggleStopDone(stopId: string) {
     setCompletedStopIds((prev) => {
@@ -61,10 +69,23 @@ export function useActiveTrip() {
     });
   }
 
+  function toggleChecklistItem(itemId: string) {
+    setChecklistDone((prev) => {
+      const next = new Set(prev);
+      if (next.has(itemId)) {
+        next.delete(itemId);
+      } else {
+        next.add(itemId);
+      }
+      return next;
+    });
+  }
+
   function startOver() {
     setItinerary(null);
     setChatHistory([]);
     setCompletedStopIds(new Set());
+    setChecklistDone(new Set());
   }
 
   return {
@@ -75,6 +96,8 @@ export function useActiveTrip() {
     completedStopIds,
     setCompletedStopIds,
     toggleStopDone,
+    checklistDone,
+    toggleChecklistItem,
     startOver,
   };
 }

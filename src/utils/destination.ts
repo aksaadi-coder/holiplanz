@@ -19,15 +19,23 @@ export function dayLabel(numDays: number): string {
  */
 export function startsInLabel(startDate: string | undefined): string | null {
   if (!startDate) return null;
-  const start = new Date(startDate);
-  start.setHours(0, 0, 0, 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffDays = Math.round((start.getTime() - today.getTime()) / 86_400_000);
-  if (diffDays < 0) return null;
+  const diffDays = daysUntilTrip(startDate);
+  if (diffDays === null || diffDays < 0) return null;
   if (diffDays === 0) return "TODAY";
   if (diffDays === 1) return "TOMORROW";
   if (diffDays < 7) return `STARTS IN ${diffDays} DAYS`;
   const weeks = Math.round(diffDays / 7);
   return `STARTS IN ${weeks} WEEK${weeks === 1 ? "" : "S"}`;
+}
+
+/** Whole days between today and a trip's start date (negative once it's
+ *  started, null with no start date). Shared by startsInLabel and the
+ *  "before you go" prep reminder banner. */
+export function daysUntilTrip(startDate: string | undefined): number | null {
+  if (!startDate) return null;
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((start.getTime() - today.getTime()) / 86_400_000);
 }

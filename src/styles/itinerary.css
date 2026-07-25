@@ -459,6 +459,30 @@
   cursor: pointer;
 }
 
+/* ---- Checklist ("Before you go") ---- */
+.hp-checklist-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: calc(26px + env(safe-area-inset-top)) 24px 24px;
+}
+.hp-checklist h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 14px 0 6px;
+  color: var(--ink);
+}
+.hp-checklist-progress {
+  margin: 0 0 12px;
+}
+.hp-checklist-cat {
+  margin: 24px 0 0;
+}
+.hp-checklist-label-done {
+  color: rgba(0, 0, 0, 0.35);
+  text-decoration: line-through;
+}
+
 /* Toggle */
 .hp-toggle {
   width: 52px;

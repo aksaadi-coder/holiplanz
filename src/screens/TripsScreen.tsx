@@ -3,14 +3,20 @@ import type { Itinerary } from "../types";
 import type { SavedTrip } from "../hooks/useSavedTrips";
 import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
 import { resolveBackground } from "../data/destinationBackgrounds";
-import { dayLabel, startsInLabel } from "../utils/destination";
+import { CHECKLIST_ITEMS } from "../data/checklistItems";
+import { cityName, dayLabel, daysUntilTrip, startsInLabel } from "../utils/destination";
 import { formatDateRange, tripRoute } from "../utils/passport";
-import { TrashIcon } from "../components/ui/icons";
+import { TrashIcon, ChevronRightIcon } from "../components/ui/icons";
 import { PassportScreen } from "./PassportScreen";
+import { ChecklistScreen } from "../components/itinerary/ChecklistScreen";
 
 interface Props {
   itinerary: Itinerary | null;
   savedTrips: SavedTrip[];
+  checklistDone: Set<string>;
+  onToggleChecklistItem: (itemId: string) => void;
+  /** Account "notify me about upcoming trips" preference — gates the prep banner. */
+  notifyTrip: boolean;
   onOpenActive: () => void;
   onDeleteActive: () => void;
   onDeleteSaved: (tripId: string) => void;
@@ -18,17 +24,24 @@ interface Props {
   onUndoDelete: () => void;
 }
 
+/** How many days out the "prep reminder" banner starts showing. */
+const PREP_REMINDER_WINDOW_DAYS = 3;
+
 /** "Coming up" hero card — photo up top, title + dates/route below, with a
  *  countdown pill. Swipe left to remove the active trip (see useSwipeToDelete
  *  and handleDeleteActiveTrip's undo, owned by App). */
 function ActiveTripCard({
   itinerary,
+  checklistDone,
   onOpen,
   onDelete,
+  onOpenChecklist,
 }: {
   itinerary: Itinerary;
+  checklistDone: Set<string>;
   onOpen: () => void;
   onDelete: () => void;
+  onOpenChecklist: () => void;
 }) {
   const { swipeX, swiping, suppressClickRef, handlers } = useSwipeToDelete({ onDelete });
   const meta = [
@@ -39,6 +52,7 @@ function ActiveTripCard({
     .filter(Boolean)
     .join(" · ");
   const countdown = startsInLabel(itinerary.startDate);
+  const prepDone = CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length;
 
   return (
     <div className="hp-swipe-wrap hp-trips-hero-wrap">
@@ -65,6 +79,22 @@ function ActiveTripCard({
           <span className="hp-trips-hero-meta">{meta}</span>
           {countdown && <span className="hp-trips-countdown">{countdown}</span>}
         </span>
+      </button>
+      <button
+        type="button"
+        className="hp-trips-prep-row"
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpenChecklist();
+        }}
+      >
+        <span>
+          <span className="hp-label">Before you go</span>
+          <strong>
+            {prepDone} of {CHECKLIST_ITEMS.length} ready
+          </strong>
+        </span>
+        <ChevronRightIcon size={18} />
       </button>
     </div>
   );
@@ -120,6 +150,9 @@ function FinishedTripRow({
 export function TripsScreen({
   itinerary,
   savedTrips,
+  checklistDone,
+  onToggleChecklistItem,
+  notifyTrip,
   onOpenActive,
   onDeleteActive,
   onDeleteSaved,
@@ -127,6 +160,7 @@ export function TripsScreen({
   onUndoDelete,
 }: Props) {
   const [openTrip, setOpenTrip] = useState<SavedTrip | null>(null);
+  const [checklistOpen, setChecklistOpen] = useState(false);
 
   if (openTrip) {
     return (
@@ -141,6 +175,18 @@ export function TripsScreen({
 
   const hasAny = Boolean(itinerary) || savedTrips.length > 0;
 
+  const daysOut = itinerary ? daysUntilTrip(itinerary.startDate) : null;
+  const prepRemaining = itinerary
+    ? CHECKLIST_ITEMS.length - CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length
+    : 0;
+  const showPrepBanner =
+    notifyTrip &&
+    itinerary &&
+    daysOut !== null &&
+    daysOut >= 0 &&
+    daysOut <= PREP_REMINDER_WINDOW_DAYS &&
+    prepRemaining > 0;
+
   return (
     <div className="hp-screen hp-trips">
       <div className="hp-trips-scroll">
@@ -148,10 +194,29 @@ export function TripsScreen({
 
         {!hasAny && <p className="hp-muted">No trips yet — plan one from Home.</p>}
 
+        {showPrepBanner && itinerary && (
+          <button type="button" className="hp-trips-prep-banner" onClick={() => setChecklistOpen(true)}>
+            <span>
+              {daysOut === 0
+                ? `Your ${cityName(itinerary.destination)} trip starts today`
+                : `Your ${cityName(itinerary.destination)} trip starts in ${daysOut} day${daysOut === 1 ? "" : "s"}`}
+              {" — "}
+              {prepRemaining} thing{prepRemaining === 1 ? "" : "s"} left to prepare
+            </span>
+            <span aria-hidden>→</span>
+          </button>
+        )}
+
         {itinerary && (
           <section className="hp-trips-section">
             <p className="hp-label">Coming up</p>
-            <ActiveTripCard itinerary={itinerary} onOpen={onOpenActive} onDelete={onDeleteActive} />
+            <ActiveTripCard
+              itinerary={itinerary}
+              checklistDone={checklistDone}
+              onOpen={onOpenActive}
+              onDelete={onDeleteActive}
+              onOpenChecklist={() => setChecklistOpen(true)}
+            />
           </section>
         )}
 
@@ -180,6 +245,14 @@ export function TripsScreen({
           </button>
         </div>
       )}
+
+      <ChecklistScreen
+        open={checklistOpen}
+        checklistDone={checklistDone}
+        onToggle={onToggleChecklistItem}
+        onClose={() => setChecklistOpen(false)}
+        backLabel="‹ Your trips"
+      />
     </div>
   );
 }

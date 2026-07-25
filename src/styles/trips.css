@@ -60,3 +60,66 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
+.hp-trips-prep-meta {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Direct link to the checklist from the "Coming up" card — sits below the
+   hero button (not nested inside it) so it can navigate to the checklist
+   instead of opening the itinerary. */
+.hp-trips-prep-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: none;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--stone);
+  border-radius: 18px;
+  padding: 14px 18px;
+  margin-top: 10px;
+  cursor: pointer;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.35);
+}
+.hp-trips-prep-row > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hp-trips-prep-row .hp-label {
+  margin: 0;
+}
+.hp-trips-prep-row strong {
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* "Before you go" reminder — shown a few days out with unchecked items,
+   gated by the account's "notify me about upcoming trips" preference. */
+.hp-trips-prep-banner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: none;
+  cursor: pointer;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  font-family: var(--font-ui);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: left;
+  line-height: 1.4;
+}
+.hp-trips-prep-banner span:last-child {
+  flex-shrink: 0;
+  color: var(--coral);
+  font-size: 18px;
+}

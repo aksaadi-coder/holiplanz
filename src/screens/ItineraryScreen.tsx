@@ -26,6 +26,8 @@ import { PreferencesScreen } from "../components/itinerary/PreferencesScreen";
 import { HotelsScreen } from "../components/itinerary/HotelsScreen";
 import { HotelDetailCard } from "../components/itinerary/HotelDetailCard";
 import { ConfirmScreen } from "../components/itinerary/ConfirmScreen";
+import { ChecklistScreen } from "../components/itinerary/ChecklistScreen";
+import { CHECKLIST_ITEMS } from "../data/checklistItems";
 import {
   InfoIcon,
   GripIcon,
@@ -61,6 +63,8 @@ interface Props {
   /** Account currency preference, e.g. "USD ($)" — drives the trip budget display. */
   currency: string;
   onCurrencyChange: (currency: string) => void;
+  checklistDone: Set<string>;
+  onToggleChecklistItem: (itemId: string) => void;
 }
 
 export function ItineraryScreen({
@@ -81,6 +85,8 @@ export function ItineraryScreen({
   onToggleSave,
   currency,
   onCurrencyChange,
+  checklistDone,
+  onToggleChecklistItem,
 }: Props) {
   const [selectedDay, setSelectedDay] = useState(itinerary.days[0]?.dayNumber ?? 1);
   const [mapOpen, setMapOpen] = useState(false);
@@ -94,6 +100,7 @@ export function ItineraryScreen({
   const [hotelsOpen, setHotelsOpen] = useState(false);
   const [openHotel, setOpenHotel] = useState<AccommodationOption | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [checklistOpen, setChecklistOpen] = useState(false);
 
   const day = useMemo(
     () => itinerary.days.find((d) => d.dayNumber === selectedDay) ?? itinerary.days[0],
@@ -295,6 +302,17 @@ export function ItineraryScreen({
           <ChevronRightIcon size={18} />
         </button>
 
+        <button type="button" className="hp-budget-row" onClick={() => setChecklistOpen(true)}>
+          <span>
+            <span className="hp-label">Before you go</span>
+            <strong>
+              {CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length} of{" "}
+              {CHECKLIST_ITEMS.length} ready
+            </strong>
+          </span>
+          <ChevronRightIcon size={18} />
+        </button>
+
         <button type="button" className="hp-trip-over" onClick={() => setConfirmOpen(true)}>
           Trip over? Confirm what you did →
         </button>
@@ -414,6 +432,13 @@ export function ItineraryScreen({
           setConfirmOpen(false);
           onShowPassport();
         }}
+      />
+
+      <ChecklistScreen
+        open={checklistOpen}
+        checklistDone={checklistDone}
+        onToggle={onToggleChecklistItem}
+        onClose={() => setChecklistOpen(false)}
       />
     </div>
   );
