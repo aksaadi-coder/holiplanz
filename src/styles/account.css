@@ -140,23 +140,8 @@
   flex-shrink: 0;
 }
 
-/* ---- Section head ("Past trips" · See all) ---- */
-.hp-acct-section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 0 0 12px;
-}
-.hp-acct-section-head .hp-label {
-  margin: 0;
-}
-.hp-acct-seeall {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-}
-
-/* ---- Trip rows (Account root preview + Past trips full list) ---- */
+/* ---- Trip rows (shared by TripsScreen's Finished list and
+   PassportListScreen's earned-passports list) ---- */
 .hp-acct-trip-list {
   display: flex;
   flex-direction: column;

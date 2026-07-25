@@ -385,7 +385,6 @@ function App() {
             return (
               <AccountScreen
                 email={session.email}
-                savedTrips={savedTrips.savedTrips}
                 prefs={accountPrefs.prefs}
                 update={accountPrefs.update}
                 profile={travelerProfile.profile}
