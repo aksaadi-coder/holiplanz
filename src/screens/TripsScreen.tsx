@@ -35,18 +35,14 @@ const PREP_REMINDER_WINDOW_DAYS = 3;
  *  and handleDeleteActiveTrip's undo, owned by App). */
 function ActiveTripCard({
   itinerary,
-  checklistDone,
   completedStopIds,
   onOpen,
   onDelete,
-  onOpenChecklist,
 }: {
   itinerary: Itinerary;
-  checklistDone: Set<string>;
   completedStopIds: Set<string>;
   onOpen: () => void;
   onDelete: () => void;
-  onOpenChecklist: () => void;
 }) {
   const { swipeX, swiping, suppressClickRef, handlers } = useSwipeToDelete({ onDelete });
   const meta = [
@@ -57,7 +53,6 @@ function ActiveTripCard({
     .filter(Boolean)
     .join(" · ");
   const countdown = startsInLabel(itinerary.startDate);
-  const prepDone = CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length;
   const duringTrip = isDuringTrip(itinerary.startDate, itinerary.numDays);
   const tripOver = isTripOver(itinerary.startDate, itinerary.numDays);
   const nextUp = duringTrip ? getNextUp(itinerary, completedStopIds) : null;
@@ -117,25 +112,6 @@ function ActiveTripCard({
           <span>
             <span className="hp-label">Trip over</span>
             <strong>Generate your passport</strong>
-          </span>
-          <ChevronRightIcon size={18} />
-        </button>
-      )}
-
-      {!duringTrip && !tripOver && (
-        <button
-          type="button"
-          className="hp-trips-prep-row"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenChecklist();
-          }}
-        >
-          <span>
-            <span className="hp-label">Before you go</span>
-            <strong>
-              {prepDone} of {CHECKLIST_ITEMS.length} ready
-            </strong>
           </span>
           <ChevronRightIcon size={18} />
         </button>
@@ -258,11 +234,9 @@ export function TripsScreen({
             <p className="hp-label">Coming up</p>
             <ActiveTripCard
               itinerary={itinerary}
-              checklistDone={checklistDone}
               completedStopIds={completedStopIds}
               onOpen={onOpenActive}
               onDelete={onDeleteActive}
-              onOpenChecklist={() => setChecklistOpen(true)}
             />
           </section>
         )}

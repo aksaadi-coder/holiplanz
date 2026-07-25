@@ -7,6 +7,9 @@
   overflow-y: auto;
   padding: calc(26px + env(safe-area-inset-top)) 24px 32px;
 }
+.hp-trips-scroll .hp-display {
+  margin-bottom: 20px;
+}
 .hp-trips-section + .hp-trips-section {
   margin-top: 28px;
 }
