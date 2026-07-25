@@ -76,7 +76,7 @@ export function GenerationScreen({ destination, error, onCancel, onRetry }: Prop
 
   return (
     <div className="hp-screen hp-generation">
-      <DestinationBackground destination={destination} intensity={0.95} tint={false} />
+      <DestinationBackground destination={destination} intensity={0.8} tint={false} />
       <div className="hp-generation-body">
         <StampRing size={132} spinning>
           <PinIcon size={34} filled className="hp-generation-pin" />
