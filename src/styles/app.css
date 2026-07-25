@@ -570,6 +570,12 @@
 }
 .hp-generation-body .hp-display {
   font-size: 26px;
+  /* No paper tint under this screen's photo (see DestinationBackground's
+     tint prop) — a soft light glow keeps the heading readable over it. */
+  text-shadow: 0 1px 12px var(--paper), 0 1px 3px var(--paper);
+}
+.hp-generation-body .hp-muted {
+  text-shadow: 0 1px 10px var(--paper), 0 1px 2px var(--paper);
 }
 .hp-generation-pin {
   color: var(--coral);
