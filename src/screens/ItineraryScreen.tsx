@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -16,6 +16,7 @@ import { scheduleForDay, getNextUp } from "../utils/schedule";
 import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
 import { cityName, dayLabel, isDuringTrip, tripDayIndex } from "../utils/destination";
 import { convertMoney, currencyCodeFromLabel } from "../utils/currency";
+import { StampRing } from "../components/ui/primitives";
 import { DestinationBackground } from "../components/DestinationBackground";
 import { MapView } from "../components/MapPanel/MapView";
 import { CardDetail } from "../components/itinerary/CardDetail";
@@ -132,6 +133,18 @@ export function ItineraryScreen({
         ? `${firstStay.options.length} options`
         : "";
   const lastAssistant = [...chatHistory].reverse().find((m) => m.role === "assistant");
+
+  // The assistant's reply note is a transient confirmation, not a permanent
+  // fixture — it used to stick around forever (persisted chatHistory never
+  // clears it) and sit over the itinerary. Auto-hide it a few seconds after
+  // each new reply; a newer reply resets the timer.
+  const [noteVisible, setNoteVisible] = useState(false);
+  useEffect(() => {
+    if (!lastAssistant) return;
+    setNoteVisible(true);
+    const timer = setTimeout(() => setNoteVisible(false), 6000);
+    return () => clearTimeout(timer);
+  }, [lastAssistant?.id]);
 
   function handleDragStart(event: DragStartEvent) {
     const stop = day?.stops.find((s) => s.id === event.active.id);
@@ -361,7 +374,14 @@ export function ItineraryScreen({
         </div>
       )}
 
-      {lastAssistant && !chatLoading && (
+      {chatLoading && (
+        <div className="hp-chat-progress" role="status">
+          <StampRing size={20} spinning />
+          <span>Updating your trip…</span>
+        </div>
+      )}
+
+      {lastAssistant && !chatLoading && noteVisible && (
         <div className="hp-assistant-note">{lastAssistant.content}</div>
       )}
 
