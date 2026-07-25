@@ -61,9 +61,7 @@ export function GenerationScreen({ destination, error, onCancel, onRetry }: Prop
           </StampRing>
           <div className="hp-gen-error-text">
             <h2 className="hp-display">That didn't load</h2>
-            <p className="hp-muted">
-              We couldn't reach our planner. Your trip details are safe — try again in a moment.
-            </p>
+            <p className="hp-muted">{error}</p>
           </div>
         </div>
         <div className="hp-generation-actions">

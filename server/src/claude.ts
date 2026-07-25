@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Anthropic, { AnthropicError, APIError } from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { randomUUID } from "node:crypto";
 import type { ChatMessage, Itinerary } from "../../shared/types.js";
@@ -16,7 +16,35 @@ import {
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const MODEL = "claude-sonnet-5";
-const MAX_TOKENS = 8000;
+// Full-itinerary responses scale with trip length (every stop needs a name,
+// description, category, time, duration, and lat/lng, plus a budget
+// breakdown and — if requested — accommodation options), so this needs more
+// headroom than the small single-field calls below. 16,000 comfortably
+// covers even a 14+ day trip with accommodations while staying under the
+// ~16K threshold where the SDK recommends streaming.
+const ITINERARY_MAX_TOKENS = 16000;
+
+/** The model's response was cut off before it finished the itinerary JSON —
+ *  distinguishable from a generic API/parse failure so the route can return
+ *  an actionable message instead of a generic "something went wrong". */
+export class ItineraryTooLargeError extends Error {
+  constructor() {
+    super("Itinerary response exceeded the output token limit before completing");
+    this.name = "ItineraryTooLargeError";
+  }
+}
+
+/** client.messages.parse() throws a plain AnthropicError (no .status) when
+ *  the response text fails JSON.parse or schema validation — which is
+ *  exactly what happens when max_tokens cuts the response off mid-JSON.
+ *  Real API errors (auth, rate limit, etc.) are APIError subclasses and
+ *  pass through unchanged. */
+function rethrowAsTooLargeIfTruncated(err: unknown): never {
+  if (err instanceof AnthropicError && !(err instanceof APIError)) {
+    throw new ItineraryTooLargeError();
+  }
+  throw err;
+}
 
 function toItinerary(core: ItineraryCore, existing?: Itinerary): Itinerary {
   const now = new Date().toISOString();
@@ -49,13 +77,15 @@ export async function generateItinerary(input: {
     .filter(Boolean)
     .join(" ");
 
-  const message = await client.messages.parse({
-    model: MODEL,
-    max_tokens: MAX_TOKENS,
-    system: SYSTEM_PROMPT,
-    output_config: { format: zodOutputFormat(generateItineraryOutputSchema) },
-    messages: [{ role: "user", content: userMessage }],
-  });
+  const message = await client.messages
+    .parse({
+      model: MODEL,
+      max_tokens: ITINERARY_MAX_TOKENS,
+      system: SYSTEM_PROMPT,
+      output_config: { format: zodOutputFormat(generateItineraryOutputSchema) },
+      messages: [{ role: "user", content: userMessage }],
+    })
+    .catch(rethrowAsTooLargeIfTruncated);
 
   if (!message.parsed_output) {
     throw new Error("Claude did not return a parseable itinerary");
@@ -78,13 +108,15 @@ export async function chatItinerary(input: {
     input.itinerary,
   )}\n\nThe user's request: "${input.userMessage}"\n\nReturn the complete updated itinerary incorporating this request, along with a one-sentence human-readable summary of what you changed.`;
 
-  const message = await client.messages.parse({
-    model: MODEL,
-    max_tokens: MAX_TOKENS,
-    system: SYSTEM_PROMPT,
-    output_config: { format: zodOutputFormat(chatItineraryOutputSchema) },
-    messages: [...historyMessages, { role: "user", content: currentStateMessage }],
-  });
+  const message = await client.messages
+    .parse({
+      model: MODEL,
+      max_tokens: ITINERARY_MAX_TOKENS,
+      system: SYSTEM_PROMPT,
+      output_config: { format: zodOutputFormat(chatItineraryOutputSchema) },
+      messages: [...historyMessages, { role: "user", content: currentStateMessage }],
+    })
+    .catch(rethrowAsTooLargeIfTruncated);
 
   if (!message.parsed_output) {
     throw new Error("Claude did not return a parseable itinerary");

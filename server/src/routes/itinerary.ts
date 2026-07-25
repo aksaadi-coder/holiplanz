@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { chatItinerary, generateItinerary, getDestinationInfo, getStopDetails } from "../claude.js";
+import {
+  chatItinerary,
+  generateItinerary,
+  getDestinationInfo,
+  getStopDetails,
+  ItineraryTooLargeError,
+} from "../claude.js";
 
 const router = Router();
 
@@ -11,6 +17,13 @@ function isValidString(value: unknown, maxLength: number): value is string {
 }
 
 function errorMessage(err: unknown): { status: number; message: string } {
+  if (err instanceof ItineraryTooLargeError) {
+    return {
+      status: 422,
+      message:
+        "Your trip is too packed to generate in one go — try a shorter trip, or fewer days at once, and add the rest afterward.",
+    };
+  }
   const anyErr = err as { status?: number };
   if (anyErr?.status === 401) {
     return {
