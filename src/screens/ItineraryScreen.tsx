@@ -251,6 +251,19 @@ export function ItineraryScreen({
           </button>
         )}
 
+        {!duringTrip && !tripOver && (
+          <button type="button" className="hp-itin-next-banner" onClick={() => setChecklistOpen(true)}>
+            <span>
+              <span className="hp-label">Before you go</span>
+              <strong>
+                {CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length} of{" "}
+                {CHECKLIST_ITEMS.length} ready
+              </strong>
+            </span>
+            <span aria-hidden>→</span>
+          </button>
+        )}
+
         {/* Collapsed map card — expands in place */}
         <div className={`hp-map-card ${mapOpen ? "is-open" : ""}`.trim()}>
           <button type="button" className="hp-map-card-row" onClick={() => setMapOpen((o) => !o)}>
@@ -357,19 +370,6 @@ export function ItineraryScreen({
           </span>
           <ChevronRightIcon size={18} />
         </button>
-
-        {!duringTrip && !tripOver && (
-          <button type="button" className="hp-budget-row" onClick={() => setChecklistOpen(true)}>
-            <span>
-              <span className="hp-label">Before you go</span>
-              <strong>
-                {CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length} of{" "}
-                {CHECKLIST_ITEMS.length} ready
-              </strong>
-            </span>
-            <ChevronRightIcon size={18} />
-          </button>
-        )}
 
         <button type="button" className="hp-trip-over" onClick={() => setConfirmOpen(true)}>
           Trip over? Confirm what you did →
