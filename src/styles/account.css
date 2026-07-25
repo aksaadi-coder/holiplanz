@@ -7,7 +7,7 @@
 .hp-acct-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: calc(26px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom));
+  padding: calc(26px + env(safe-area-inset-top)) 24px 32px;
 }
 
 /* Generic sub-screen scaffolding (Upgrade, Notifications, Payments, Language,
@@ -15,7 +15,7 @@
 .hp-acct-sub-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: calc(26px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom));
+  padding: calc(26px + env(safe-area-inset-top)) 24px 32px;
 }
 .hp-acct-sub h1 {
   font-family: var(--font-display);
@@ -395,7 +395,7 @@
 }
 .hp-acct-upgrade-later {
   flex-shrink: 0;
-  margin: 0 24px calc(24px + env(safe-area-inset-bottom));
+  margin: 0 24px 24px;
   height: 40px;
   border: none;
   background: transparent;

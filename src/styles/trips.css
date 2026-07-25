@@ -5,7 +5,7 @@
 .hp-trips-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: calc(26px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom));
+  padding: calc(26px + env(safe-area-inset-top)) 24px 32px;
 }
 .hp-trips-section + .hp-trips-section {
   margin-top: 28px;
