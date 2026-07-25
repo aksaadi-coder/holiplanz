@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 const STORAGE_KEY = "holidayPlanner.accountPrefs.v1";
 
 export const LANGUAGE_OPTIONS = ["English", "العربية", "Français", "Deutsch"];
-export const CURRENCY_OPTIONS = ["EUR (€)", "USD ($)", "AED (د.إ)"];
+export const CURRENCY_OPTIONS = ["EUR (€)", "USD ($)", "GBP (£)", "AED (د.إ)"];
 export const UNIT_OPTIONS = ["Metric", "Imperial"];
 
 interface AccountPrefs {
