@@ -34,6 +34,33 @@
   margin: 16px 4px 0;
 }
 
+/* Account → Profile's title matches the tab-root display style (Trips,
+   Passport, …) rather than the plain 400-weight heading the other Account
+   sub-screens use — set via an .hp-display h1 instead of a bare <h1>, so
+   this only affects that one screen. */
+.hp-acct-sub-scroll h1.hp-display {
+  /* .hp-acct-sub h1 (class+element) outranks the bare .hp-display class on
+     specificity, so font-weight/letter-spacing need restating here to
+     actually win — margin alone isn't enough. */
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 14px 0 20px;
+}
+
+/* ---- Traveler profile form (Account → Profile, and the same component
+   reused during first-run onboarding) — chip/label text sized up a notch
+   from the app-wide default for legibility on this field-heavy screen. ---- */
+.hp-profile-form .hp-chip {
+  font-size: 16px;
+  padding: 11px 18px;
+}
+.hp-profile-form .hp-label {
+  font-size: 14px;
+}
+.hp-profile-form .hp-field input {
+  font-size: 17px;
+}
+
 /* ---- Profile ---- */
 .hp-acct-profile {
   display: flex;

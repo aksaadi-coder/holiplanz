@@ -19,7 +19,7 @@ export function ProfileScreen({ profile, update, onBack }: Props) {
         <button type="button" className="hp-back-link" onClick={onBack}>
           ‹ Account
         </button>
-        <h1>Profile</h1>
+        <h1 className="hp-display">Profile</h1>
         <p className="hp-acct-note">
           Helps tailor new itineraries to you — nothing here is shared beyond this device.
         </p>

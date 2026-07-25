@@ -26,7 +26,7 @@ function toggleInList(list: string[], value: string): string[] {
  */
 export function ProfileForm({ profile, update }: Props) {
   return (
-    <>
+    <div className="hp-profile-form">
       <p className="hp-label">Age range</p>
       <div className="hp-chip-group">
         {AGE_RANGE_OPTIONS.map((o) => (
@@ -103,6 +103,6 @@ export function ProfileForm({ profile, update }: Props) {
           aria-label="Profile notes"
         />
       </div>
-    </>
+    </div>
   );
 }
