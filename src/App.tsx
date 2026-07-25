@@ -14,7 +14,7 @@ import { TripsScreen } from "./screens/TripsScreen";
 import { TabBar } from "./components/TabBar";
 import { ErrorBanner } from "./components/ErrorBanner";
 import { AccessGate } from "./components/AccessGate";
-import { PassportScreen } from "./screens/PassportScreen";
+import { PassportListScreen } from "./screens/PassportListScreen";
 import { AccountScreen } from "./screens/account/AccountScreen";
 import { EntryFlow } from "./screens/entry/EntryFlow";
 import { cityName } from "./utils/destination";
@@ -226,6 +226,12 @@ function App() {
     nav.resetTo("passport");
   }
 
+  // Sends the active trip straight to "How was [city]?" — used by the Trips
+  // and Passport tabs' nudges for a trip that isn't confirmed yet.
+  function handleOpenConfirm() {
+    nav.navigate({ name: "itinerary", openConfirm: true });
+  }
+
   // Manual bookmark toggle on the itinerary header — lets the user save a
   // trip as soon as it's generated, without waiting to confirm/complete it.
   function handleToggleSaveTrip() {
@@ -338,7 +344,7 @@ function App() {
                 completedStopIds={completedStopIds}
                 notifyTrip={accountPrefs.prefs.notifyTrip}
                 onOpenActive={() => nav.navigate({ name: "itinerary" })}
-                onOpenConfirm={() => nav.navigate({ name: "itinerary", openConfirm: true })}
+                onOpenConfirm={handleOpenConfirm}
                 onDeleteActive={handleDeleteActiveTrip}
                 onDeleteSaved={handleDeleteSavedTrip}
                 tripUndoMessage={
@@ -354,7 +360,15 @@ function App() {
               />
             );
           case "passport":
-            return <PassportScreen itinerary={itinerary} completedStopIds={completedStopIds} />;
+            return (
+              <PassportListScreen
+                itinerary={itinerary}
+                completedStopIds={completedStopIds}
+                savedTrips={savedTrips.savedTrips}
+                isActiveSaved={itinerary ? savedTrips.isSaved(itinerary.id) : false}
+                onOpenConfirm={handleOpenConfirm}
+              />
+            );
           case "account":
             return (
               <AccountScreen
