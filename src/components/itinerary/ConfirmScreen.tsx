@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Itinerary } from "../../types";
 import { cityName } from "../../utils/destination";
 import { CloseCircle } from "../ui/primitives";
@@ -24,9 +25,21 @@ export function ConfirmScreen({
   onClose,
   onGeneratePassport,
 }: Props) {
+  // completedStopIds only records "visited" — a stop's absence from it means
+  // either "skipped" or "not decided yet", and those look identical from the
+  // outside. Without this, every stop the user hasn't visited renders with
+  // Skipped pre-highlighted, as if it were already their choice. Track what's
+  // actually been decided this session so an untouched stop shows neither
+  // button selected, leaving it to the user.
+  const [decided, setDecided] = useState<Set<string>>(() => new Set(completedStopIds));
+
   if (!open) return null;
 
   const stops = itinerary.days.flatMap((day) => day.stops);
+
+  function markDecided(stopId: string) {
+    setDecided((prev) => (prev.has(stopId) ? prev : new Set(prev).add(stopId)));
+  }
 
   return (
     <div className="hp-fullscreen hp-confirm">
@@ -42,21 +55,28 @@ export function ConfirmScreen({
         <div className="hp-confirm-list">
           {stops.map((stop) => {
             const visited = completedStopIds.has(stop.id);
+            const chosen = decided.has(stop.id);
             return (
               <div key={stop.id} className="hp-confirm-item">
                 <b>{stop.name}</b>
                 <div className="hp-confirm-choices">
                   <button
                     type="button"
-                    className={`hp-choice ${visited ? "is-on" : ""}`.trim()}
-                    onClick={() => onToggle(stop.id, true)}
+                    className={`hp-choice ${chosen && visited ? "is-on" : ""}`.trim()}
+                    onClick={() => {
+                      onToggle(stop.id, true);
+                      markDecided(stop.id);
+                    }}
                   >
                     Visited
                   </button>
                   <button
                     type="button"
-                    className={`hp-choice ${!visited ? "is-on" : ""}`.trim()}
-                    onClick={() => onToggle(stop.id, false)}
+                    className={`hp-choice ${chosen && !visited ? "is-on" : ""}`.trim()}
+                    onClick={() => {
+                      onToggle(stop.id, false);
+                      markDecided(stop.id);
+                    }}
                   >
                     Skipped
                   </button>
