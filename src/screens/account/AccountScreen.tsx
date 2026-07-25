@@ -3,6 +3,7 @@ import type { useAccountPrefs } from "../../hooks/useAccountPrefs";
 import type { useTravelerProfile } from "../../hooks/useTravelerProfile";
 import { useProfilePhoto } from "../../hooks/useProfilePhoto";
 import { PinIcon, PlusCircleIcon } from "../../components/ui/icons";
+import { Sheet } from "../../components/ui/primitives";
 import { UpgradeScreen } from "./UpgradeScreen";
 import { NotificationsScreen } from "./NotificationsScreen";
 import { PaymentsScreen } from "./PaymentsScreen";
@@ -12,6 +13,10 @@ import { ProfileScreen } from "./ProfileScreen";
 
 interface Props {
   email: string | null;
+  /** Custom display name, or null to fall back to the email-derived one. */
+  name: string | null;
+  setName: (name: string) => void;
+  onSignOut: () => void;
   prefs: ReturnType<typeof useAccountPrefs>["prefs"];
   update: ReturnType<typeof useAccountPrefs>["update"];
   profile: ReturnType<typeof useTravelerProfile>["profile"];
@@ -43,9 +48,19 @@ function nameFromEmail(email: string | null): string {
  * this needs new top-level nav screens. The toast is rendered once, outside
  * the per-view branches below, so it shows no matter which view is active.
  */
-export function AccountScreen({ email, prefs, update, profile, updateProfile }: Props) {
+export function AccountScreen({
+  email,
+  name: customName,
+  setName,
+  onSignOut,
+  prefs,
+  update,
+  profile,
+  updateProfile,
+}: Props) {
   const [view, setView] = useState<View>({ name: "root" });
   const [toast, setToast] = useState<string | null>(null);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const { photo, setPhoto } = useProfilePhoto();
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -94,10 +109,17 @@ export function AccountScreen({ email, prefs, update, profile, updateProfile }: 
     content = <HelpScreen onBack={() => setView({ name: "root" })} />;
   } else if (view.name === "profile") {
     content = (
-      <ProfileScreen profile={profile} update={updateProfile} onBack={() => setView({ name: "root" })} />
+      <ProfileScreen
+        profile={profile}
+        update={updateProfile}
+        name={customName}
+        placeholderName={nameFromEmail(email)}
+        onNameChange={setName}
+        onBack={() => setView({ name: "root" })}
+      />
     );
   } else {
-    const name = nameFromEmail(email);
+    const name = customName ?? nameFromEmail(email);
 
     content = (
       <div className="hp-account">
@@ -186,6 +208,19 @@ export function AccountScreen({ email, prefs, update, profile, updateProfile }: 
               <span className="hp-acct-settings-chevron">›</span>
             </button>
           </div>
+
+          {/* Separated from the settings list above: this signs out rather than
+              opening a sub-screen, so it shouldn't read as another row of the
+              same kind. Confirmed via a sheet — signing back in means redoing
+              the whole email/code flow, so an accidental tap is worth
+              guarding against even though nothing is deleted. */}
+          <button
+            type="button"
+            className="hp-acct-signout"
+            onClick={() => setSignOutOpen(true)}
+          >
+            Log out
+          </button>
         </div>
       </div>
     );
@@ -197,6 +232,33 @@ export function AccountScreen({ email, prefs, update, profile, updateProfile }: 
   return (
     <div className="hp-screen">
       {content}
+
+      <Sheet open={signOutOpen} onClose={() => setSignOutOpen(false)} title="Log out?">
+        <p className="hp-muted hp-acct-signout-note">
+          You'll go back to the sign-in screen, where you can use a different email. Your trips,
+          profile and photo stay on this device.
+        </p>
+        <div className="hp-acct-signout-actions">
+          <button
+            type="button"
+            className="hp-btn hp-btn-primary"
+            onClick={() => {
+              setSignOutOpen(false);
+              onSignOut();
+            }}
+          >
+            Log out
+          </button>
+          <button
+            type="button"
+            className="hp-btn hp-btn-ghost"
+            onClick={() => setSignOutOpen(false)}
+          >
+            Stay signed in
+          </button>
+        </div>
+      </Sheet>
+
       {toast && <div className="hp-passport-toast">{toast}</div>}
     </div>
   );

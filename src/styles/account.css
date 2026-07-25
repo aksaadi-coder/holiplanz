@@ -245,6 +245,39 @@
   color: rgba(0, 0, 0, 0.4);
 }
 
+/* ---- Log out (Account root) ----
+   Deliberately not an .hp-acct-settings-row: it acts rather than navigating,
+   so it gets its own full-width outlined treatment below the list instead of
+   a chevron row. Coral (the "earned"/attention colour) without a filled
+   background — it's a real state change, but not a destructive one. */
+.hp-acct-signout {
+  display: block;
+  width: 100%;
+  margin-top: 26px;
+  padding: 15px 0;
+  border: none;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--stone);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--coral);
+}
+.hp-acct-signout-note {
+  font-size: 15px;
+  margin-bottom: 18px;
+}
+.hp-acct-signout-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hp-acct-signout-actions .hp-btn {
+  width: 100%;
+}
+
 /* ---- Notifications ---- */
 .hp-acct-row {
   display: flex;

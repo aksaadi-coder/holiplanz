@@ -386,6 +386,9 @@ function App() {
             return (
               <AccountScreen
                 email={session.email}
+                name={session.name}
+                setName={session.setName}
+                onSignOut={session.signOut}
                 prefs={accountPrefs.prefs}
                 update={accountPrefs.update}
                 profile={travelerProfile.profile}
