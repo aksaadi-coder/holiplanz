@@ -1645,6 +1645,16 @@
   color: rgba(0, 0, 0, 0.4);
   margin: 0 0 20px;
 }
+.hp-export-variant-toggle {
+  margin-bottom: 18px;
+}
+/* No extra padding/background needed here — .hp-export-scroll already
+   supplies the 24px padding + paper background that PassportPage expects
+   (see .hp-capture-page-full for why the off-screen capture needs its own
+   copy of that same context). */
+.hp-export-full-preview {
+  margin-top: 4px;
+}
 .hp-export-actions {
   padding: 12px 24px 24px;
   display: flex;
@@ -1679,13 +1689,23 @@
 }
 
 /* ---- Off-screen capture page (Export screen preview + PDF/PNG capture) ----
-   Both render MiniPassportCard, so what's shown here and what gets captured
-   are pixel-identical, uploaded photo included. No padding/background here —
-   the exported file should be just the white card itself, not the app's
-   beige screen backdrop around it. */
+   Renders whichever variant (mini/full) is selected, so what's shown here and
+   what gets captured are pixel-identical, uploaded photo included. No
+   padding/background by default — the mini card is a self-contained white
+   card, so the exported file should be just that card, not the app's beige
+   screen backdrop around it. */
 .hp-capture-page {
   width: 402px;
   box-sizing: border-box;
+}
+/* The full PassportPage isn't self-contained the way the mini card is — it's
+   normally rendered inside .hp-passport-scroll's 24px padding and the app's
+   paper background (its MRZ strip bleeds to the edge via a matching -24px
+   margin). Reproduce that ambient padding/background here so a "Full" export
+   looks the same as the live Passport tab instead of edge-to-edge/transparent. */
+.hp-capture-page-full {
+  padding: 24px;
+  background: var(--paper);
 }
 
 /* ---- Toast ---- */

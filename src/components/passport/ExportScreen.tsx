@@ -1,22 +1,38 @@
 import type { PassportData } from "../../utils/passport";
 import { MiniPassportCard } from "./MiniPassportCard";
+import { PassportPage } from "./PassportPage";
+import { Chip } from "../ui/primitives";
+
+export type PassportExportVariant = "mini" | "full";
 
 interface Props {
   data: PassportData;
   photo: string | null;
   busy: null | "pdf" | "image";
+  variant: PassportExportVariant;
+  onVariantChange: (variant: PassportExportVariant) => void;
   onBack: () => void;
   onDownloadPdf: () => void;
   onSaveImage: () => void;
 }
 
 /**
- * Full-screen "Export as PDF" view — a preview of the compact passport card
- * plus download actions. The preview renders the same MiniPassportCard as the
- * off-screen capture target (owned by PassportScreen), so what's shown here
- * is an exact match for what gets captured for the PDF/image.
+ * Full-screen "Export as PDF" view — a preview of the passport, plus download
+ * actions. The Mini/Full toggle picks between the compact MiniPassportCard and
+ * the full stamped PassportPage; the preview always renders the same
+ * component as the off-screen capture target (owned by PassportScreen), so
+ * what's shown here is an exact match for what gets captured for the PDF/image.
  */
-export function ExportScreen({ data, photo, busy, onBack, onDownloadPdf, onSaveImage }: Props) {
+export function ExportScreen({
+  data,
+  photo,
+  busy,
+  variant,
+  onVariantChange,
+  onBack,
+  onDownloadPdf,
+  onSaveImage,
+}: Props) {
   return (
     <div className="hp-export-screen">
       <div className="hp-export-scroll">
@@ -26,7 +42,18 @@ export function ExportScreen({ data, photo, busy, onBack, onDownloadPdf, onSaveI
         <h1 className="hp-export-h1">Export as PDF</h1>
         <p className="hp-export-lead">A print-ready page, stamps and all.</p>
 
-        <MiniPassportCard data={data} photo={photo} />
+        <div className="hp-chip-group hp-export-variant-toggle">
+          <Chip label="Mini" selected={variant === "mini"} onClick={() => onVariantChange("mini")} />
+          <Chip label="Full" selected={variant === "full"} onClick={() => onVariantChange("full")} />
+        </div>
+
+        {variant === "full" ? (
+          <div className="hp-export-full-preview">
+            <PassportPage data={data} photo={photo} />
+          </div>
+        ) : (
+          <MiniPassportCard data={data} photo={photo} />
+        )}
       </div>
 
       <div className="hp-export-actions">

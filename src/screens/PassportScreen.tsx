@@ -4,7 +4,7 @@ import { buildPassport } from "../utils/passport";
 import { PassportPage } from "../components/passport/PassportPage";
 import { MiniPassportCard } from "../components/passport/MiniPassportCard";
 import { ShareSheet } from "../components/passport/ShareSheet";
-import { ExportScreen } from "../components/passport/ExportScreen";
+import { ExportScreen, type PassportExportVariant } from "../components/passport/ExportScreen";
 import {
   savePassportImage,
   savePassportPdf,
@@ -28,13 +28,14 @@ type Overlay = null | "share" | "export";
  * Passport tab — the full passport-page design: corner category stamps around a
  * central destination stamp, trip details with a photo slot, route line and an
  * MRZ strip. All values are derived from the trip (see buildPassport). Owns the
- * Share sheet and Export screen. Export always uses the compact MiniPassportCard
- * (not this tab's full page) — the Export preview and the PDF/PNG capture render
- * the same MiniPassportCard, so what you export is exactly what's previewed there.
+ * Share sheet and Export screen. Export offers a Mini/Full toggle (see
+ * ExportScreen) — the off-screen capture target below renders whichever
+ * variant is selected, so the PDF/PNG always matches the Export preview.
  */
 export function PassportScreen({ itinerary, completedStopIds, onBack, backLabel = "‹ Back" }: Props) {
   const [photo, setPhoto] = useState<string | null>(null);
   const [overlay, setOverlay] = useState<Overlay>(null);
+  const [exportVariant, setExportVariant] = useState<PassportExportVariant>("mini");
   const [busy, setBusy] = useState<null | "pdf" | "image">(null);
   const [toast, setToast] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -150,6 +151,8 @@ export function PassportScreen({ itinerary, completedStopIds, onBack, backLabel 
           data={data}
           photo={photo}
           busy={busy}
+          variant={exportVariant}
+          onVariantChange={setExportVariant}
           onBack={() => setOverlay(null)}
           onDownloadPdf={handleDownloadPdf}
           onSaveImage={handleSaveImage}
@@ -158,12 +161,21 @@ export function PassportScreen({ itinerary, completedStopIds, onBack, backLabel 
 
       {toast && <div className="hp-passport-toast">{toast}</div>}
 
-      {/* Off-screen capture target for PDF / image export — mirrors the mini
-          card shown in ExportScreen, so the download always matches what's
-          shown there, uploaded photo included. */}
+      {/* Off-screen capture target for PDF / image export — mirrors whichever
+          variant is selected in ExportScreen, so the download always matches
+          what's shown there, uploaded photo included. */}
       <div className="hp-capture-host" aria-hidden>
-        <div className="hp-capture-page" ref={captureRef}>
-          <MiniPassportCard data={data} photo={photo} />
+        <div
+          className={
+            exportVariant === "full" ? "hp-capture-page hp-capture-page-full" : "hp-capture-page"
+          }
+          ref={captureRef}
+        >
+          {exportVariant === "full" ? (
+            <PassportPage data={data} photo={photo} />
+          ) : (
+            <MiniPassportCard data={data} photo={photo} />
+          )}
         </div>
       </div>
     </div>
