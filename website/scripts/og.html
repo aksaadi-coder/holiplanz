@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,400&display=swap"
+    />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1200px; height: 630px; }
+      body {
+        position: relative;
+        background: #ff4c3f;
+        color: #fff;
+        overflow: hidden;
+        font-family: 'Hanken Grotesk', sans-serif;
+        padding: 64px 72px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .circle { position: absolute; border-radius: 50%; }
+      .circle--solid {
+        width: 900px; height: 900px;
+        background: rgba(255, 255, 255, 0.07);
+        right: -260px; top: -320px;
+      }
+      .circle--dashed {
+        width: 640px; height: 640px;
+        border: 1px dashed rgba(255, 255, 255, 0.45);
+        right: -80px; bottom: -300px;
+      }
+      .wordmark {
+        position: relative;
+        font-family: 'Newsreader', Georgia, serif;
+        font-size: 34px;
+        font-style: italic;
+        line-height: 1;
+      }
+      .title {
+        position: relative;
+        font-family: 'Newsreader', Georgia, serif;
+        font-weight: 500;
+        line-height: 0.95;
+        letter-spacing: -0.02em;
+      }
+      .title span { display: block; }
+      .title .small { font-size: 58px; }
+      .title .big { font-size: 96px; }
+      .foot {
+        position: relative;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 32px;
+      }
+      .soon {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.78);
+      }
+      .tag { font-size: 20px; color: rgba(255, 255, 255, 0.85); }
+    </style>
+  </head>
+  <body>
+    <div class="circle circle--solid"></div>
+    <div class="circle circle--dashed"></div>
+
+    <div class="wordmark">holiplanz</div>
+
+    <h1 class="title">
+      <span class="small">Plan less.</span>
+      <span class="big">Experience more.</span>
+    </h1>
+
+    <div class="foot">
+      <span class="soon">Coming soon · iPhone &amp; Android</span>
+      <span class="tag">A full itinerary in about thirty seconds</span>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,92 @@
+---
+/**
+ * The design system's one card shell: panel background, radius, no shadow.
+ *
+ * Shadows do not exist in this system (--shadow-card: none). Cards are
+ * distinguished from the page by a one-hair background shift, and emphasis is
+ * an inset ring — never elevation, never a border.
+ */
+interface Props {
+  variant?: 'default' | 'stop';
+  /** Emphasis ring, drawn inset so the card's box doesn't shift. */
+  featured?: boolean;
+  padding?: number;
+  radius?: number;
+  subtitle?: string;
+  title?: string;
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  featured = false,
+  padding = 24,
+  radius = 16,
+  subtitle,
+  title,
+  class: className,
+} = Astro.props;
+---
+
+<div
+  class:list={['card', { 'card--featured': featured }, className]}
+  style={`--card-pad:${padding}px;--card-radius:${radius}px`}
+>
+  {
+    variant === 'stop' ? (
+      <>
+        <span class="card__subtitle">
+          <span class="card__dot" aria-hidden="true" />
+          {subtitle}
+        </span>
+        <span class="card__title">{title}</span>
+        <slot />
+      </>
+    ) : (
+      <slot />
+    )
+  }
+</div>
+
+<style>
+  .card {
+    background: var(--bg-panel);
+    border-radius: var(--card-radius);
+    padding: var(--card-pad);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card--featured {
+    box-shadow: inset 0 0 0 1px var(--hp-black);
+  }
+
+  .card__subtitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--type-label-size);
+    font-weight: var(--type-label-weight);
+    letter-spacing: var(--type-label-tracking);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  /* The one place a coral dot is allowed: it marks a stop on a day. */
+  .card__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+  }
+
+  .card__title {
+    margin-top: 6px;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-primary);
+  }
+</style>

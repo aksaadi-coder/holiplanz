@@ -1,0 +1,98 @@
+---
+import Base from '../layouts/Base.astro';
+import Band from '../components/Band.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Button from '../components/Button.astro';
+import FaqItem from '../components/FaqItem.astro';
+
+const faqs = [
+  {
+    question: 'When can I actually use it?',
+    answer:
+      'Holiplanz arrives on iPhone and Android in 2026. There’s no web version planned — the app is where the trip lives, including offline while you’re travelling.',
+  },
+  {
+    question: 'What does it cost?',
+    answer:
+      'Your first journey is on us — every feature, once, on the house. After that: the free plan keeps one basic itinerary with manual edits; a Trip Pass is $19 one-time for a single trip with unlimited AI editing, offline export and a Trip Passport; Premium is $49 a year for unlimited trips. The Trip Pass does not auto-renew.',
+  },
+  {
+    question: 'How long does a plan take to build?',
+    answer:
+      'Thirty to forty seconds for a complete itinerary — days in order, places to stay, budget and trip info. You’ll get a fact or two about where you’re going while it works.',
+  },
+  {
+    question: 'Can I change what it gives me?',
+    answer:
+      'Yes. Drag anything to reorder it, or just ask — "swap lunch for something local", "keep the mornings free" — and the day rebuilds around it. Free plans can edit by hand; asking in plain language needs a Trip Pass or Premium.',
+  },
+  {
+    question: 'Does Holiplanz book anything for me?',
+    answer:
+      'No. We plan the trip and hand you a shortlist worth booking — you book it yourself, wherever you prefer. Nothing is reserved or paid for inside the app.',
+  },
+  {
+    question: 'What is the Trip Passport?',
+    answer:
+      'A record of what you actually did. When you get back you confirm which stops you made, and the passport stamps itself by category — museums, food, outdoors. Anything you skipped stays blank. It’s not a score and there’s nothing to compete over.',
+  },
+  {
+    question: 'Will it work without signal?',
+    answer:
+      'With a Trip Pass or Premium you can take your itinerary offline and export it as a PDF before you fly, so the plan is with you whether or not the data is.',
+  },
+  {
+    question: 'Is it any good for families, or solo?',
+    answer:
+      'Both. Tell us who’s coming and how you like to travel — "hiking with kids" works as well as anything from the list, and the plan shapes around it.',
+  },
+];
+---
+
+<Base
+  title="Support — Holiplanz"
+  description="Questions about Holiplanz answered plainly: when it launches, what it costs, how long a plan takes, whether we book anything (we don't), and how the Trip Passport works."
+>
+  <PageBanner title="Questions, answered plainly." titleSize="clamp(42px, 5.2vw, 68px)">
+    The app isn't out yet, so most of this is about what to expect. If your question isn't here,
+    <a href="/contact">write to us</a> and a person will reply.
+  </PageBanner>
+
+  <Band padTop={80} padBottom={88}>
+    <div class="faqs">
+      {faqs.map((faq) => <FaqItem question={faq.question}>{faq.answer}</FaqItem>)}
+    </div>
+  </Band>
+
+  <Fragment slot="closing">
+    <Band padTop={80} padBottom={72}>
+      <div class="stuck">
+        <h2 class="h2 stuck__heading">Still stuck? Ask us directly.</h2>
+        <Button variant="coral" href="/contact">Contact us&nbsp;&nbsp;→</Button>
+      </div>
+    </Band>
+  </Fragment>
+</Base>
+
+<style>
+  .faqs {
+    max-width: 820px;
+    margin-inline: auto;
+    border-top: 1px solid var(--border-default);
+  }
+
+  .stuck {
+    max-width: 840px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+  }
+
+  .stuck__heading {
+    font-size: clamp(30px, 3.8vw, 46px);
+    line-height: 1.05;
+  }
+</style>

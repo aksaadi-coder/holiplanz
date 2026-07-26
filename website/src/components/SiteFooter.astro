@@ -1,0 +1,85 @@
+---
+import Wordmark from './Wordmark.astro';
+import { productLinks, companyLinks, legalLinks } from '../data/nav';
+
+/**
+ * The footer renders no theme of its own. It is mounted inside the page's
+ * single dark wrapper in Base.astro, together with the closing band, so the
+ * two share one continuous field with no seam between them — the page must
+ * not stay white to the bottom.
+ */
+
+const columns = [
+  { label: 'Product', links: productLinks(Astro.url.pathname) },
+  { label: 'Company', links: companyLinks },
+  { label: 'Legal', links: legalLinks },
+];
+---
+
+<footer class="footer">
+  <div class="footer__cols wrap">
+    <div class="footer__brand">
+      <Wordmark tone="coral" size={26} pin={20} />
+      <span class="footer__tagline">Plan less. Experience more.</span>
+    </div>
+    {
+      columns.map((column) => (
+        <div class="footer__col">
+          <span class="label">{column.label}</span>
+          {column.links.map((link) => (
+            <a href={link.href}>{link.text}</a>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+  <div class="footer__base wrap">
+    <span>© 2026 Holiplanz</span>
+    <span>Made for people who'd rather be there</span>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--border-onDark);
+    padding: 48px var(--gutter) 40px;
+  }
+
+  .footer__cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: 40px;
+  }
+
+  .footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .footer__tagline {
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 15px;
+    align-items: flex-start;
+  }
+
+  .footer__base {
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-onDark);
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: var(--type-caption-size);
+    color: var(--text-secondary);
+  }
+</style>

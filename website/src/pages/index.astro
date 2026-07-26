@@ -1,0 +1,389 @@
+---
+import Base from '../layouts/Base.astro';
+import Band from '../components/Band.astro';
+import Hero from '../components/Hero.astro';
+import StepBand from '../components/StepBand.astro';
+import ScreenshotCard from '../components/ScreenshotCard.astro';
+import PricingCard from '../components/PricingCard.astro';
+import Stamp from '../components/Stamp.astro';
+
+import homeFilled from '../assets/screenshots/08-home-filled.png';
+import itineraryDay1 from '../assets/screenshots/15-itinerary-day1.png';
+import mapFull from '../assets/screenshots/18-itinerary-map-full.png';
+import tripInfo from '../assets/screenshots/20-itinerary-trip-info.png';
+import budget from '../assets/screenshots/21-itinerary-budget.png';
+import checklist from '../assets/screenshots/26-itinerary-checklist.png';
+import passport from '../assets/screenshots/passport-screen-v2.png';
+
+/**
+ * The home page. One long scroll, nine bands.
+ *
+ * The shape is deliberate: a conventional hero says what the product is, then
+ * the page walks through a single worked example — three days in Lisbon, from
+ * the first typed line to a stamped passport. The visitor is watching a
+ * demonstration, not planning a trip.
+ */
+
+const groundCards = [
+  {
+    image: mapFull,
+    alt: 'The Lisbon day map',
+    caption: 'Every stop on one map, in walking order.',
+  },
+  {
+    image: tripInfo,
+    alt: 'Lisbon trip info — time, weather, currency',
+    caption: 'Time, weather, currency, plug type, tipping.',
+  },
+  {
+    image: budget,
+    alt: 'Lisbon trip budget',
+    caption: 'What it costs, before you commit to it.',
+  },
+  {
+    image: checklist,
+    alt: 'Before you go checklist',
+    caption: 'The admin, in one list you can finish.',
+  },
+];
+
+const tiers = [
+  {
+    tier: 'Free',
+    price: '$0',
+    features: [
+      { text: 'One basic itinerary' },
+      { text: 'View and save trips' },
+      { text: 'Manual edits only' },
+      { text: 'Passport preview — locked', muted: true },
+    ],
+  },
+  {
+    tier: 'Trip Pass · new',
+    tierTone: 'accent' as const,
+    price: '$19',
+    priceSuffix: 'one-time',
+    featured: true,
+    features: [
+      { text: 'Unlimited AI editing' },
+      { text: 'Offline & PDF export' },
+      { text: 'Earn your Trip Passport' },
+      { text: 'Budget planner & tips' },
+    ],
+  },
+  {
+    tier: 'Premium',
+    price: '$49',
+    priceSuffix: '/ year',
+    features: [
+      { text: 'Everything in Trip Pass' },
+      { text: 'Your passport collection' },
+      { text: 'Priority feature access' },
+      { text: 'Unlimited trips, all year' },
+    ],
+  },
+];
+---
+
+<Base
+  title="Holiplanz — Plan less. Experience more."
+  description="Tell us where you're going and get a complete, ready-to-book itinerary — days, stays, maps and costs — in about thirty seconds. Coming soon on iPhone and Android."
+>
+  <Hero />
+
+  {/*
+    2 · The framing statement. Load-bearing: it tells the visitor the next five
+    sections are a demonstration rather than an invitation. Do not cut it.
+  */}
+  <Band padTop={96} padBottom={0}>
+    <div class="framing wrap">
+      <span class="label">A worked example</span>
+      <h2 class="h2 framing__heading">
+        Here's one trip to Lisbon, from a single line to a finished passport.
+      </h2>
+      <p class="lede framing__lede">Five steps, exactly as they happen in the app.</p>
+    </div>
+  </Band>
+
+  {/* 3 · Step 01 */}
+  <StepBand
+    id="flow"
+    label="01 · You ask"
+    heading="One line is the whole brief."
+    image={homeFilled}
+    alt="Holiplanz home screen with Lisbon entered"
+    imageSide="right"
+    padTop={72}
+    padBottom={96}
+  >
+    <Fragment slot="body">
+      Where, when, and roughly how you like to travel. Pick a style or type your own — "hiking
+      with kids" works as well as anything from the list.
+    </Fragment>
+  </StepBand>
+
+  {/*
+    4 · Step 02. The spinning stamp ring stands in for a loading spinner — it is
+    the brand's signature motif, and the wait is used to teach you something
+    about where you're going.
+  */}
+  <Band tone="dark" padTop={104} padBottom={104}>
+    <div class="plan">
+      <Stamp variant="ring" size={120} spinning>
+        <img class="plan__pin" src="/assets/brand/stamp-pin.png" alt="" width="40" height="40" />
+      </Stamp>
+      <span class="label">02 · We plan</span>
+      <h2 class="plan__quote">
+        "Did you know — Lisbon is the capital and largest city of Portugal, on the Atlantic coast
+        where the river Tagus meets the sea."
+      </h2>
+      <p class="plan__body">
+        Thirty to forty seconds. The wait teaches you something about where you're going, instead
+        of spinning.
+      </p>
+    </div>
+  </Band>
+
+  {/* 5 · Step 03 — mirrors step 01, screenshot on the left */}
+  <StepBand
+    label="03 · Your days, decided"
+    heading="Three days, already in order."
+    image={itineraryDay1}
+    alt="Day one of the Lisbon itinerary"
+    imageSide="left"
+    padTop={104}
+    padBottom={96}
+  >
+    <Fragment slot="body">
+      Castle at nine, the viewpoint before lunch, fado in Alfama after dark. Drag anything, or
+      just ask — "swap lunch for something local" — and the day rebuilds itself around it.
+    </Fragment>
+    <ul class="days">
+      <li>Where you'll stay — three options, not three hundred</li>
+      <li>Before you go — twelve things, ticked off</li>
+      <li>Trip budget — €1,240, broken down honestly</li>
+    </ul>
+  </StepBand>
+
+  {/* 6 · Step 04 */}
+  <Band tone="panel" bordered padTop={96} padBottom={96}>
+    <div class="ground wrap">
+      <div class="ground__head">
+        <span class="label">04 · On the ground</span>
+        <h2 class="h2 ground__heading">Everything you'd have googled anyway.</h2>
+      </div>
+      <div class="ground__grid">
+        {groundCards.map((card) => <ScreenshotCard {...card} />)}
+      </div>
+    </div>
+  </Band>
+
+  {/*
+    7 · Step 05. The Trip Passport is the product's signature emotional feature:
+    stamps are earned only for what you actually did, and what you skipped stays
+    visibly blank. The copy's honesty about that is the point of the section.
+  */}
+  <StepBand
+    id="passport"
+    tone="dark"
+    label="05 · You come home"
+    heading="The only souvenir that fills itself in."
+    headingSize="clamp(40px, 5vw, 66px)"
+    bodySize={19}
+    copyGap={24}
+    image={passport}
+    alt="A London family getaway trip passport with its coral admitted stamp"
+    imageSide="right"
+    imageMaxWidth={340}
+    padTop={112}
+    padBottom={112}
+  >
+    <Fragment slot="body">
+      Say what you actually did and the passport stamps itself — museums, food, the walk you
+      almost skipped. What you missed stays blank. That's the point.
+    </Fragment>
+  </StepBand>
+
+  {/* 8 · Pricing */}
+  <Band id="pricing" padTop={104} padBottom={104}>
+    <div class="pricing wrap">
+      <div class="pricing__head">
+        <span class="label">Pricing</span>
+        <h2 class="h2 pricing__heading">Your first journey is on us.</h2>
+        <p class="lede">
+          Full access to every feature, once, on the house. After that, pick whichever suits how
+          often you travel.
+        </p>
+      </div>
+      <div class="pricing__grid">
+        {tiers.map((tier) => <PricingCard {...tier} />)}
+      </div>
+    </div>
+  </Band>
+
+  {/*
+    9 · Closing. Mounted into the layout's dark wrapper so it runs continuously
+    into the footer. The stamp is the launch announcement — it should read as
+    something pressed onto the page, not as footer small print.
+  */}
+  <Fragment slot="closing">
+    <Band padTop={96} padBottom={80}>
+      <div class="closing">
+        <h2 class="h2 closing__heading">That was one scroll. The app does it in thirty seconds.</h2>
+        <Stamp variant="destination" label="iPhone & Android" sublabel="2026" size={180} />
+      </div>
+    </Band>
+  </Fragment>
+</Base>
+
+<style>
+  /* ---- 2 · framing ---- */
+  .framing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .framing__heading {
+    font-size: clamp(34px, 4.2vw, 52px);
+    line-height: 1.05;
+    max-width: 820px;
+    text-wrap: balance;
+  }
+
+  .framing__lede {
+    max-width: 520px;
+  }
+
+  /* ---- 4 · we plan ---- */
+  .plan {
+    max-width: 1000px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 36px;
+  }
+
+  .plan__pin {
+    width: 40px;
+    height: auto;
+    filter: invert(1);
+  }
+
+  .plan__quote {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(34px, 4vw, 52px);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.15;
+    max-width: 820px;
+    text-wrap: pretty;
+    color: var(--text-primary);
+  }
+
+  .plan__body {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 520px;
+  }
+
+  /* ---- 5 · your days ---- */
+  .days {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 16px;
+    color: var(--text-list);
+  }
+
+  /* ---- 6 · on the ground ---- */
+  .ground {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  .ground__head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 620px;
+  }
+
+  .ground__heading {
+    font-size: clamp(38px, 4.6vw, 58px);
+  }
+
+  /* The four screens stay together as one set at every width: four across,
+     then 2×2, then a single column. Explicit column counts rather than the
+     handoff's auto-fit minmax(340px), which lands on three-up with an orphan
+     underneath at the 1240px content width. */
+  .ground__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  @media (min-width: 620px) {
+    .ground__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .ground__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* ---- 8 · pricing ---- */
+  .pricing {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .pricing__head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 640px;
+  }
+
+  .pricing__heading {
+    font-size: clamp(38px, 4.6vw, 58px);
+  }
+
+  .pricing__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  /* ---- 9 · closing ---- */
+  .closing {
+    max-width: 840px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 32px;
+  }
+
+  .closing__heading {
+    font-size: clamp(38px, 4.6vw, 58px);
+    text-wrap: balance;
+  }
+</style>

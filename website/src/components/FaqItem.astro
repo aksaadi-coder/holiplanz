@@ -1,0 +1,69 @@
+---
+/**
+ * One FAQ, as a native <details>/<summary>.
+ *
+ * Native on purpose: it is keyboard- and screen-reader-accessible with no
+ * JavaScript at all, and it works on a page that ships none. The default
+ * disclosure triangle is suppressed in favour of a coral +, which is the only
+ * mark the design uses here.
+ */
+interface Props {
+  question: string;
+}
+
+const { question } = Astro.props;
+---
+
+<details class="faq">
+  <summary class="faq__summary">
+    {question}
+    <span class="faq__mark" aria-hidden="true">+</span>
+  </summary>
+  <p class="faq__answer"><slot /></p>
+</details>
+
+<style>
+  .faq {
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .faq__summary {
+    cursor: pointer;
+    /* Both are needed: list-style covers Firefox, the pseudo-element covers
+       WebKit. Without them the browser's own triangle sits beside the +. */
+    list-style: none;
+    padding: 26px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    font-family: var(--font-display);
+    font-size: 23px;
+    line-height: 1.25;
+  }
+
+  .faq__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq__summary:hover {
+    color: var(--accent);
+  }
+
+  .faq__mark {
+    font-family: var(--font-body);
+    font-size: 22px;
+    line-height: 1;
+    color: var(--accent);
+    flex: none;
+  }
+
+  .faq__answer {
+    margin: 0 0 26px;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--text-muted-strong);
+    max-width: 640px;
+    text-wrap: pretty;
+  }
+</style>

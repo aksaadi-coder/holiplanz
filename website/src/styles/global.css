@@ -1,0 +1,203 @@
+/* Holiplanz marketing site — global styles.
+
+   Tokens are the design-system files copied verbatim from the handoff. Nothing
+   below redefines a token value; it only adds the web-only pieces the mobile
+   design never needed (link hover, focus rings, smooth scroll) and a few
+   semantic aliases for values the prototype wrote out by hand. */
+
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+
+/* Fonts are loaded with <link rel="preconnect"> + <link rel="stylesheet"> in
+   Base.astro rather than the token bundle's @import, which is render-blocking
+   and can't be preconnected. Same families, same weights. */
+
+:root {
+  /* The prototype writes body copy on paper as rgba(0,0,0,0.62) and the list
+     lines as rgba(0,0,0,0.72) — both stronger than --text-secondary (0.4).
+     Naming them here keeps the handoff's rule intact: nothing inside a band
+     hardcodes a colour, so a band flips to dark purely via data-theme. */
+  --text-muted-strong: rgba(0, 0, 0, 0.62);
+  --text-list: rgba(0, 0, 0, 0.72);
+  /* The legal pages set their body a touch stronger — they're the only pages
+     anyone reads at length. */
+  --text-body: rgba(0, 0, 0, 0.7);
+  /* The quietest line on a page: an aside pointing somewhere else. */
+  --text-faint: rgba(0, 0, 0, 0.55);
+  /* Hairlines on the dark bands are white-on-ink, not the stone border. */
+  --border-onDark: rgba(255, 255, 255, 0.12);
+  /* The screenshot frame's hairline. Without it a paper-white app screenshot
+     dissolves into the paper background — an earlier revision proved it. */
+  --frame-border: var(--border-default);
+  /* Page furniture */
+  --wrap-max: 1240px;
+  --gutter: clamp(20px, 4vw, 48px);
+}
+
+[data-theme='dark'] {
+  --text-muted-strong: var(--text-secondary);
+  --text-list: rgba(255, 255, 255, 0.72);
+  --text-body: rgba(255, 255, 255, 0.7);
+  --text-faint: rgba(255, 255, 255, 0.55);
+  /* Lighter than --border-default (#3A362E) on purpose: the passport
+     screenshot needs the frame to read as a hairline, not a gap. */
+  --frame-border: rgba(255, 255, 255, 0.14);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* The hero's decorative circles overhang the viewport on purpose. */
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  /* Sticky footer: the short pages (contact, cookies) don't fill a desktop
+     viewport, and without this the dark band ends mid-screen with paper below
+     it. Flex column plus margin-top:auto on the closing wrapper pushes it to
+     the bottom when there's room, and leaves the long pages untouched. Not
+     position:fixed — that would sit on top of the home page's content. */
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* tokens/colors.css ships app defaults for links (coral, underline on hover).
+   The website's rule is the opposite: links inherit the band's text colour and
+   go accent on hover, never underlined. */
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* The prototype specifies no focus treatment at all — it was designed for a
+   touch app. This is a keyboard-and-mouse canvas, so one is required. A dashed
+   coral ring echoes the stamp motif rather than inventing a new device. */
+:focus-visible {
+  outline: 2px dashed var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Anchored sections shouldn't land flush against the top of the viewport. */
+[id] {
+  scroll-margin-top: 24px;
+}
+
+/* The one continuous animation on the page: the step-02 stamp ring. Mounted
+   here rather than per-instance so the keyframes exist exactly once. */
+@keyframes hp-stamp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Brand rule is "calm: fades, no bounces" — under reduced motion there is
+   nothing left to fade, so everything simply stops. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- shared primitives -------------------------------------------------- */
+
+/* Every band's inner column: 1240px, centred. */
+.wrap {
+  max-width: var(--wrap-max);
+  margin-inline: auto;
+  width: 100%;
+}
+
+/* 13px uppercase — the only uppercase text on the site apart from stamps. */
+.label {
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-tracking);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Headings run tight; the size is set per band because every band differs. */
+.h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.lede {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--text-muted-strong);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Keyboard users get a way past the nav into the page proper. */
+.skip-link {
+  position: absolute;
+  left: var(--gutter);
+  top: -100px;
+  z-index: 10;
+  background: var(--hp-paper);
+  color: var(--hp-black);
+  padding: 12px 20px;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 16px;
+  color: var(--hp-black);
+}

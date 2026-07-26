@@ -1,0 +1,155 @@
+---
+import TopBar from './TopBar.astro';
+import Button from './Button.astro';
+import TripPassCard from './TripPassCard.astro';
+
+/**
+ * The hero: a full-bleed field of vivid coral, one of the few places the
+ * accent is spent at scale.
+ *
+ * Note what is *not* here: there is no destination input. The page demonstrates
+ * one worked trip rather than inviting the visitor to plan one, because there
+ * is no product on the web to plan it with. Adding a live-looking field here
+ * would be a promise the site can't keep — that was an explicit design call.
+ */
+---
+
+<section class="hero">
+  <div class="hero__circle hero__circle--solid" aria-hidden="true"></div>
+  <div class="hero__circle hero__circle--dashed" aria-hidden="true"></div>
+
+  <TopBar />
+
+  <div class="hero__body wrap">
+    <div class="hero__copy">
+      <h1 class="hero__title">
+        <span class="hero__titleSmall">Plan less.</span>
+        <span class="hero__titleBig">Experience more.</span>
+      </h1>
+      <p class="hero__sub">
+        Tell us where you're going. Get a complete, ready-to-book itinerary — days, stays, maps
+        and costs — in about thirty seconds.
+      </p>
+      <div class="hero__actions">
+        <Button variant="secondary" href="#flow">See how it works&nbsp;&nbsp;↓</Button>
+        <span class="hero__soon">Coming soon · iPhone &amp; Android</span>
+      </div>
+    </div>
+    <div class="hero__graphic">
+      <TripPassCard />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    background: var(--hp-coral-vivid);
+    color: var(--hp-white);
+    overflow: hidden;
+    padding: 40px var(--gutter) 96px;
+    min-height: 640px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Two circles pushed off the edge of the field — the only decoration on the
+     page, and non-interactive. */
+  .hero__circle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .hero__circle--solid {
+    width: 900px;
+    height: 900px;
+    background: rgba(255, 255, 255, 0.07);
+    right: -260px;
+    top: -320px;
+  }
+
+  .hero__circle--dashed {
+    width: 640px;
+    height: 640px;
+    border: 1px dashed rgba(255, 255, 255, 0.45);
+    right: -80px;
+    bottom: -300px;
+  }
+
+  .hero__body {
+    position: relative;
+    flex: 1;
+    display: grid;
+    /* min(360px, 100%) rather than a bare 360px: below ~400px of content width
+       a hard minimum makes the column wider than its container and the card
+       and copy run off the right edge. The min() collapses it cleanly instead,
+       and behaves identically at every width where 360px actually fits. */
+    grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+    gap: 56px;
+    align-items: center;
+    padding-top: 72px;
+  }
+
+  .hero__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+    max-width: 620px;
+  }
+
+  .hero__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+
+  /* The two lines are deliberately different sizes: the payoff line dominates
+     and the setup line defers to it. */
+  .hero__titleSmall {
+    display: block;
+    font-size: clamp(34px, 4.4vw, 60px);
+  }
+
+  .hero__titleBig {
+    display: block;
+    font-size: clamp(52px, 7vw, 96px);
+  }
+
+  .hero__sub {
+    margin: 0;
+    font-size: clamp(18px, 1.6vw, 22px);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 460px;
+  }
+
+  .hero__actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .hero__soon {
+    font-size: var(--type-label-size);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .hero__graphic {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: end;
+  }
+
+  .hero :global(:focus-visible) {
+    outline-color: var(--hp-white);
+  }
+</style>

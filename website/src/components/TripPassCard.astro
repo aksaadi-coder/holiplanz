@@ -1,0 +1,149 @@
+---
+/**
+ * The hero graphic — a boarding-pass-shaped card, tilted, perforated.
+ *
+ * The design explored four hero graphics (passport stamp, day cards, a
+ * destination list, and this); this is the one that ships. The others are
+ * recorded in the handoff and are deliberately not built.
+ *
+ * Naming caution: this card's label reads "Your trip", not "Trip pass". The
+ * pricing section has a paid tier literally called Trip Pass ($19). They are
+ * different things and the copy must keep them apart.
+ */
+const stats = [
+  { label: 'Days', value: '3' },
+  { label: 'Style', value: 'Foodie' },
+  { label: 'Budget', value: '€1,240' },
+];
+---
+
+<div class="pass">
+  <div class="pass__top">
+    <div class="pass__head">
+      <div class="pass__dest">
+        <span class="pass__eyebrow">Your trip</span>
+        <span class="pass__city">Lisbon</span>
+      </div>
+      <img class="pass__pin" src="/assets/brand/stamp-pin.png" alt="" width="26" height="26" />
+    </div>
+    <div class="pass__stats">
+      {
+        stats.map((stat) => (
+          <div class="pass__stat">
+            <span class="pass__statLabel">{stat.label}</span>
+            <span class="pass__statValue">{stat.value}</span>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <div class="pass__stub">
+    <span class="pass__time">Planned in 34 seconds</span>
+    <span class="pass__ready">✈ Ready</span>
+  </div>
+</div>
+
+<style>
+  /* Paper on coral, tilted off-axis, and no shadow — the tilt does the lifting
+     that elevation would do in another system. */
+  .pass {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    background: var(--hp-paper);
+    border-radius: var(--radius-lg);
+    transform: rotate(-3deg);
+    overflow: hidden;
+  }
+
+  .pass__top {
+    padding: 28px 28px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .pass__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .pass__dest {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .pass__eyebrow {
+    font-size: var(--type-label-size);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  .pass__city {
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--hp-black);
+  }
+
+  .pass__pin {
+    width: 26px;
+    height: auto;
+  }
+
+  .pass__stats {
+    display: flex;
+    gap: 32px;
+  }
+
+  .pass__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .pass__statLabel {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  .pass__statValue {
+    font-family: var(--font-display);
+    font-size: 24px;
+    line-height: 1;
+    color: var(--hp-black);
+  }
+
+  /* The perforation. A dashed rule, not a cut-out — the card is one piece. */
+  .pass__stub {
+    border-top: 2px dashed var(--hp-stone);
+    padding: 20px 28px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .pass__time {
+    font-size: 15px;
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  /* One of the few places coral is earned. */
+  .pass__ready {
+    font-size: var(--type-label-size);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--hp-coral);
+  }
+</style>

@@ -1,0 +1,107 @@
+---
+import LegalPage from '../layouts/LegalPage.astro';
+import DocSection from '../components/DocSection.astro';
+import DocContact from '../components/DocContact.astro';
+import { site } from '../data/site';
+
+const collected = [
+  {
+    term: 'What you tell us',
+    text: "Your destination, dates, travel style, who's coming, and any changes you ask for. This is what the plan is built from.",
+  },
+  {
+    term: 'Your account',
+    text: "An email address, and a record of which plan you're on. Payments are handled by the app stores — we never see your card.",
+  },
+  {
+    term: 'How the app is used',
+    text: "Basic, aggregated usage and crash data so we can fix what's broken. Not tied to your name where it doesn't need to be.",
+  },
+];
+---
+
+<LegalPage
+  title="Privacy notice — Holiplanz"
+  description="What Holiplanz collects to plan your trip, who else sees it, how long we keep it, and how to ask us to delete it."
+  heading="Privacy notice"
+  draftNote="Wording must be checked against your actual data practices and jurisdictions."
+>
+  <Fragment slot="lede">
+    We collect what we need to plan your trip, we don't sell it, and you can ask us to delete it
+    at any time.
+  </Fragment>
+
+  <DocSection heading="Who we are">
+    <p>
+      Holiplanz is the data controller for the information described here. Our registered details
+      and the contact address for data questions are at the bottom of this page.
+    </p>
+  </DocSection>
+
+  <DocSection heading="What we collect">
+    <p>Three kinds of information, and no more than we need:</p>
+    <ul class="doc__list">
+      {
+        collected.map((item) => (
+          <li class="doc__listItem">
+            <span class="doc__listTerm">{item.term}</span>
+            <span class="doc__listText">{item.text}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </DocSection>
+
+  <DocSection heading="What we don't do">
+    <p>
+      We don't sell your data. We don't share it with advertisers. We don't build a profile of you
+      to target you with anything, and we don't track you across other apps or websites.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Why we're allowed to use it">
+    <p>
+      To deliver what you asked for — planning your trip and keeping your account working. Where
+      we rely on your consent, such as optional communications, you can withdraw it at any time
+      without affecting the app.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Who else sees it">
+    <p>
+      A small number of suppliers who help run the service — hosting, the AI models that draft
+      your itinerary, crash reporting, and the app stores that process payment. They act on our
+      instructions and cannot use your information for their own purposes.
+    </p>
+  </DocSection>
+
+  <DocSection heading="How long we keep it">
+    <p>
+      Your trips and passport stay while your account is open, because they're yours to look back
+      on. Close your account and we delete them, apart from anything we're legally required to
+      retain.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Your rights">
+    <p>
+      You can ask for a copy of your data, ask us to correct it, ask us to delete it, or object to
+      how we're using it. Write to the address below and we'll respond within the period the law
+      allows. If you're unhappy with our answer you can complain to your local data protection
+      authority.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Children">
+    <p>Holiplanz isn't intended for children. Family trips are planned by an adult account holder.</p>
+  </DocSection>
+
+  <DocSection heading="Changes to this notice">
+    <p>
+      If we change anything that matters, we'll say so in the app rather than quietly updating this
+      page.
+    </p>
+  </DocSection>
+
+  <DocContact label="Data questions" email={site.privacyEmail} />
+</LegalPage>

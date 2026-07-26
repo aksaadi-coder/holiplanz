@@ -1,0 +1,125 @@
+---
+import type { ImageMetadata } from 'astro';
+import Band from './Band.astro';
+import ScreenshotFrame from './ScreenshotFrame.astro';
+
+/**
+ * The two-column step band: a label, a heading and a paragraph beside one app
+ * screenshot. Used three times on the home page and mirrored left/right so the
+ * eye crosses the page as the story advances.
+ *
+ * This is one of the three patterns the handoff asks to be reusable rather than
+ * hand-built per instance, because the pages still to be designed (How it
+ * Works, Trip Passport, Pricing) are made of the same material.
+ */
+interface Props {
+  id?: string;
+  tone?: 'page' | 'panel' | 'dark';
+  label: string;
+  heading: string;
+  /** The clamp() for the heading — every band on the page sizes its own. */
+  headingSize?: string;
+  bodySize?: number;
+  image: ImageMetadata;
+  alt: string;
+  imageSide?: 'left' | 'right';
+  imageMaxWidth?: number;
+  copyGap?: number;
+  padTop?: number;
+  padBottom?: number;
+}
+
+const {
+  id,
+  tone = 'page',
+  label,
+  heading,
+  headingSize = 'clamp(38px, 4.6vw, 58px)',
+  bodySize = 18,
+  image,
+  alt,
+  imageSide = 'right',
+  imageMaxWidth = 340,
+  copyGap = 20,
+  padTop = 104,
+  padBottom = 96,
+} = Astro.props;
+---
+
+<Band id={id} tone={tone} padTop={padTop} padBottom={padBottom}>
+  <div
+    class="step wrap"
+    style={`--h2-size:${headingSize};--body-size:${bodySize}px;--copy-gap:${copyGap}px`}
+  >
+    {
+      imageSide === 'left' && (
+        <div class="step__media">
+          <ScreenshotFrame
+            src={image}
+            alt={alt}
+            maxWidth={imageMaxWidth}
+            surface={tone === 'panel' ? 'primary' : 'panel'}
+          />
+        </div>
+      )
+    }
+
+    <div class="step__copy">
+      <span class="label">{label}</span>
+      <h2 class="h2 step__heading">{heading}</h2>
+      <p class="step__body"><slot name="body" /></p>
+      <slot />
+    </div>
+
+    {
+      imageSide === 'right' && (
+        <div class="step__media">
+          <ScreenshotFrame
+            src={image}
+            alt={alt}
+            maxWidth={imageMaxWidth}
+            surface={tone === 'panel' ? 'primary' : 'panel'}
+          />
+        </div>
+      )
+    }
+  </div>
+</Band>
+
+<style>
+  /* 360px minimum: the band collapses to one column before either side gets
+     cramped, and no JS or breakpoint is involved. The min() guards the case
+     where the viewport itself is narrower than the minimum — without it the
+     column overflows its container on a small phone. */
+  .step {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+    gap: 72px;
+    align-items: center;
+  }
+
+  .step__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--copy-gap);
+    max-width: 520px;
+  }
+
+  .step__heading {
+    font-size: var(--h2-size);
+  }
+
+  .step__body {
+    margin: 0;
+    font-size: var(--body-size);
+    line-height: 1.6;
+    color: var(--text-muted-strong);
+    text-wrap: pretty;
+  }
+
+  .step__media {
+    display: flex;
+    justify-content: center;
+  }
+</style>

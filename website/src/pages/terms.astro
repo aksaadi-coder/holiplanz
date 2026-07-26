@@ -1,0 +1,89 @@
+---
+import LegalPage from '../layouts/LegalPage.astro';
+import DocSection from '../components/DocSection.astro';
+import DocContact from '../components/DocContact.astro';
+import { site } from '../data/site';
+---
+
+<LegalPage
+  title="Terms of use — Holiplanz"
+  description="Holiplanz is a planning tool, not a travel agent — it books nothing. What we do, what to check before you book, and how plans and payment work."
+  heading="Terms of use"
+  draftNote="The liability and refund clauses in particular need a lawyer's eye."
+>
+  <Fragment slot="lede">
+    We plan trips, you book them. Use the app sensibly, check the details before you commit money,
+    and either of us can walk away.
+  </Fragment>
+
+  <DocSection heading="What Holiplanz does">
+    <p>
+      We draft travel itineraries and suggest places to stay and things to do. We are a planning
+      tool, not a travel agent, tour operator or booking platform. We don't reserve anything, take
+      payment for travel, or act as your agent with any hotel, airline or venue.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Check before you book">
+    <p>
+      Plans are generated automatically and can be wrong. Opening hours change, places close,
+      prices move, and routes that look walkable on a map sometimes aren't. Always confirm the
+      details with the provider before you spend money or rely on them — especially anything
+      involving visas, health requirements, or safety.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Your account">
+    <p>
+      You need to be an adult to hold an account, and you're responsible for what happens under it.
+      Keep your login to yourself.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Plans and payment">
+    <p>
+      Your first journey is free, with every feature unlocked once. After that a Trip Pass is a
+      one-time payment covering a single trip and does not auto-renew; Premium is an annual
+      subscription that does, until you cancel. Payment is handled by the App Store or Google Play,
+      so their billing and refund rules apply alongside ours.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Using it fairly">
+    <p>
+      Don't scrape the service, resell the plans it produces as your own product, try to break its
+      limits, or use it for anything unlawful. We may suspend accounts that do.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Who owns what">
+    <p>
+      The app, its design and the Holiplanz name are ours. Your trips and your Trip Passport are
+      yours — we only use them to run the service for you.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Where our responsibility ends">
+    <p>
+      We take care with the service but can't promise a plan will be complete, current or suited to
+      your circumstances. We aren't responsible for third-party providers you book with, or for
+      losses arising from relying on a suggestion without checking it. Nothing here limits rights
+      you have under consumer law that can't be limited.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Ending it">
+    <p>
+      You can close your account whenever you like. We may end or suspend access if these terms are
+      broken, or if we stop offering the service — in which case we'll give reasonable notice.
+    </p>
+  </DocSection>
+
+  <DocSection heading="Changes">
+    <p>
+      If we change these terms materially we'll tell you in the app before the change takes effect.
+    </p>
+  </DocSection>
+
+  <DocContact label="Questions about these terms" email={site.generalEmail} />
+</LegalPage>

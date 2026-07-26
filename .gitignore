@@ -30,3 +30,6 @@ server/.env
 *.sln
 *.sw?
 .env*
+
+# Marketing site (website/) — node_modules and dist are already covered above
+website/.astro

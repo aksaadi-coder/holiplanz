@@ -1,0 +1,70 @@
+---
+/**
+ * The wordmark is set in type — Newsreader, lowercase, italic — not an image.
+ * There is no logo file and there shouldn't be one.
+ *
+ * Coral is earned, and the wordmark is one of the few places that earns it.
+ * On a coral field it goes white instead, because coral on coral is nothing.
+ */
+interface Props {
+  tone?: 'coral' | 'white';
+  size?: number;
+  /** Locks the stamp-pin mark up beside it — 18px in the banner, 20px in the footer. */
+  pin?: number | false;
+  class?: string;
+}
+
+const { tone = 'coral', size = 26, pin = false, class: className } = Astro.props;
+---
+
+<span class:list={['wordmark', `wordmark--${tone}`, className]} style={`--wordmark-size:${size}px`}>
+  {
+    pin && (
+      <img
+        class="wordmark__pin"
+        src="/assets/brand/stamp-pin.png"
+        alt=""
+        width={pin}
+        height={pin}
+        style={`--pin-size:${pin}px`}
+      />
+    )
+  }
+  <span class="wordmark__text">holiplanz</span>
+</span>
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .wordmark__text {
+    font-family: var(--font-display);
+    font-size: var(--wordmark-size);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .wordmark--coral .wordmark__text {
+    color: var(--accent);
+  }
+
+  .wordmark--white .wordmark__text {
+    color: var(--hp-white);
+  }
+
+  /* Only a 256px PNG of the pin exists — no vector source was ever provided.
+     It is rendered at two sizes and inverted in both; an SVG should be
+     commissioned before this goes anywhere near a retina display.
+
+     brightness(0) first, then invert: the artwork isn't pure black, so
+     inverting it alone yields a grey mark rather than a white one. */
+  .wordmark__pin {
+    width: var(--pin-size);
+    height: auto;
+    filter: brightness(0) invert(1);
+  }
+</style>

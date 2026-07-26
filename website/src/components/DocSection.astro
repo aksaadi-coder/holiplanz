@@ -1,0 +1,83 @@
+---
+/**
+ * One section of a legal document: a Newsreader heading over running text.
+ *
+ * The three legal pages share one layout — 720px column, 44px between
+ * sections — so a reader who has learned to scan one can scan the others.
+ */
+interface Props {
+  heading: string;
+}
+
+const { heading } = Astro.props;
+---
+
+<section class="doc">
+  <h2 class="doc__heading">{heading}</h2>
+  <slot />
+</section>
+
+<style>
+  .doc {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .doc__heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--text-primary);
+  }
+
+  /* Body copy runs looser here than elsewhere on the site: 1.7 rather than
+     1.6, because these are the only pages anyone reads at length. */
+  .doc :global(p) {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
+
+  .doc :global(a) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+  }
+
+  .doc :global(a:hover) {
+    border-bottom-color: var(--accent);
+  }
+
+  /* The indented list on Privacy's "what we collect" — a left hairline instead
+     of bullets, so three kinds of thing read as one group. */
+  .doc :global(.doc__list) {
+    margin: 0;
+    padding: 0 0 0 20px;
+    list-style: none;
+    border-left: 1px solid var(--border-default);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .doc :global(.doc__listItem) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .doc :global(.doc__listTerm) {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .doc :global(.doc__listText) {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-body);
+  }
+</style>

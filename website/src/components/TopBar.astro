@@ -1,0 +1,99 @@
+---
+import type { NavLink } from '../data/nav';
+import { mainNav, isCurrent } from '../data/nav';
+import Wordmark from './Wordmark.astro';
+
+/**
+ * The top bar. It lives *inside* the coral field rather than above it, and it
+ * is deliberately not sticky — the page is a single narrative scroll and a
+ * persistent bar would sit on top of the story the whole way down.
+ *
+ * The home hero uses the bare wordmark; the subpage banner locks the stamp-pin
+ * up beside it and gives the row a fixed 72px height.
+ */
+interface Props {
+  links?: NavLink[];
+  /** The subpage banner's treatment: pin + wordmark, row fixed at 72px. */
+  withPin?: boolean;
+  class?: string;
+}
+
+const { links = mainNav(Astro.url.pathname), withPin = false, class: className } = Astro.props;
+const pathname = Astro.url.pathname;
+---
+
+<div class:list={['topbar', { 'topbar--fixedRow': withPin }, className]}>
+  <div class="topbar__inner wrap">
+    <a class="topbar__brand" href="/" aria-label="Holiplanz — home">
+      <Wordmark tone="white" size={26} pin={withPin ? 18 : false} />
+    </a>
+    <nav class="topbar__nav" aria-label="Main">
+      {
+        links.map((link) => {
+          const current = isCurrent(link.href, pathname);
+          return (
+            <a href={link.href} class:list={{ 'is-current': current }} aria-current={current ? 'page' : undefined}>
+              {link.text}
+            </a>
+          );
+        })
+      }
+    </nav>
+  </div>
+</div>
+
+<style>
+  .topbar {
+    position: relative;
+  }
+
+  .topbar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  /* On the subpages the banner has no other top padding, so the row carries
+     the height itself. */
+  .topbar--fixedRow .topbar__inner {
+    min-height: 72px;
+  }
+
+  .topbar__brand {
+    display: flex;
+    align-items: center;
+  }
+
+  .topbar__brand:hover {
+    color: inherit;
+  }
+
+  .topbar__nav {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    font-size: 15px;
+  }
+
+  .topbar__nav a {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  /* The page you're on sits at full white — the only distinction the nav
+     makes, and enough of one on a flat coral field. */
+  .topbar__nav a.is-current {
+    color: var(--hp-white);
+  }
+
+  /* On the coral field the accent hover would be invisible, so links resolve
+     to full white instead — same idea, legible surface. */
+  .topbar__nav a:hover {
+    color: var(--hp-white);
+  }
+
+  .topbar :global(:focus-visible) {
+    outline-color: var(--hp-white);
+  }
+</style>

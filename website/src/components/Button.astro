@@ -1,0 +1,120 @@
+---
+/**
+ * The pill button from the design system.
+ *
+ * Note the default command colour is Ink, not coral — coral is earned, and a
+ * button is not one of the places that earns it. The `coral` variant exists in
+ * the design system for highlight moments and is deliberately unused here.
+ *
+ * Outline styles use an inset ring rather than a border: a border would change
+ * the button's box and there are no elevation treatments anywhere in this
+ * system to fall back on.
+ */
+interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'coral';
+  href?: string;
+  type?: 'button' | 'submit';
+  disabled?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'primary',
+  href,
+  type = 'button',
+  disabled = false,
+  class: className,
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+---
+
+<Tag
+  href={href}
+  type={href ? undefined : type}
+  disabled={href ? undefined : disabled}
+  aria-disabled={href && disabled ? 'true' : undefined}
+  class:list={['btn', `btn--${variant}`, className]}
+>
+  <slot />
+</Tag>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding: 0 32px;
+    border: 0;
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .btn--primary {
+    background: var(--command);
+    color: var(--text-inverse);
+  }
+
+  .btn--primary:hover {
+    background: color-mix(in srgb, var(--command) 88%, #000);
+    color: var(--text-inverse);
+  }
+
+  .btn--primary:active {
+    background: color-mix(in srgb, var(--command) 78%, #000);
+  }
+
+  .btn--secondary {
+    background: var(--hp-white);
+    color: var(--hp-black);
+    box-shadow: var(--border-hairline);
+  }
+
+  .btn--secondary:hover {
+    background: color-mix(in srgb, var(--hp-white) 94%, var(--hp-stone));
+    color: var(--hp-black);
+  }
+
+  .btn--secondary:active {
+    background: color-mix(in srgb, var(--hp-white) 86%, var(--hp-stone));
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--command);
+  }
+
+  .btn--ghost:hover {
+    background: color-mix(in srgb, transparent 92%, var(--command));
+    color: var(--command);
+  }
+
+  .btn--coral {
+    background: var(--hp-coral);
+    color: var(--hp-white);
+  }
+
+  .btn--coral:hover {
+    background: color-mix(in srgb, var(--hp-coral) 88%, #000);
+    color: var(--hp-white);
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    background: var(--hp-grey-disabled);
+    color: rgba(0, 0, 0, 0.4);
+    box-shadow: none;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+</style>

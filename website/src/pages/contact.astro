@@ -1,0 +1,100 @@
+---
+import Base from '../layouts/Base.astro';
+import Band from '../components/Band.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Card from '../components/Card.astro';
+import { site } from '../data/site';
+---
+
+<Base
+  title="Contact us — Holiplanz"
+  description="Three inboxes, all read by a person: general and support, press and partnerships, and privacy or data requests."
+>
+  <PageBanner title="Say hello." titleSize="clamp(42px, 5.2vw, 66px)">
+    Small team, real inboxes. Whichever one you pick, a person reads it.
+  </PageBanner>
+
+  <Band padTop={80} padBottom={96}>
+    <div class="wrap inboxes">
+      <Card padding={28} radius={24}>
+        <span class="label">General &amp; support</span>
+        <a class="inbox__email" href={`mailto:${site.generalEmail}`}>{site.generalEmail}</a>
+        <p class="inbox__text">
+          Questions about the app, your plan, or something that went wrong.
+        </p>
+      </Card>
+      <Card padding={28} radius={24}>
+        <span class="label">Press &amp; partnerships</span>
+        <a class="inbox__email" href={`mailto:${site.pressEmail}`}>{site.pressEmail}</a>
+        <p class="inbox__text">
+          Media enquiries, and anyone in travel who wants to work together.
+        </p>
+      </Card>
+      <Card padding={28} radius={24}>
+        <span class="label">Privacy &amp; your data</span>
+        <a class="inbox__email" href={`mailto:${site.privacyEmail}`}>{site.privacyEmail}</a>
+        <p class="inbox__text">
+          Data requests and anything covered by our <a class="inbox__link" href="/privacy">privacy
+          notice</a>.
+        </p>
+      </Card>
+    </div>
+  </Band>
+
+  <Band padTop={0} padBottom={96}>
+    <div class="wrap">
+      <p class="aside">
+        Before you write, <a class="inbox__link" href="/support">the support page</a> covers
+        pricing, launch timing and how the Trip Passport works.
+      </p>
+    </div>
+  </Band>
+</Base>
+
+<style>
+  .inboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  /* The address is the point of the card, so it gets display type and the
+     accent — this is one of the places coral is earned. */
+  .inbox__email {
+    margin-top: 10px;
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(24px, 2.6vw, 32px);
+    line-height: 1.15;
+    color: var(--accent);
+    /* These addresses are long enough to overflow a 300px card otherwise. */
+    word-break: break-all;
+  }
+
+  .inbox__email:hover {
+    color: var(--hp-coral-vivid);
+  }
+
+  .inbox__text {
+    margin: 12px 0 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-muted-strong);
+  }
+
+  .inbox__link {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+  }
+
+  .inbox__link:hover {
+    border-bottom-color: var(--accent);
+  }
+
+  .aside {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text-faint);
+  }
+</style>

@@ -1,0 +1,41 @@
+---
+/**
+ * How each legal page ends: a hairline rule, a small label, and the relevant
+ * address set large in coral Newsreader — so the page closes on a way to reach
+ * someone rather than on a clause.
+ */
+interface Props {
+  label: string;
+  email: string;
+}
+
+const { label, email } = Astro.props;
+---
+
+<div class="docContact">
+  <span class="label">{label}</span>
+  <a class="docContact__email" href={`mailto:${email}`}>{email}</a>
+</div>
+
+<style>
+  .docContact {
+    padding-top: 32px;
+    border-top: 1px solid var(--border-default);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .docContact__email {
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height: 1.2;
+    color: var(--accent);
+    word-break: break-word;
+  }
+
+  .docContact__email:hover {
+    color: var(--hp-coral-vivid);
+  }
+</style>

@@ -1,0 +1,40 @@
+/* Holiplanz color tokens.
+   Sources: Holiplanz_Brand_Identity_Concept.pptx (palette), Holiplanz_UI_Phase4_Concept.pptx (light/dark),
+   Figma "Holiplanz App Design" Visual-Design page (entry-screen values + Variables Color/Color 2). */
+:root{
+  /* base */
+  --hp-coral:#F95C4B;          /* brand accent (light) */
+  --hp-coral-dark:#FF7A63;     /* accent on dark surfaces */
+  --hp-coral-vivid:#FF4C3F;    /* Figma Variable "Color 2" — entry screens (splash/login/loading) */
+  --hp-black:#000000;          /* Figma Variable "Color" — text / mark */
+  --hp-ink:#161410;            /* dark surface (rgb 22,20,16) */
+  --hp-paper:#F6F4F1;          /* base surface */
+  --hp-panel:#F6F4F2;          /* cards & panels — one hair off the page */
+  --hp-stone:#E4DED2;          /* borders & dividers only */
+  --hp-stone-warm:#E5DED1;     /* Figma border on ink button (rgb 229,222,209) */
+  --hp-white:#FFFFFF;
+  --hp-grey-screen:#F5F5F5;    /* Figma screen bg / device outline */
+  --hp-grey-home:#F5F4F2;      /* Figma Home bg */
+  --hp-grey-disabled:#D9D9D9;  /* Figma disabled button / ring */
+  /* semantic — light */
+  --bg-primary:var(--hp-paper);
+  --bg-panel:var(--hp-panel);
+  --border-default:var(--hp-stone);
+  --accent:var(--hp-coral);
+  --text-primary:var(--hp-black);
+  --text-secondary:rgba(0,0,0,0.4);
+  --text-inverse:var(--hp-white);
+  --command:var(--hp-ink);     /* default command colour — primary buttons are Ink, not coral */
+}
+[data-theme="dark"]{
+  --bg-primary:var(--hp-ink);
+  --bg-panel:#211E19;
+  --border-default:#3A362E;
+  --accent:var(--hp-coral-dark);
+  --text-primary:var(--hp-white);
+  --text-secondary:rgba(255,255,255,0.5);
+  --text-inverse:var(--hp-ink);
+  --command:var(--hp-white);
+}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--hp-coral-vivid);text-decoration:underline}

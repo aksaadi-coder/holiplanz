@@ -1,0 +1,63 @@
+---
+/**
+ * A full-width horizontal band — the page's one structural unit.
+ *
+ * Three tones, and they are the whole story: page (paints nothing and inherits
+ * whatever it sits in), panel (one hair off the page, hairline top and bottom),
+ * and dark. The dark tone works purely by setting data-theme="dark" and reading
+ * --bg-primary back out, exactly as the design does. Nothing inside a band
+ * should ever hardcode a dark colour — that is what makes a band re-tonable by
+ * changing one prop, and it is why the closing band can sit inside the footer's
+ * dark wrapper as a plain "page" band with no seam.
+ */
+interface Props {
+  tone?: 'page' | 'panel' | 'dark';
+  id?: string;
+  /** Vertical padding in px. Horizontal padding is always the page gutter. */
+  padTop?: number;
+  padBottom?: number;
+  /** Hairline rules top and bottom — used by the panel band. */
+  bordered?: boolean;
+  class?: string;
+}
+
+const {
+  tone = 'page',
+  id,
+  padTop = 96,
+  padBottom = 96,
+  bordered = false,
+  class: className,
+} = Astro.props;
+---
+
+<section
+  id={id}
+  data-theme={tone === 'dark' ? 'dark' : undefined}
+  class:list={['band', `band--${tone}`, { 'band--bordered': bordered }, className]}
+  style={`--pad-top:${padTop}px;--pad-bottom:${padBottom}px`}
+>
+  <slot />
+</section>
+
+<style>
+  .band {
+    padding: var(--pad-top) var(--gutter) var(--pad-bottom);
+  }
+
+  /* .band--page paints nothing on purpose — see the note above. */
+
+  .band--panel {
+    background: var(--bg-panel);
+  }
+
+  .band--dark {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  .band--bordered {
+    border-top: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--border-default);
+  }
+</style>

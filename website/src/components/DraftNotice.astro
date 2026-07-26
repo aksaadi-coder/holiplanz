@@ -1,0 +1,56 @@
+---
+/**
+ * "Draft — needs legal review", on the three legal pages.
+ *
+ * This is not decorative. The wording of those pages was written for voice and
+ * structure and has not been through legal review, so the notice stays until a
+ * qualified lawyer has approved the text against the real data practices,
+ * suppliers and jurisdictions. Turn it off in one place — `site.legalReviewed`
+ * — when that has actually happened.
+ *
+ * Drawn quieter than the design's boxed version: a single slim rule-bordered
+ * line rather than a filled block, so it reads as a margin note to the person
+ * maintaining the page rather than an alarm to the person reading it. It keeps
+ * the dashed coral edge, which is the stamp motif at document scale, and coral
+ * is genuinely earned by a warning.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<aside class:list={['draft', className]}>
+  <span class="draft__label">Draft — needs legal review</span>
+  <span class="draft__note"><slot /></span>
+</aside>
+
+<style>
+  .draft {
+    max-width: 720px;
+    margin-inline: auto;
+    padding: 12px 16px;
+    border: 1px dashed color-mix(in srgb, var(--accent) 50%, transparent);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+  }
+
+  .draft__label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .draft__note {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+</style>

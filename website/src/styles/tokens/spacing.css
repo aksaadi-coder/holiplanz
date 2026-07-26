@@ -1,0 +1,17 @@
+/* Spacing (4px grid) and radius — from Phase 4 deck + exact Figma values. */
+:root{
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-12:48px;
+  --radius-sm:8px;
+  --radius-md:16px;
+  --radius-lg:24px;
+  --radius-full:999px;
+  /* exact Figma component radii — copy verbatim, do not snap */
+  --radius-auth-button:48px;   /* login provider buttons, h 40 */
+  --radius-cta:40px;           /* full-width bottom CTA, h 48 */
+  --radius-get-started:55px;   /* Splash 3 outline CTA, h 50 */
+  --radius-screen:45px;        /* phone screen frame (32px on dark splash) */
+  --screen-w:402px;--screen-h:874px; /* Figma frame size */
+  --shadow-card:none;          /* cards are borderless panels, one hair off the page — no drop shadows */
+  --border-hairline:inset 0 0 0 1px var(--hp-black); /* Figma outline buttons use inset ring, not border */
+  --dash-ring:1px dashed var(--accent); /* the stamp motif */
+}

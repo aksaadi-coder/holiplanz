@@ -1,0 +1,127 @@
+---
+import type { NavLink } from '../data/nav';
+import TopBar from './TopBar.astro';
+
+/**
+ * The subpage banner — it replaces a conventional header rather than sitting
+ * under one, carrying the nav *and* the page title on the same coral field so
+ * a subpage opens the way the home page does.
+ *
+ * Same two decorative circles as the home hero, scaled down. Not sticky: it
+ * scrolls away like everything else.
+ */
+interface Props {
+  title: string;
+  /** Each page sizes its own h1; About runs largest. */
+  titleSize?: string;
+  /** Shown under the lede on the legal pages only. */
+  lastUpdated?: string;
+  /** Legal pages swap the main nav for Privacy · Terms · Cookies. */
+  links?: NavLink[];
+  padBottom?: number;
+  titlePadTop?: number;
+  gap?: number;
+}
+
+const {
+  title,
+  titleSize = 'clamp(40px, 5vw, 62px)',
+  lastUpdated,
+  links,
+  padBottom = 88,
+  titlePadTop = 72,
+  gap = 24,
+} = Astro.props;
+---
+
+<section
+  class="banner"
+  style={`--pad-bottom:${padBottom}px;--title-pad-top:${titlePadTop}px;--title-size:${titleSize};--gap:${gap}px`}
+>
+  <div class="banner__circle banner__circle--solid" aria-hidden="true"></div>
+  <div class="banner__circle banner__circle--dashed" aria-hidden="true"></div>
+
+  <TopBar links={links} withPin />
+
+  <div class="banner__title wrap">
+    <h1 class="banner__heading">{title}</h1>
+    <p class="banner__lede"><slot /></p>
+    {lastUpdated && <span class="banner__updated">Last updated {lastUpdated}</span>}
+  </div>
+</section>
+
+<style>
+  .banner {
+    position: relative;
+    background: var(--hp-coral-vivid);
+    color: var(--hp-white);
+    overflow: hidden;
+    padding: 0 var(--gutter) var(--pad-bottom);
+  }
+
+  .banner__circle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .banner__circle--solid {
+    width: 820px;
+    height: 820px;
+    background: rgba(255, 255, 255, 0.07);
+    right: -220px;
+    top: -380px;
+  }
+
+  .banner__circle--dashed {
+    width: 560px;
+    height: 560px;
+    border: 1px dashed rgba(255, 255, 255, 0.45);
+    right: -60px;
+    bottom: -320px;
+  }
+
+  .banner__title {
+    position: relative;
+    padding-top: var(--title-pad-top);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+
+  .banner__heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--title-size);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    max-width: 820px;
+    text-wrap: balance;
+  }
+
+  .banner__lede {
+    margin: 0;
+    font-size: clamp(18px, 1.6vw, 21px);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 620px;
+    text-wrap: pretty;
+  }
+
+  /* A link inside the lede has to stay legible on coral, so it goes white with
+     a rule under it rather than to the accent. */
+  .banner__lede :global(a) {
+    color: var(--hp-white);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .banner__updated {
+    font-size: var(--type-caption-size);
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .banner :global(:focus-visible) {
+    outline-color: var(--hp-white);
+  }
+</style>

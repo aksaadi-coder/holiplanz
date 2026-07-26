@@ -1,0 +1,26 @@
+/* Holiplanz type system.
+   Newsreader carries warmth at scale; Hanken Grotesk does the working hours.
+   Inter appears in the Figma Visual-Design page for utility text ("Skip", facts). */
+:root{
+  --font-display:'Newsreader',Georgia,serif;
+  --font-body:'Hanken Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-utility:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  /* ramp — from Phase 4 deck */
+  --type-display-size:56px;   --type-display-weight:500; /* Newsreader Medium */
+  --type-h2-size:28px;        --type-h2-weight:400;      /* Newsreader Regular */
+  --type-body-size:17px;      --type-body-weight:400;    /* Hanken Grotesk Regular */
+  --type-label-size:13px;     --type-label-weight:500;   /* Hanken Grotesk Medium · UPPERCASE */
+  --type-label-tracking:0.08em;
+  /* Figma in-app sizes */
+  --type-wordmark-size:24px;  /* Newsreader, coral */
+  --type-splash-size:40px;    /* "Plan Less, Experience More" */
+  --type-button-size:16px;    /* Hanken Grotesk */
+  --type-caption-size:14px;
+  --leading-tight:100%;       /* Figma uses 100% line-height throughout */
+  --leading-body:1.5;
+}
+.hp-display{font-family:var(--font-display);font-size:var(--type-display-size);font-weight:var(--type-display-weight);line-height:1.05;color:var(--text-primary)}
+.hp-h2{font-family:var(--font-display);font-size:var(--type-h2-size);font-weight:var(--type-h2-weight);line-height:1.1;color:var(--text-primary)}
+.hp-body{font-family:var(--font-body);font-size:var(--type-body-size);font-weight:var(--type-body-weight);line-height:var(--leading-body);color:var(--text-primary)}
+.hp-label{font-family:var(--font-body);font-size:var(--type-label-size);font-weight:var(--type-label-weight);letter-spacing:var(--type-label-tracking);text-transform:uppercase;color:var(--text-secondary)}
+.hp-wordmark{font-family:var(--font-display);font-size:var(--type-wordmark-size);font-weight:400;color:var(--accent)}

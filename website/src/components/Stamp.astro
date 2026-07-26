@@ -1,0 +1,173 @@
+---
+/**
+ * The stamp — the brand's single repeating graphic device.
+ *
+ * Ported from the design system's Stamp.jsx. Three variants:
+ *   ring        dashed circle, optionally spinning, with counter-rotating
+ *               children so whatever sits inside stays upright
+ *   destination dashed coral ellipse, rotated -4°, the "ADMITTED" mark
+ *   category    dashed box showing a visit count (unused on the home page,
+ *               kept because it is part of the component's contract)
+ *
+ * Web-only addition: the destination stamp's type is sized in container units
+ * so the whole mark shrinks as one piece. The React original hardcodes 44px,
+ * which is fine in a fixed-width app frame and overflows on a 360px browser.
+ */
+interface Props {
+  variant?: 'ring' | 'destination' | 'category';
+  size?: number;
+  spinning?: boolean;
+  label?: string;
+  sublabel?: string;
+  count?: number;
+  class?: string;
+}
+
+const {
+  variant = 'ring',
+  size = 175,
+  spinning = false,
+  label,
+  sublabel,
+  count,
+  class: className,
+} = Astro.props;
+---
+
+{
+  variant === 'destination' && (
+    <div
+      class:list={['stamp-destination', className]}
+      style={`--stamp-w:${size * 2.56}px`}
+    >
+      <span class="stamp-destination__admitted">ADMITTED · HOLIPLANZ</span>
+      <span class="stamp-destination__label">{label}</span>
+      <span class="stamp-destination__sub">✈ {sublabel}</span>
+    </div>
+  )
+}
+
+{
+  variant === 'category' && (
+    <div
+      class:list={['stamp-category', { 'stamp-category--visited': !!count }, className]}
+    >
+      <div class="stamp-category__label">{label}</div>
+      <div class="stamp-category__count">{count ? `× ${count} visited` : 'not visited'}</div>
+    </div>
+  )
+}
+
+{
+  variant === 'ring' && (
+    <div
+      class:list={['stamp-ring', { 'stamp-ring--spinning': spinning }, className]}
+      style={`--stamp-size:${size}px`}
+    >
+      <div class="stamp-ring__inner">
+        <slot />
+      </div>
+    </div>
+  )
+}
+
+<style>
+  /* ---- ring ---- */
+  .stamp-ring {
+    width: var(--stamp-size);
+    height: var(--stamp-size);
+    border-radius: 50%;
+    border: 4px dashed var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    flex: none;
+  }
+
+  .stamp-ring__inner {
+    display: flex;
+  }
+
+  .stamp-ring--spinning {
+    animation: hp-stamp-spin 14s linear infinite;
+  }
+
+  /* The pin inside runs the same animation in reverse so it stays upright
+     while the dashes travel around it. */
+  .stamp-ring--spinning .stamp-ring__inner {
+    animation: hp-stamp-spin 14s linear infinite reverse;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stamp-ring--spinning,
+    .stamp-ring--spinning .stamp-ring__inner {
+      animation: none;
+    }
+  }
+
+  /* ---- destination ---- */
+  .stamp-destination {
+    container-type: inline-size;
+    width: var(--stamp-w);
+    max-width: 100%;
+    aspect-ratio: 2.56 / 1.6;
+    border: 2px dashed var(--accent);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.3cqw;
+    transform: rotate(-4deg);
+    font-family: var(--font-body);
+    color: var(--accent);
+    text-align: center;
+  }
+
+  .stamp-destination__admitted {
+    font-size: min(13px, 2.83cqw);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+  }
+
+  .stamp-destination__label {
+    font-family: var(--font-display);
+    font-size: min(44px, 9.5cqw);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .stamp-destination__sub {
+    font-size: min(14px, 3.04cqw);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  /* ---- category ---- */
+  .stamp-category {
+    border: 1.5px dashed rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 16px 24px;
+    text-align: center;
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+  }
+
+  .stamp-category--visited {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+  }
+
+  .stamp-category__label {
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.06em;
+  }
+
+  .stamp-category__count {
+    font-size: 14px;
+    margin-top: 2px;
+  }
+</style>

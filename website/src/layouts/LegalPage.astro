@@ -1,0 +1,63 @@
+---
+import Base from './Base.astro';
+import Band from '../components/Band.astro';
+import PageBanner from '../components/PageBanner.astro';
+import DraftNotice from '../components/DraftNotice.astro';
+import { legalNav } from '../data/nav';
+import { site } from '../data/site';
+
+/**
+ * Privacy, Terms and Cookies share one document layout: a 720px column with
+ * 44px between sections. The nav swaps to the three legal pages, because a
+ * visitor reading one is usually looking for another.
+ */
+interface Props {
+  title: string;
+  description: string;
+  heading: string;
+  /** What specifically still needs a lawyer's eye on this page. */
+  draftNote: string;
+}
+
+const { title, description, heading, draftNote } = Astro.props;
+const showDraft = !site.legalReviewed;
+---
+
+<Base title={title} description={description}>
+  <PageBanner
+    title={heading}
+    lastUpdated={site.legalUpdated}
+    links={legalNav}
+    padBottom={80}
+    titlePadTop={64}
+    gap={20}
+  >
+    <slot name="lede" />
+  </PageBanner>
+
+  {
+    showDraft && (
+      <Band padTop={48} padBottom={0}>
+        <DraftNotice>{draftNote}</DraftNotice>
+      </Band>
+    )
+  }
+
+  <Band padTop={showDraft ? 40 : 72} padBottom={88}>
+    <div class="doc">
+      <slot />
+    </div>
+  </Band>
+
+  <Fragment slot="closing" />
+</Base>
+
+<style>
+  .doc {
+    max-width: 720px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+  }
+</style>
