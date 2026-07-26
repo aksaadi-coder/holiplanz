@@ -310,6 +310,7 @@ function App() {
         return (
           <GenerationScreen
             destination={screen.request.destination}
+            numDays={screen.request.numDays}
             error={genError}
             onCancel={handleCancelGeneration}
             onRetry={() => lastRequestRef.current && runGeneration(lastRequestRef.current)}

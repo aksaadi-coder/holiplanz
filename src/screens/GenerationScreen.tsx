@@ -7,9 +7,21 @@ import { cityName } from "../utils/destination";
 
 interface Props {
   destination: string;
+  /** Trip length, when the user gave one — only used to set the wait
+   *  expectation, since generation time scales with it. */
+  numDays?: number;
   error: string | null;
   onCancel: () => void;
   onRetry: () => void;
+}
+
+/** Generation time scales with trip length — a 10-day trip measures around a
+ *  minute and three quarters against ~35s for a short one — so a flat
+ *  "20–30 seconds" was most wrong on exactly the trips that wait longest. */
+function waitEstimate(numDays: number | undefined): string {
+  if (!numDays || numDays <= 4) return "This usually takes 30–40 seconds";
+  if (numDays <= 8) return "This usually takes about a minute";
+  return "A trip this long takes a couple of minutes to plan";
 }
 
 /** Shown until the real Wikipedia-sourced facts below arrive (or if none are
@@ -28,7 +40,7 @@ function fallbackFact(destination: string): string {
  * App.tsx; this screen is driven by the `error` prop and the parent's loading
  * lifecycle.
  */
-export function GenerationScreen({ destination, error, onCancel, onRetry }: Props) {
+export function GenerationScreen({ destination, numDays, error, onCancel, onRetry }: Props) {
   const [facts, setFacts] = useState<string[]>(() => [fallbackFact(destination)]);
   const [factIx, setFactIx] = useState(0);
 
@@ -82,7 +94,7 @@ export function GenerationScreen({ destination, error, onCancel, onRetry }: Prop
           <PinIcon size={34} filled className="hp-generation-pin" />
         </StampRing>
         <h2 className="hp-display">Crafting your {destination || "trip"} itinerary</h2>
-        <p className="hp-muted">This usually takes 20–30 seconds</p>
+        <p className="hp-muted">{waitEstimate(numDays)}</p>
         <div className="hp-fact" key={factIx}>
           {facts[factIx]}
         </div>

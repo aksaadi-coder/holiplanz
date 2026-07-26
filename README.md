@@ -62,6 +62,7 @@ The app is structured so Vercel can host both the frontend and the backend as on
 
 Notes:
 - On Vercel's free (Hobby) tier, the backend function may take a second or two to "wake up" after being idle - normal for a serverless function, not a bug.
+- `vercel.json` sets the function's `maxDuration` to 300s (5 minutes). Generating an itinerary is genuinely slow - a 10-day trip takes around a minute and three quarters - and at the previous 60s the deployed function was killed mid-generation for anything but a short trip. 300s is the ceiling on Hobby and the default on Pro, so it needs no plan change; it does need **Fluid compute** enabled (Project Settings > Functions), which is the default for projects created since 2025. If a deploy ever fails complaining about `maxDuration`, that switch is why.
 - `localStorage` (saved trips, access code) is per-browser, so each person you share the link with keeps their own saved trips independently.
 
 ## Limitations
