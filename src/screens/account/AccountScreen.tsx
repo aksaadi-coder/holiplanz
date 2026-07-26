@@ -3,7 +3,7 @@ import type { useAccountPrefs } from "../../hooks/useAccountPrefs";
 import type { useTravelerProfile } from "../../hooks/useTravelerProfile";
 import { useProfilePhoto } from "../../hooks/useProfilePhoto";
 import type { Membership } from "../../hooks/useMembership";
-import { PREMIUM_PRICE } from "../../data/plans";
+import { PREMIUM_PERIOD, PREMIUM_PRICE } from "../../data/plans";
 import { PinIcon, PlusCircleIcon } from "../../components/ui/icons";
 import { Sheet } from "../../components/ui/primitives";
 import { PlansScreen } from "./PlansScreen";
@@ -178,7 +178,7 @@ export function AccountScreen({
                 {membership.premium
                   ? "Unlimited trips and your passport collection"
                   : membership.firstJourneyUsed
-                    ? `Unlimited trips, all year — ${PREMIUM_PRICE}/month`
+                    ? `Unlimited trips, all year — ${PREMIUM_PRICE}/${PREMIUM_PERIOD}`
                     : "Your first journey is on us — see what's next"}
               </span>
             </span>

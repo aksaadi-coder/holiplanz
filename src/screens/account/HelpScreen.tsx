@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PREMIUM_PRICE, TRIP_PASS_PRICE } from "../../data/plans";
+import { PREMIUM_PERIOD, PREMIUM_PRICE, TRIP_PASS_PRICE } from "../../data/plans";
 
 interface Props {
   onBack: () => void;
@@ -24,7 +24,7 @@ const FAQS = [
   },
   {
     q: "What does a trip cost?",
-    a: `Your first journey is on us, with every feature unlocked. After that a Trip Pass is ${TRIP_PASS_PRICE} for one trip — no subscription, no auto-renewal — or Premium is ${PREMIUM_PRICE}/month for unlimited trips. Planning itself, your maps and your saved trips stay free.`,
+    a: `Your first journey is on us, with every feature unlocked. After that a Trip Pass is ${TRIP_PASS_PRICE} for one trip — no subscription, no auto-renewal — or Premium is ${PREMIUM_PRICE} a ${PREMIUM_PERIOD} for unlimited trips, which works out cheaper from three trips on. Planning itself, your maps and your saved trips stay free.`,
   },
   {
     q: "If I buy a Trip Pass, do I keep it?",

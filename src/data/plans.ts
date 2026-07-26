@@ -11,7 +11,26 @@
  */
 
 export const TRIP_PASS_PRICE = "$19";
-export const PREMIUM_PRICE = "$10";
+export const PREMIUM_PRICE = "$49";
+/**
+ * Premium is billed annually, and that's structural rather than cosmetic.
+ *
+ * Billed monthly at $10 the Trip Pass was irrational: a single month of
+ * Premium cost $10 against the pass's $19 and unlocked strictly more, so the
+ * sensible move for any one trip was to subscribe, export, and cancel — and
+ * the pass existed only for people who refuse subscriptions on principle.
+ * Monthly also broke the "best value from 2 trips" claim badly: $120 a year
+ * against $38 in passes needs ~6 trips a year to pay off, not 2.
+ *
+ * Annual fixes both. $49 against $57 for three passes means one trip is a
+ * pass, three or more is Premium, and the crossover the card claims is the
+ * crossover the arithmetic gives. There's no single month to buy as a
+ * cheaper substitute for a pass.
+ *
+ * Keep the two in step if either price moves: the footnote on the Premium
+ * tier below states the crossover, so it has to stay true.
+ */
+export const PREMIUM_PERIOD = "year";
 
 /** What a paid trip unlocks — the four things a Trip Pass buys.
  *
@@ -45,7 +64,7 @@ export interface PlanTier {
   name: string;
   /** Headline price, or null for the free tier which leads with a phrase. */
   price: string | null;
-  /** Sits next to the price ("one-time", "/ month") or replaces it on Free. */
+  /** Sits next to the price ("one-time", "/ year") or replaces it on Free. */
   priceNote: string;
   features: string[];
   /** Italic line under the divider at the foot of the card. */
@@ -86,14 +105,14 @@ export const PLAN_TIERS: PlanTier[] = [
     key: "premium",
     name: "Premium plan",
     price: PREMIUM_PRICE,
-    priceNote: "/ month",
+    priceNote: `/ ${PREMIUM_PERIOD}`,
     features: [
       "Everything in Trip Pass",
       "Your passport collection",
       "Priority feature access",
       "Unlimited trips, all year",
     ],
-    footnote: "Best value from 2 trips a year",
+    footnote: "Best value from 3 trips a year",
   },
 ];
 

@@ -2,6 +2,7 @@ import { Sheet } from "../ui/primitives";
 import {
   FEATURE_LABELS,
   FEATURE_PITCH,
+  PREMIUM_PERIOD,
   PREMIUM_PRICE,
   TRIP_PASS_PRICE,
   type FeatureKey,
@@ -65,7 +66,7 @@ export function UpgradeSheet({
           <b>Premium</b>
           <span className="hp-upsell-price" translate="no">
             {PREMIUM_PRICE}
-            <span className="hp-upsell-per"> / month</span>
+            <span className="hp-upsell-per"> / {PREMIUM_PERIOD}</span>
           </span>
         </span>
         <span className="hp-upsell-option-sub">
