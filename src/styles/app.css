@@ -606,12 +606,10 @@
 }
 .hp-generation-body .hp-display {
   font-size: 26px;
-  /* No paper tint under this screen's photo (see DestinationBackground's
-     tint prop) — a soft light glow keeps the heading readable over it. */
-  text-shadow: 0 1px 12px var(--paper), 0 1px 3px var(--paper);
-}
-.hp-generation-body .hp-muted {
-  text-shadow: 0 1px 10px var(--paper), 0 1px 2px var(--paper);
+  /* No text-shadow here: these two lines used to carry a paper glow to stay
+     readable over an un-tinted photo, back when this screen ran its background
+     brighter than every other screen. It now shares the standard tinted one
+     (see DestinationBackground), which does that job on its own. */
 }
 .hp-generation-pin {
   color: var(--coral);

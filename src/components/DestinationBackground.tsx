@@ -1,17 +1,17 @@
 import { resolveBackground } from "../data/destinationBackgrounds";
 
 interface Props {
-  /** The destination typed by the user; drives which photo is shown. */
+  /** The destination typed by the user; drives which photo is shown. Pass null
+   *  (or nothing) to hide the background — it fades rather than cutting, so
+   *  Home can hold it back until a destination has actually been committed. */
   destination?: string | null;
-  /** 0–1 how visible the photo is under the paper tint. Default 0.6 — kept
-   *  the same across every screen that uses this (Home, Generation,
-   *  Itinerary) for a consistent look. */
-  intensity?: number;
-  /** Set false for a full-bleed photo with no readability wash — only where
-   *  there's no body text sitting directly on it (e.g. the loading screen,
-   *  whose text lives in its own opaque fact card). Default true. */
-  tint?: boolean;
 }
+
+/** How visible the photo is under the paper tint. Deliberately not a prop:
+ *  every screen showing this background must show it identically, and when it
+ *  was tunable per screen they drifted — the loading screen ended up brighter
+ *  and un-tinted, so it read as a different app for the few seconds it was up. */
+const PHOTO_OPACITY = 0.72;
 
 /**
  * Blurred, tinted background photo that reacts to the trip destination.
@@ -19,15 +19,18 @@ interface Props {
  * src/data/destinationBackgrounds.ts (default: Mount Fuji / Japan).
  * Sits behind content; text always renders over the paper tint for legibility.
  */
-export function DestinationBackground({ destination, intensity = 0.6, tint = true }: Props) {
-  const src = resolveBackground(destination);
+export function DestinationBackground({ destination }: Props) {
+  const shown = Boolean(destination?.trim());
   return (
     <div className="hp-dest-bg" aria-hidden="true">
       <div
         className="hp-dest-bg-photo"
-        style={{ backgroundImage: `url("${src}")`, opacity: intensity }}
+        style={{
+          backgroundImage: `url("${resolveBackground(destination)}")`,
+          opacity: shown ? PHOTO_OPACITY : 0,
+        }}
       />
-      {tint && <div className="hp-dest-bg-tint" />}
+      <div className="hp-dest-bg-tint" />
     </div>
   );
 }

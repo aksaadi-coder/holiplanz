@@ -66,7 +66,7 @@ export function GenerationScreen({ destination, numDays, error, onCancel, onRetr
   if (error) {
     return (
       <div className="hp-screen hp-generation is-error">
-        <DestinationBackground destination={destination} intensity={0.72} />
+        <DestinationBackground destination={destination} />
         <div className="hp-gen-error-top">
           <StampRing size={150}>
             <CloseIcon className="hp-gen-error-x" size={30} />
@@ -88,7 +88,7 @@ export function GenerationScreen({ destination, numDays, error, onCancel, onRetr
 
   return (
     <div className="hp-screen hp-generation">
-      <DestinationBackground destination={destination} intensity={0.8} tint={false} />
+      <DestinationBackground destination={destination} />
       <div className="hp-generation-body">
         <StampRing size={132} spinning>
           <PinIcon size={34} filled className="hp-generation-pin" />

@@ -187,7 +187,7 @@ export function ItineraryScreen({
 
   return (
     <div className="hp-screen hp-itin">
-      <DestinationBackground destination={itinerary.destination} intensity={0.72} />
+      <DestinationBackground destination={itinerary.destination} />
 
       <header className="hp-itin-head">
         {/* A place name and a day count, joined into one string: two adjacent

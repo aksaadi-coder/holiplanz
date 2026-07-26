@@ -80,7 +80,8 @@ export function HomeScreen({ loading, onSubmit }: Props) {
 
   return (
     <div className="hp-screen hp-home">
-      <DestinationBackground destination={destDone ? destination : null} intensity={destDone ? 0.72 : 0} />
+      {/* Held back until a destination is committed, then fades in. */}
+      <DestinationBackground destination={destDone ? destination : null} />
 
       <div className="hp-home-scroll">
         <div className="hp-wordmark">holiplanz</div>
