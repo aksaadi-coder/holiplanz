@@ -1,0 +1,48 @@
+---
+/**
+ * A dashed coral ring with something short inside — the stamp motif doing duty
+ * as a numeral or a mark.
+ *
+ * About uses it at 44px for 01 / 02 / 03 instead of plain "N°" text; Terms uses
+ * it at 26px for the `!` beside "Check before you book". Reuse it anywhere the
+ * site needs to enumerate or flag, rather than reaching for an icon — there is
+ * no icon font here and there shouldn't be one.
+ */
+interface Props {
+  size?: number;
+  fontSize?: number;
+  /** Numerals are set in the display face; a bare mark like `!` is not. */
+  display?: boolean;
+  class?: string;
+}
+
+const { size = 44, fontSize = 17, display = true, class: className } = Astro.props;
+---
+
+<span
+  class:list={['ring', { 'ring--display': display }, className]}
+  style={`--ring-size:${size}px;--ring-font:${fontSize}px`}
+  aria-hidden="true"
+>
+  <slot />
+</span>
+
+<style>
+  .ring {
+    width: var(--ring-size);
+    height: var(--ring-size);
+    border-radius: 50%;
+    border: 1.5px dashed var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--ring-font);
+    line-height: 1;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .ring--display {
+    font-family: var(--font-display);
+  }
+</style>

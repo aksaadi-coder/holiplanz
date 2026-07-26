@@ -1,12 +1,16 @@
 # Holiplanz — marketing site
 
-The public site for Holiplanz — seven pages, all designed. Built from
+The public site for Holiplanz — six pages, all designed. Built from
 `design_handoff_holiplanz_website` (Phase 5).
 
-It is a static brochure: no accounts, no forms, no data fetching, and **zero JavaScript ships
-to the browser**. Every call to action resolves to "Coming soon · iPhone & Android · 2026",
-because there is no product on the web to send anyone to. The Support FAQ is native
-`<details>` — accessible with no script, and it must stay that way.
+It is a static brochure: no accounts, no data fetching, no network calls. Every call to action
+resolves to "Coming soon · iPhone & Android · 2026", because there is no product on the web to
+send anyone to.
+
+**JavaScript ships on the home page only**, and only for the live demo — about 3KB, inlined, no
+separate request. Every other page ships none. Two things stay script-free on purpose and should
+remain so: the Support FAQ is native `<details>`, and the §04 reel is CSS scroll-snap rather than
+a carousel.
 
 This lives inside the app repo but is a completely separate project — its own `package.json`,
 its own build, its own Vercel project. It is deliberately **not** in the root `workspaces` array,
@@ -31,32 +35,49 @@ cd website && npm install && npm run dev
 src/
   styles/tokens/    design-system tokens, copied verbatim from the handoff
   styles/global.css tokens + the web-only additions (focus rings, link hover, reduced motion)
-  layouts/          Base (head, meta, footer wrapper) · LegalPage (privacy/terms/cookies)
-  components/       Band · StepBand · ScreenshotFrame · PageBanner are the page patterns
-  data/             nav.ts (link lists) · site.ts (addresses + the legal-review flag)
-  pages/            index + about, support, contact, privacy, terms, cookies
+  layouts/          Base (head, meta, footer wrapper) · LegalPage (privacy + terms)
+  components/       Band · StepBand · ScreenshotFrame · PageBanner · RailLayout · Ring
+  data/             nav.ts (link lists) · site.ts (address, legal-review + indexable flags)
+  pages/            index + about, support, contact, privacy, terms
 ```
 
-The six subpages share one shell, as the handoff asks: `PageBanner` is the coral band carrying
+The five subpages share one shell, as the handoff asks: `PageBanner` is the coral band carrying
 the nav *and* the page title, and `Base` supplies the dark footer. `Band`, `StepBand` and
-`ScreenshotFrame` are the home page's section patterns, reused on About — How it Works, Trip
-Passport and Pricing are still to be designed as standalone pages and are made of the same
-material.
+`ScreenshotFrame` are the home page's section patterns, reused on About; `RailLayout` is the
+sticky-rail pattern shared by Support and the two legal pages; `Ring` is the dashed-coral stamp
+mark doing duty as a numeral or a flag. How it Works, Trip Passport and Pricing are still to be
+designed as standalone pages and are made of the same material.
 
-The top nav is the same five links on every page — The flow · Trip Passport · Pricing · About ·
-Contact us — except the three legal pages, which swap in Privacy · Terms · Cookies, since
-someone reading one is usually looking for another. Support lives in the footer only.
+The top nav is the same six links on every page — The flow · Trip Passport · Pricing · Support ·
+About · Contact us — except the two legal pages, which swap in Privacy · Terms, since someone
+reading one is usually looking for the other. **Support belongs in the top nav**: pre-launch it
+is the only utility page that sells, answering what it costs and when you can use it. Don't
+demote it to the footer.
+
+**Cookies is a section of Privacy** (`/privacy#cookies`), not a page. `/cookies` was live at one
+point, so `vercel.json` permanently redirects it. Privacy stays standalone whatever else moves —
+Apple and Google both require a dedicated privacy-policy URL for app submission.
 
 ### The rules worth not breaking
 
-- **Coral is earned.** It belongs to the wordmark, the hero field, the stamps, the "Trip Pass ·
-  new" label and `✈ READY`. Buttons are Ink (`--command`), not coral.
+- **Coral is earned.** It belongs to the wordmark, the hero field, the stamps, the demo's send
+  button and `✈ READY`. Buttons are Ink (`--command`), not coral — and the Trip Pass tier is a
+  muted label with no coral and no "new" tag; its inset ring already carries the emphasis.
+- **The live demo must not over-promise.** It is keyword matching over three stops, not AI, and
+  reordering is ↑/↓ buttons, not drag. An earlier revision described grabbing a card by a handle
+  when neither existed. Don't describe an affordance the build doesn't render.
 - **No shadows.** `--shadow-card: none`. Emphasis is an inset ring (`inset 0 0 0 1px`), never
   elevation, never a border.
 - **Dark bands carry no dark colours.** A band goes dark by setting `data-theme="dark"` and
   letting the semantic tokens flip. Anything that hardcodes a dark value breaks that.
-- **Screenshots are never cropped.** Full width, auto height, inside a rounded hairline frame.
-  A fixed-height crop was tried during design and rejected.
+- **Screenshots are never cropped where a screen is the subject.** Full width, auto height,
+  inside a rounded hairline frame. The one exception is where several sit side by side — the §04
+  reel and §05 — which use `ScreenshotFrame`'s `ratio` prop, because the exports aren't all the
+  same pixel ratio and otherwise the cards end at different heights.
+- **The §04 reel keeps its tab stop and its visible scrollbar.** There are no arrow buttons, so
+  without both the overflowing card is unreachable for keyboard and mouse-only users.
+- **The contents rail collapses, not compresses.** `RailLayout` is a wrapping flex row, never a
+  grid with a fixed first track — that variant left a 119px body column at 375px.
 
 ## Deploying
 
@@ -70,14 +91,14 @@ Without it the build falls back to `https://holiplanz.com`.
 
 ## Before this goes live
 
-- [ ] **Legal review.** Privacy, Terms and Cookies carry a visible "Draft — needs legal review"
-      notice, because the handoff is explicit that the wording was written for voice and structure
-      and has not been checked against real data practices, suppliers and jurisdictions. Once a
-      lawyer has approved the text, set `site.legalReviewed = true` in `src/data/site.ts` and all
-      three notices disappear. Don't remove them any other way.
-- [ ] **`src/data/site.ts`** — `hello@`, `press@` and `privacy@` are the placeholders the design
-      specifies, not confirmed addresses. The contact and legal pages read as statements of fact
-      to whoever lands on them, so the mailboxes need to exist first.
+- [ ] **Legal review.** Privacy and Terms carry a visible "Draft — needs legal review" notice,
+      because the handoff is explicit that the wording was written for voice and structure and has
+      not been checked against real data practices, suppliers and jurisdictions. Once a lawyer has
+      approved the text, set `site.legalReviewed = true` in `src/data/site.ts` and both notices
+      disappear. Don't remove them any other way.
+- [ ] **`src/data/site.ts`** — `hello@holiplanz.com` is the placeholder the design specifies, not
+      a confirmed address. It is now the site's only address and the single action the site
+      offers, so the mailbox needs to exist before launch.
 - [ ] **The site is unlisted.** `site.indexable` is `false`, so every page carries
       `noindex, nofollow`, `robots.txt` disallows everything and the sitemap isn't advertised —
       a deploy can be shared without turning up in search results. Flip it to `true` at launch;
@@ -100,9 +121,9 @@ Without it the build falls back to `https://holiplanz.com`.
 
 Deliberate deviations, all noted in the code where they happen:
 
-1. **Section 04's four screens stay together** — explicit 4 / 2×2 / 1 column counts instead of
-   `auto-fit minmax(340px, 1fr)`, which lands on three-up with an orphan at the 1240px content
-   width. Requested during the build.
+1. **The live demo's copy says "move a card up or down yourself"** where the prototype says "take
+   hold of a card and move it". The build renders ↑/↓ buttons, not drag, and the handoff's own
+   rule is not to describe an affordance that isn't there.
 2. **`minmax(min(360px, 100%), 1fr)`** on the two-column grids. The bare 360px minimum makes the
    column wider than its container below ~400px and the content runs off the right edge of a
    phone. Identical everywhere the minimum actually fits.

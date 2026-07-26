@@ -3,31 +3,40 @@ import Base from '../layouts/Base.astro';
 import Band from '../components/Band.astro';
 import Hero from '../components/Hero.astro';
 import StepBand from '../components/StepBand.astro';
-import ScreenshotCard from '../components/ScreenshotCard.astro';
+import LiveDemo from '../components/LiveDemo.astro';
+import Reel from '../components/Reel.astro';
+import ScreenshotFrame from '../components/ScreenshotFrame.astro';
 import PricingCard from '../components/PricingCard.astro';
 import Stamp from '../components/Stamp.astro';
 
 import homeFilled from '../assets/screenshots/08-home-filled.png';
 import itineraryDay1 from '../assets/screenshots/15-itinerary-day1.png';
-import mapFull from '../assets/screenshots/18-itinerary-map-full.png';
+import mapCard from '../assets/screenshots/17-itinerary-map-card.png';
 import tripInfo from '../assets/screenshots/20-itinerary-trip-info.png';
+import stopDetail from '../assets/screenshots/19-itinerary-stop-detail.png';
+import hotelDetail from '../assets/screenshots/24-itinerary-hotel-detail-9c141e8d.png';
 import budget from '../assets/screenshots/21-itinerary-budget.png';
-import checklist from '../assets/screenshots/26-itinerary-checklist.png';
+import preferences from '../assets/screenshots/22-itinerary-preferences.png';
 import passport from '../assets/screenshots/passport-screen-v2.png';
 
 /**
- * The home page. One long scroll, nine bands.
+ * The home page. One long scroll.
+ *
+ * The narrative runs 01 You ask → 02 We plan → 03 Your days → the live demo →
+ * 04 On the ground → 05 On your terms → 06 You come home, then pricing, the
+ * closing stamp and the footer.
  *
  * The shape is deliberate: a conventional hero says what the product is, then
  * the page walks through a single worked example — three days in Lisbon, from
  * the first typed line to a stamped passport. The visitor is watching a
- * demonstration, not planning a trip.
+ * demonstration, with one exception: the live demo, which is the only place
+ * they can touch the product.
  */
 
-const groundCards = [
+const groundScreens = [
   {
-    image: mapFull,
-    alt: 'The Lisbon day map',
+    image: mapCard,
+    alt: 'The day map, expanded in the itinerary',
     caption: 'Every stop on one map, in walking order.',
   },
   {
@@ -36,14 +45,25 @@ const groundCards = [
     caption: 'Time, weather, currency, plug type, tipping.',
   },
   {
-    image: budget,
-    alt: 'Lisbon trip budget',
-    caption: 'What it costs, before you commit to it.',
+    image: stopDetail,
+    alt: 'A single stop, in detail',
+    caption: 'Each stop, with what to know before you arrive.',
   },
   {
-    image: checklist,
-    alt: 'Before you go checklist',
-    caption: 'The admin, in one list you can finish.',
+    image: hotelDetail,
+    alt: 'Casa Amarela — a hotel detail screen',
+    caption: "Where you'll stay, down to the room.",
+  },
+];
+
+const terms = [
+  {
+    title: 'The budget, before you commit',
+    text: "Stays, food, getting around and what you'll pay to enter — totalled, and broken down so you can see what to cut.",
+  },
+  {
+    title: 'Your preferences, kept',
+    text: 'Pace, budget band, how you like to eat and get around. Change one and the plan follows — and it remembers next time.',
   },
 ];
 
@@ -59,8 +79,9 @@ const tiers = [
     ],
   },
   {
-    tier: 'Trip Pass · new',
-    tierTone: 'accent' as const,
+    // No coral label and no "new" tag: coral is earned, and a price tier
+    // doesn't earn it. The inset ring already carries the emphasis.
+    tier: 'Trip Pass',
     price: '$19',
     priceSuffix: 'one-time',
     featured: true,
@@ -92,8 +113,8 @@ const tiers = [
   <Hero />
 
   {/*
-    2 · The framing statement. Load-bearing: it tells the visitor the next five
-    sections are a demonstration rather than an invitation. Do not cut it.
+    The framing statement. Load-bearing: it tells the visitor the sections that
+    follow are a demonstration rather than an invitation. Do not cut it.
   */}
   <Band padTop={96} padBottom={0}>
     <div class="framing wrap">
@@ -105,7 +126,7 @@ const tiers = [
     </div>
   </Band>
 
-  {/* 3 · Step 01 */}
+  {/* 01 */}
   <StepBand
     id="flow"
     label="01 · You ask"
@@ -123,9 +144,9 @@ const tiers = [
   </StepBand>
 
   {/*
-    4 · Step 02. The spinning stamp ring stands in for a loading spinner — it is
-    the brand's signature motif, and the wait is used to teach you something
-    about where you're going.
+    02. The spinning stamp ring stands in for a loading spinner — it is the
+    brand's signature motif, and the wait is used to teach you something about
+    where you're going.
   */}
   <Band tone="dark" padTop={104} padBottom={104}>
     <div class="plan">
@@ -144,7 +165,7 @@ const tiers = [
     </div>
   </Band>
 
-  {/* 5 · Step 03 — mirrors step 01, screenshot on the left */}
+  {/* 03 — mirrors 01, screenshot on the left */}
   <StepBand
     label="03 · Your days, decided"
     heading="Three days, already in order."
@@ -165,28 +186,104 @@ const tiers = [
     </ul>
   </StepBand>
 
-  {/* 6 · Step 04 */}
-  <Band tone="panel" bordered padTop={96} padBottom={96}>
-    <div class="ground wrap">
-      <div class="ground__head">
-        <span class="label">04 · On the ground</span>
-        <h2 class="h2 ground__heading">Everything you'd have googled anyway.</h2>
+  {/*
+    The live demo. The only place a visitor touches the product, so the copy
+    around it describes exactly what the build renders — arrows and a chat bar,
+    not a drag handle.
+  */}
+  <Band padTop={96} padBottom={96}>
+    <div class="wrap demo-band">
+      <div class="demo-band__copy">
+        <span class="label">Try it · Nothing to install</span>
+        <h2 class="h2 demo-band__heading">Ask for a change. Or move it yourself.</h2>
+        <p class="demo-band__body">
+          Two ways to reshape a day, and neither is a form. Type what you'd rather do and the plan
+          rewrites itself — or move a card up or down yourself. This is the real thing, working
+          right here.
+        </p>
+        <div class="demo-band__hints">
+          <span>Use a card's arrows to reorder the day</span>
+          <span>Or type in the chat bar — try "lunch", "morning" or "outdoors"</span>
+        </div>
       </div>
-      <div class="ground__grid">
-        {groundCards.map((card) => <ScreenshotCard {...card} />)}
+      <div class="demo-band__mock">
+        <LiveDemo />
       </div>
     </div>
   </Band>
 
   {/*
-    7 · Step 05. The Trip Passport is the product's signature emotional feature:
-    stamps are earned only for what you actually did, and what you skipped stays
+    04. Full-bleed so the reel can run past the content box; the header stays
+    inside it and centred.
+  */}
+  <Band tone="panel" bordered fullBleed padTop={96} padBottom={96}>
+    <div class="wrap ground__head">
+      <span class="label">04 · On the ground</span>
+      <h2 class="h2 ground__heading">Everything you'd have googled anyway.</h2>
+    </div>
+    <Reel items={groundScreens} label="Itinerary screens, scroll sideways" />
+  </Band>
+
+  {/*
+    05. Budget and preferences were cards in §04 and were pulled out: they are
+    about money and control, not about what you'd google.
+  */}
+  <Band padTop={104} padBottom={104}>
+    <div class="wrap terms">
+      <div class="terms__copy">
+        <span class="label">05 · On your terms</span>
+        <h2 class="h2 terms__heading">What it costs, and how you like to travel.</h2>
+        <p class="terms__body">
+          The two things a plan is useless without: an honest number, and the sense that it was
+          built for you rather than for everyone.
+        </p>
+        <div class="terms__rows">
+          {
+            terms.map((entry) => (
+              <div class="terms__row">
+                <h3 class="terms__rowTitle">{entry.title}</h3>
+                <p class="terms__rowText">{entry.text}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+      {/*
+        flex-basis 480 on the column and 220 on each frame: a smaller basis lets
+        one frame wrap and the section grows taller, and `flex: 1 1 0` lets them
+        collapse to a sliver. align-items must stay flex-start or the row's
+        default stretch silently overrides the frames' aspect-ratio.
+      */}
+      <div class="terms__media">
+        <ScreenshotFrame
+          src={budget}
+          alt="Lisbon trip budget"
+          maxWidth={null}
+          radius={28}
+          ratio={0.462}
+          class="terms__frame"
+        />
+        <ScreenshotFrame
+          src={preferences}
+          alt="Adjusting trip preferences"
+          maxWidth={null}
+          radius={28}
+          ratio={0.462}
+          class="terms__frame"
+        />
+      </div>
+    </div>
+  </Band>
+
+  {/*
+    06. The Trip Passport is the product's signature emotional feature: stamps
+    are earned only for what you actually did, and what you skipped stays
     visibly blank. The copy's honesty about that is the point of the section.
   */}
   <StepBand
     id="passport"
     tone="dark"
-    label="05 · You come home"
+    label="06 · You come home"
     heading="The only souvenir that fills itself in."
     headingSize="clamp(40px, 5vw, 66px)"
     bodySize={19}
@@ -194,7 +291,7 @@ const tiers = [
     image={passport}
     alt="A London family getaway trip passport with its coral admitted stamp"
     imageSide="right"
-    imageMaxWidth={340}
+    imageMaxWidth={400}
     padTop={112}
     padBottom={112}
   >
@@ -204,7 +301,7 @@ const tiers = [
     </Fragment>
   </StepBand>
 
-  {/* 8 · Pricing */}
+  {/* Pricing */}
   <Band id="pricing" padTop={104} padBottom={104}>
     <div class="pricing wrap">
       <div class="pricing__head">
@@ -222,8 +319,8 @@ const tiers = [
   </Band>
 
   {/*
-    9 · Closing. Mounted into the layout's dark wrapper so it runs continuously
-    into the footer. The stamp is the launch announcement — it should read as
+    Closing. Mounted into the layout's dark wrapper so it runs continuously into
+    the footer. The stamp is the launch announcement — it should read as
     something pressed onto the page, not as footer small print.
   */}
   <Fragment slot="closing">
@@ -237,7 +334,7 @@ const tiers = [
 </Base>
 
 <style>
-  /* ---- 2 · framing ---- */
+  /* ---- framing ---- */
   .framing {
     display: flex;
     flex-direction: column;
@@ -257,7 +354,7 @@ const tiers = [
     max-width: 520px;
   }
 
-  /* ---- 4 · we plan ---- */
+  /* ---- 02 · we plan ---- */
   .plan {
     max-width: 1000px;
     margin-inline: auto;
@@ -294,7 +391,7 @@ const tiers = [
     max-width: 520px;
   }
 
-  /* ---- 5 · your days ---- */
+  /* ---- 03 · your days ---- */
   .days {
     margin: 8px 0 0;
     padding: 0;
@@ -306,47 +403,141 @@ const tiers = [
     color: var(--text-list);
   }
 
-  /* ---- 6 · on the ground ---- */
-  .ground {
+  /* ---- live demo ---- */
+  .demo-band {
     display: flex;
-    flex-direction: column;
-    gap: 48px;
+    flex-wrap: wrap;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
   }
 
-  .ground__head {
+  .demo-band__copy {
+    flex: 1 1 340px;
     display: flex;
     flex-direction: column;
+    gap: 20px;
+    max-width: 480px;
+  }
+
+  .demo-band__heading {
+    font-size: clamp(38px, 4.6vw, 58px);
+  }
+
+  .demo-band__body {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--text-muted-strong);
+    text-wrap: pretty;
+  }
+
+  .demo-band__hints {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 8px;
+    font-size: 16px;
+    color: var(--text-list);
+  }
+
+  .demo-band__mock {
+    flex: 1 1 340px;
+    display: flex;
+    justify-content: center;
+    max-width: 420px;
+  }
+
+  /* ---- 04 · on the ground ---- */
+  /* The band is full-bleed so the reel can run past the 1240px column; the
+     header puts the gutter back for itself. */
+  .ground__head {
+    padding-inline: var(--gutter);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 16px;
-    max-width: 620px;
   }
 
   .ground__heading {
     font-size: clamp(38px, 4.6vw, 58px);
+    max-width: 760px;
   }
 
-  /* The four screens stay together as one set at every width: four across,
-     then 2×2, then a single column. Explicit column counts rather than the
-     handoff's auto-fit minmax(340px), which lands on three-up with an orphan
-     underneath at the 1240px content width. */
-  .ground__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
+  /* ---- 05 · on your terms ---- */
+  .terms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(40px, 5vw, 72px);
+    align-items: center;
   }
 
-  @media (min-width: 620px) {
-    .ground__grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  .terms__copy {
+    flex: 1 1 300px;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
-  @media (min-width: 1000px) {
-    .ground__grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
+  .terms__heading {
+    font-size: clamp(36px, 4.4vw, 54px);
   }
 
-  /* ---- 8 · pricing ---- */
+  .terms__body {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--text-muted-strong);
+    text-wrap: pretty;
+  }
+
+  .terms__rows {
+    margin-top: 12px;
+    border-top: 1px solid var(--border-default);
+  }
+
+  .terms__row {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .terms__rowTitle {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.15;
+  }
+
+  .terms__rowText {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-muted-strong);
+  }
+
+  .terms__media {
+    flex: 1 1 480px;
+    display: flex;
+    justify-content: center;
+    /* Must stay flex-start: the default stretch overrides the frames'
+       aspect-ratio and they come out different heights. */
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .terms__media :global(.terms__frame) {
+    flex: 1 1 220px;
+    max-width: 340px;
+  }
+
+  /* ---- pricing ---- */
   .pricing {
     display: flex;
     flex-direction: column;
@@ -371,7 +562,7 @@ const tiers = [
     align-items: stretch;
   }
 
-  /* ---- 9 · closing ---- */
+  /* ---- closing ---- */
   .closing {
     max-width: 840px;
     margin-inline: auto;

@@ -4,6 +4,7 @@ import Band from '../components/Band.astro';
 import PageBanner from '../components/PageBanner.astro';
 import Button from '../components/Button.astro';
 import FaqItem from '../components/FaqItem.astro';
+import RailLayout from '../components/RailLayout.astro';
 
 const faqs = [
   {
@@ -59,9 +60,17 @@ const faqs = [
   </PageBanner>
 
   <Band padTop={80} padBottom={88}>
-    <div class="faqs">
-      {faqs.map((faq) => <FaqItem question={faq.question}>{faq.answer}</FaqItem>)}
-    </div>
+    <RailLayout>
+      <Fragment slot="rail">
+        <span class="rail__label">{faqs.length === 8 ? 'Eight questions' : `${faqs.length} questions`}</span>
+        <span class="rail__note">
+          Tap any question to open it. If yours isn't here, <a href="/contact">ask us</a>.
+        </span>
+      </Fragment>
+      <div class="faqs">
+        {faqs.map((faq) => <FaqItem question={faq.question}>{faq.answer}</FaqItem>)}
+      </div>
+    </RailLayout>
   </Band>
 
   <Fragment slot="closing">
@@ -76,9 +85,31 @@ const faqs = [
 
 <style>
   .faqs {
-    max-width: 820px;
-    margin-inline: auto;
     border-top: 1px solid var(--border-default);
+  }
+
+  .rail__label {
+    font-size: var(--type-label-size);
+    font-weight: var(--type-label-weight);
+    letter-spacing: var(--type-label-tracking);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .rail__note {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-faint);
+  }
+
+  .rail__note a {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+  }
+
+  .rail__note a:hover {
+    border-bottom-color: var(--accent);
   }
 
   .stuck {

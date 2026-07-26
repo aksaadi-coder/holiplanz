@@ -5,9 +5,15 @@ import type { ImageMetadata } from 'astro';
 /**
  * An app screenshot in its rounded hairline frame.
  *
- * Screenshots are shown whole and uncropped — full width, auto height. An
- * earlier revision cropped them to a fixed height and it was rejected, so
- * there is deliberately no height or object-fit anywhere in here.
+ * Two modes, and the difference matters:
+ *
+ * - **Whole** (default) — full width, auto height, nothing cropped. Used
+ *   wherever a screen is the subject of a section. An early revision cropped
+ *   these to a fixed height and it was rejected.
+ * - **Ratio** — a fixed `aspect-ratio` with `object-fit: cover` anchored to the
+ *   top. Used only where several screens sit side by side: the exports aren't
+ *   all the same pixel ratio, so without a fixed frame the cards end at
+ *   different heights and their captions stop lining up.
  *
  * The screenshots themselves are swappable: they are real exports from the
  * current app build and will be replaced as the app evolves. Keeping them
@@ -18,14 +24,17 @@ interface Props {
   alt: string;
   /**
    * 340 for the phone screens in the step bands, 400 for the passport.
-   * `null` lets the frame fill its grid column, as the four-up cards do.
+   * `null` lets the frame fill its grid column or flex track.
    */
   maxWidth?: number | null;
-  /** 40 on the tall phone frames, 28 on the four-up cards. */
+  /** 40 on the tall phone frames, 28 on the side-by-side cards. */
   radius?: number;
   /** Which surface sits behind the image inside the frame. */
   surface?: 'panel' | 'primary';
+  /** Set to crop to a fixed shape — 0.462 is the app's screen ratio. */
+  ratio?: number;
   loading?: 'lazy' | 'eager';
+  class?: string;
 }
 
 const {
@@ -34,7 +43,9 @@ const {
   maxWidth = 340,
   radius = 40,
   surface = 'panel',
+  ratio,
   loading = 'lazy',
+  class: className,
 } = Astro.props;
 
 const fluid = maxWidth === null;
@@ -43,16 +54,22 @@ const fluid = maxWidth === null;
 // inside the original — no upscaling at either density.
 const widths = fluid ? [400, 804] : [maxWidth, maxWidth * 2];
 
-// The fluid case is the four-up grid: roughly a third of the 1240px column on
-// desktop, half the viewport at tablet, near-full on a phone.
+// The fluid case is a side-by-side row: roughly a third of the 1240px column
+// on desktop, half the viewport at tablet, near-full on a phone.
 const sizes = fluid
-  ? '(min-width: 1120px) 300px, (min-width: 760px) 46vw, 92vw'
+  ? '(min-width: 1120px) 340px, (min-width: 760px) 46vw, 92vw'
   : `(max-width: ${maxWidth}px) 100vw, ${maxWidth}px`;
 ---
 
 <div
-  class:list={['frame', `frame--${surface}`, { 'frame--fluid': fluid }]}
-  style={`--frame-max:${fluid ? 'none' : `${maxWidth}px`};--frame-radius:${radius}px`}
+  class:list={['frame', `frame--${surface}`, { 'frame--fluid': fluid, 'frame--ratio': !!ratio }, className]}
+  style={[
+    `--frame-max:${fluid ? 'none' : `${maxWidth}px`}`,
+    `--frame-radius:${radius}px`,
+    ratio ? `--frame-ratio:${ratio}` : '',
+  ]
+    .filter(Boolean)
+    .join(';')}
 >
   <Picture
     src={src}
@@ -73,6 +90,9 @@ const sizes = fluid
     border-radius: var(--frame-radius);
     overflow: hidden;
     border: 1px solid var(--frame-border);
+    /* Without this the border sits outside the declared aspect-ratio box and
+       two frames meant to match end up 2px apart. */
+    box-sizing: border-box;
   }
 
   .frame--panel {
@@ -83,9 +103,21 @@ const sizes = fluid
     background: var(--bg-primary);
   }
 
+  .frame--ratio {
+    aspect-ratio: var(--frame-ratio);
+  }
+
   .frame :global(img) {
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  /* Anchored to the top: these screens carry their heading in the first
+     couple of hundred pixels, and centring would cut it off. */
+  .frame--ratio :global(img) {
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
   }
 </style>

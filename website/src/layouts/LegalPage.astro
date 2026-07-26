@@ -3,13 +3,18 @@ import Base from './Base.astro';
 import Band from '../components/Band.astro';
 import PageBanner from '../components/PageBanner.astro';
 import DraftNotice from '../components/DraftNotice.astro';
+import RailLayout from '../components/RailLayout.astro';
 import { legalNav } from '../data/nav';
 import { site } from '../data/site';
 
 /**
- * Privacy, Terms and Cookies share one document layout: a 720px column with
- * 44px between sections. The nav swaps to the three legal pages, because a
- * visitor reading one is usually looking for another.
+ * Privacy and Terms share one document layout: a sticky "On this page" rail
+ * beside a body column capped at 640px, sections 44px apart.
+ *
+ * Privacy stays a standalone page even though Cookies folded into it — Apple
+ * and Google both require a dedicated privacy-policy URL for app submission,
+ * and an anchor into a combined "Legal" page is weaker for that. Don't tidy up
+ * by folding Privacy into Terms.
  */
 interface Props {
   title: string;
@@ -21,6 +26,7 @@ interface Props {
 
 const { title, description, heading, draftNote } = Astro.props;
 const showDraft = !site.legalReviewed;
+const hasFigures = Astro.slots.has('figures');
 ---
 
 <Base title={title} description={description}>
@@ -36,17 +42,35 @@ const showDraft = !site.legalReviewed;
   </PageBanner>
 
   {
+    hasFigures && (
+      <Band padTop={64} padBottom={0}>
+        <div class="figures">
+          <slot name="figures" />
+        </div>
+      </Band>
+    )
+  }
+
+  {
     showDraft && (
-      <Band padTop={48} padBottom={0}>
+      <Band padTop={hasFigures ? 56 : 64} padBottom={0}>
         <DraftNotice>{draftNote}</DraftNotice>
       </Band>
     )
   }
 
   <Band padTop={showDraft ? 40 : 72} padBottom={88}>
-    <div class="doc">
-      <slot />
-    </div>
+    <RailLayout>
+      <Fragment slot="rail">
+        <nav class="contents" aria-label="On this page">
+          <span class="contents__label">On this page</span>
+          <slot name="rail" />
+        </nav>
+      </Fragment>
+      <div class="doc">
+        <slot />
+      </div>
+    </RailLayout>
   </Band>
 
   <Fragment slot="closing" />
@@ -54,10 +78,73 @@ const showDraft = !site.legalReviewed;
 
 <style>
   .doc {
-    max-width: 720px;
-    margin-inline: auto;
     display: flex;
     flex-direction: column;
     gap: 44px;
+  }
+
+  /* The reassurance figures: hairline dividers drawn by the 1px grid gap, and
+     the outer cells lose their outside padding so the row aligns with the
+     column rather than sitting inset from it. */
+  .figures {
+    max-width: 900px;
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: 1px;
+    background: var(--border-default);
+    border-top: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .contents {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .contents__label {
+    font-size: var(--type-label-size);
+    font-weight: var(--type-label-weight);
+    letter-spacing: var(--type-label-tracking);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .contents :global(a) {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .figures :global(.figure) {
+    background: var(--bg-primary);
+    padding: 26px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .figures :global(.figure:first-child) {
+    padding-left: 0;
+  }
+
+  .figures :global(.figure:last-child) {
+    padding-right: 0;
+  }
+
+  /* The answer arrives before any clause does. */
+  .figures :global(.figure__value) {
+    font-family: var(--font-display);
+    font-size: 32px;
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  .figures :global(.figure__note) {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-muted-strong);
   }
 </style>

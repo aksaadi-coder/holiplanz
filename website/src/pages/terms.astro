@@ -3,6 +3,22 @@ import LegalPage from '../layouts/LegalPage.astro';
 import DocSection from '../components/DocSection.astro';
 import DocContact from '../components/DocContact.astro';
 import { site } from '../data/site';
+
+const contents = [
+  { href: '#does', text: 'What Holiplanz does' },
+  { href: '#check', text: 'Check before you book' },
+  { href: '#account', text: 'Your account' },
+  { href: '#payment', text: 'Plans and payment' },
+  { href: '#fair', text: 'Using it fairly' },
+  { href: '#owns', text: 'Who owns what' },
+  { href: '#limits', text: 'Our responsibility' },
+];
+
+const plans = [
+  { term: 'First journey', value: 'Free, every feature, once' },
+  { term: 'Trip Pass — $19', value: 'One trip · does not auto-renew' },
+  { term: 'Premium — $49', value: 'Yearly · renews until cancelled' },
+];
 ---
 
 <LegalPage
@@ -16,7 +32,11 @@ import { site } from '../data/site';
     and either of us can walk away.
   </Fragment>
 
-  <DocSection heading="What Holiplanz does">
+  <Fragment slot="rail">
+    {contents.map((item) => <a href={item.href}>{item.text}</a>)}
+  </Fragment>
+
+  <DocSection id="does" heading="What Holiplanz does">
     <p>
       We draft travel itineraries and suggest places to stay and things to do. We are a planning
       tool, not a travel agent, tour operator or booking platform. We don't reserve anything, take
@@ -24,7 +44,11 @@ import { site } from '../data/site';
     </p>
   </DocSection>
 
-  <DocSection heading="Check before you book">
+  {/*
+    Set apart deliberately: this is the one clause that stops a traveller acting
+    on a wrong itinerary, so it must not read like the others.
+  */}
+  <DocSection id="check" heading="Check before you book" callout>
     <p>
       Plans are generated automatically and can be wrong. Opening hours change, places close,
       prices move, and routes that look walkable on a map sometimes aren't. Always confirm the
@@ -33,14 +57,24 @@ import { site } from '../data/site';
     </p>
   </DocSection>
 
-  <DocSection heading="Your account">
+  <DocSection id="account" heading="Your account">
     <p>
       You need to be an adult to hold an account, and you're responsible for what happens under it.
       Keep your login to yourself.
     </p>
   </DocSection>
 
-  <DocSection heading="Plans and payment">
+  <DocSection id="payment" heading="Plans and payment">
+    <div class="doc__rows">
+      {
+        plans.map((plan) => (
+          <div class="doc__row doc__row--tight">
+            <span class="doc__rowTerm">{plan.term}</span>
+            <span class="doc__rowValue">{plan.value}</span>
+          </div>
+        ))
+      }
+    </div>
     <p>
       Your first journey is free, with every feature unlocked once. After that a Trip Pass is a
       one-time payment covering a single trip and does not auto-renew; Premium is an annual
@@ -49,21 +83,21 @@ import { site } from '../data/site';
     </p>
   </DocSection>
 
-  <DocSection heading="Using it fairly">
+  <DocSection id="fair" heading="Using it fairly">
     <p>
       Don't scrape the service, resell the plans it produces as your own product, try to break its
       limits, or use it for anything unlawful. We may suspend accounts that do.
     </p>
   </DocSection>
 
-  <DocSection heading="Who owns what">
+  <DocSection id="owns" heading="Who owns what">
     <p>
       The app, its design and the Holiplanz name are ours. Your trips and your Trip Passport are
       yours — we only use them to run the service for you.
     </p>
   </DocSection>
 
-  <DocSection heading="Where our responsibility ends">
+  <DocSection id="limits" heading="Where our responsibility ends">
     <p>
       We take care with the service but can't promise a plan will be complete, current or suited to
       your circumstances. We aren't responsible for third-party providers you book with, or for

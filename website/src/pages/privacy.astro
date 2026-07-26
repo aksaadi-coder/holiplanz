@@ -4,6 +4,22 @@ import DocSection from '../components/DocSection.astro';
 import DocContact from '../components/DocContact.astro';
 import { site } from '../data/site';
 
+const figures = [
+  { value: 'Never', note: 'sold to anyone, at any price' },
+  { value: 'Zero', note: 'advertising or profiling cookies' },
+  { value: 'Yours', note: 'deleted whenever you ask' },
+];
+
+const contents = [
+  { href: '#collect', text: 'What we collect' },
+  { href: '#dont', text: "What we don't do" },
+  { href: '#basis', text: "Why we're allowed" },
+  { href: '#suppliers', text: 'Who else sees it' },
+  { href: '#keep', text: 'How long we keep it' },
+  { href: '#rights', text: 'Your rights' },
+  { href: '#cookies', text: 'Cookies' },
+];
+
 const collected = [
   {
     term: 'What you tell us',
@@ -18,17 +34,51 @@ const collected = [
     text: "Basic, aggregated usage and crash data so we can fix what's broken. Not tied to your name where it doesn't need to be.",
   },
 ];
+
+const cookies = [
+  {
+    kind: 'Strictly necessary',
+    meta: 'No consent needed',
+    text: "Keeps the site working — security, load balancing, and remembering your cookie choice so we don't ask twice.",
+  },
+  {
+    kind: 'Analytics',
+    meta: 'Optional — off until you agree',
+    text: "Aggregated counts of which pages people read, so we know what's worth writing more of. No names, no cross-site tracking.",
+  },
+  {
+    kind: 'Advertising',
+    meta: 'None',
+    accent: true,
+    text: "We don't run ads and we don't set advertising or profiling cookies.",
+  },
+];
 ---
 
 <LegalPage
-  title="Privacy notice — Holiplanz"
-  description="What Holiplanz collects to plan your trip, who else sees it, how long we keep it, and how to ask us to delete it."
-  heading="Privacy notice"
+  title="Privacy & cookies — Holiplanz"
+  description="What Holiplanz collects to plan your trip, who else sees it, how long we keep it, how to ask us to delete it, and the few cookies this site uses."
+  heading="Privacy & cookies"
   draftNote="Wording must be checked against your actual data practices and jurisdictions."
 >
   <Fragment slot="lede">
     We collect what we need to plan your trip, we don't sell it, and you can ask us to delete it
     at any time.
+  </Fragment>
+
+  <Fragment slot="figures">
+    {
+      figures.map((figure) => (
+        <div class="figure">
+          <span class="figure__value">{figure.value}</span>
+          <span class="figure__note">{figure.note}</span>
+        </div>
+      ))
+    }
+  </Fragment>
+
+  <Fragment slot="rail">
+    {contents.map((item) => <a href={item.href}>{item.text}</a>)}
   </Fragment>
 
   <DocSection heading="Who we are">
@@ -38,7 +88,7 @@ const collected = [
     </p>
   </DocSection>
 
-  <DocSection heading="What we collect">
+  <DocSection id="collect" heading="What we collect">
     <p>Three kinds of information, and no more than we need:</p>
     <ul class="doc__list">
       {
@@ -52,14 +102,14 @@ const collected = [
     </ul>
   </DocSection>
 
-  <DocSection heading="What we don't do">
+  <DocSection id="dont" heading="What we don't do">
     <p>
       We don't sell your data. We don't share it with advertisers. We don't build a profile of you
       to target you with anything, and we don't track you across other apps or websites.
     </p>
   </DocSection>
 
-  <DocSection heading="Why we're allowed to use it">
+  <DocSection id="basis" heading="Why we're allowed to use it">
     <p>
       To deliver what you asked for — planning your trip and keeping your account working. Where
       we rely on your consent, such as optional communications, you can withdraw it at any time
@@ -67,7 +117,7 @@ const collected = [
     </p>
   </DocSection>
 
-  <DocSection heading="Who else sees it">
+  <DocSection id="suppliers" heading="Who else sees it">
     <p>
       A small number of suppliers who help run the service — hosting, the AI models that draft
       your itinerary, crash reporting, and the app stores that process payment. They act on our
@@ -75,7 +125,7 @@ const collected = [
     </p>
   </DocSection>
 
-  <DocSection heading="How long we keep it">
+  <DocSection id="keep" heading="How long we keep it">
     <p>
       Your trips and passport stay while your account is open, because they're yours to look back
       on. Close your account and we delete them, apart from anything we're legally required to
@@ -83,12 +133,42 @@ const collected = [
     </p>
   </DocSection>
 
-  <DocSection heading="Your rights">
+  <DocSection id="rights" heading="Your rights">
     <p>
       You can ask for a copy of your data, ask us to correct it, ask us to delete it, or object to
       how we're using it. Write to the address below and we'll respond within the period the law
       allows. If you're unhappy with our answer you can complain to your local data protection
       authority.
+    </p>
+  </DocSection>
+
+  {/*
+    Cookies is a section here rather than a page of its own: the two subjects
+    are closely related and this site sets almost nothing.
+  */}
+  <DocSection id="cookies" heading="Cookies on this website">
+    <p>
+      A cookie is a small file a site stores on your device to remember something between visits.
+      This site uses very few, and none of them follow you anywhere.
+    </p>
+    <div class="doc__rows">
+      {
+        cookies.map((row) => (
+          <div class="doc__row">
+            <div class="doc__rowHead">
+              <span class="doc__rowTerm">{row.kind}</span>
+              <span class:list={['doc__rowMeta', { 'doc__rowMeta--accent': row.accent }]}>
+                {row.meta}
+              </span>
+            </div>
+            <span class="doc__rowText">{row.text}</span>
+          </div>
+        ))
+      }
+    </div>
+    <p>
+      You can withdraw consent for the optional ones at any time, and clear or block cookies
+      entirely in your browser settings. The Holiplanz app itself uses no cookies.
     </p>
   </DocSection>
 

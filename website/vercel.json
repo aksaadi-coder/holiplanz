@@ -14,5 +14,12 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/cookies",
+      "destination": "/privacy#cookies",
+      "permanent": true
+    }
   ]
 }

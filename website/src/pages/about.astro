@@ -4,21 +4,22 @@ import Band from '../components/Band.astro';
 import PageBanner from '../components/PageBanner.astro';
 import ScreenshotFrame from '../components/ScreenshotFrame.astro';
 import Stamp from '../components/Stamp.astro';
+import Ring from '../components/Ring.astro';
 import passport from '../assets/screenshots/passport-screen-v2.png';
 
 const principles = [
   {
-    number: 'N° 01',
+    number: '01',
     title: 'One decision at a time',
     text: 'Every screen asks for one thing. No dashboards, no forty-field forms, nothing to configure before you begin.',
   },
   {
-    number: 'N° 02',
+    number: '02',
     title: 'Three options, not three hundred',
     text: "Choice past a point is just work. We do the comparing and show you the shortlist we'd actually book.",
   },
   {
-    number: 'N° 03',
+    number: '03',
     title: "Honest, even when it's blank",
     text: 'Your passport records what you did, not what you meant to do. Nothing is inflated and nothing skipped counts against you.',
   },
@@ -37,7 +38,7 @@ const principles = [
     there the trip you were excited about turned into admin — and the excitement went with it.
   </PageBanner>
 
-  {/* The thesis, at reading size. */}
+  {/* The thesis. First paragraph at pull-quote scale, then down to body. */}
   <Band padTop={88} padBottom={80}>
     <div class="intent">
       <p class="intent__lead">
@@ -58,8 +59,10 @@ const principles = [
         {
           principles.map((principle) => (
             <div class="principle">
-              <span class="principle__number">{principle.number}</span>
-              <h3 class="principle__title">{principle.title}</h3>
+              <div class="principle__head">
+                <Ring size={44} fontSize={17}>{principle.number}</Ring>
+                <h3 class="principle__title">{principle.title}</h3>
+              </div>
               <p class="principle__text">{principle.text}</p>
             </div>
           ))
@@ -110,18 +113,22 @@ const principles = [
     gap: 24px;
   }
 
-  /* Set at reading size rather than heading size — it's a statement, not a
-     headline, and it earns its weight by being said plainly. */
+  /* Pull-quote scale, in the display face — a statement rather than a
+     headline. The second paragraph drops to body size, which is where the real
+     thesis sits; the size change is what makes it land. */
   .intent__lead {
     margin: 0;
-    font-size: clamp(20px, 1.8vw, 24px);
-    line-height: 1.55;
+    font-family: var(--font-display);
+    font-size: clamp(26px, 2.8vw, 38px);
+    font-weight: 400;
+    line-height: 1.25;
     color: var(--text-primary);
     text-wrap: pretty;
   }
 
   .intent__follow {
     margin: 0;
+    max-width: 620px;
     font-size: 18px;
     line-height: 1.65;
     color: var(--text-muted-strong);
@@ -153,7 +160,15 @@ const principles = [
     padding: 36px 32px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+  }
+
+  /* The dashed ring carries the numeral — the stamp motif doing duty as a
+     figure, rather than plain "N°" text. */
+  .principle__head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
   }
 
   /* The outer cells lose their outside padding so the text aligns with the
@@ -164,12 +179,6 @@ const principles = [
 
   .principle:last-child {
     padding-right: 0;
-  }
-
-  .principle__number {
-    font-family: var(--font-display);
-    font-size: 15px;
-    color: var(--accent);
   }
 
   .principle__title {

@@ -18,6 +18,11 @@ interface Props {
   padBottom?: number;
   /** Hairline rules top and bottom — used by the panel band. */
   bordered?: boolean;
+  /**
+   * Drop the horizontal gutter so content can run past the 1240px column.
+   * The §04 reel needs this; whatever sits inside must put the gutter back.
+   */
+  fullBleed?: boolean;
   class?: string;
 }
 
@@ -27,6 +32,7 @@ const {
   padTop = 96,
   padBottom = 96,
   bordered = false,
+  fullBleed = false,
   class: className,
 } = Astro.props;
 ---
@@ -34,7 +40,12 @@ const {
 <section
   id={id}
   data-theme={tone === 'dark' ? 'dark' : undefined}
-  class:list={['band', `band--${tone}`, { 'band--bordered': bordered }, className]}
+  class:list={[
+    'band',
+    `band--${tone}`,
+    { 'band--bordered': bordered, 'band--fullBleed': fullBleed },
+    className,
+  ]}
   style={`--pad-top:${padTop}px;--pad-bottom:${padBottom}px`}
 >
   <slot />
@@ -59,5 +70,10 @@ const {
   .band--bordered {
     border-top: 1px solid var(--border-default);
     border-bottom: 1px solid var(--border-default);
+  }
+
+  .band--fullBleed {
+    padding-inline: 0;
+    overflow: hidden;
   }
 </style>

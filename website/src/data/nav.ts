@@ -7,9 +7,12 @@ export interface NavLink {
 }
 
 /**
- * The top nav on all seven pages: three anchors into the home page, then the
- * two pages a visitor is most likely to want. Support is deliberately not up
- * here — it lives in the footer, and Contact points at it.
+ * The top nav on every page: three anchors into the home page, then the three
+ * pages a visitor is most likely to want.
+ *
+ * Support sits up here deliberately. It is the only utility page that sells —
+ * pre-launch it answers "what does it cost", "when can I use it", "does it
+ * book anything for me". Don't demote it back to the footer.
  *
  * The anchors stay bare fragments on the home page so the smooth scroll works,
  * and get rooted elsewhere, where following one costs a navigation.
@@ -20,19 +23,20 @@ export function mainNav(pathname: string): NavLink[] {
     { href: `${root}#flow`, text: 'The flow' },
     { href: `${root}#passport`, text: 'Trip Passport' },
     { href: `${root}#pricing`, text: 'Pricing' },
+    { href: '/support', text: 'Support' },
     { href: '/about', text: 'About' },
     { href: '/contact', text: 'Contact us' },
   ];
 }
 
 /**
- * The legal pages swap the top nav for their siblings: someone reading one of
- * the three is usually looking for another.
+ * The legal pages swap the top nav for their sibling: someone reading one is
+ * usually looking for the other. Cookies is a section of Privacy rather than a
+ * page of its own — the subjects are close and this site sets almost nothing.
  */
 export const legalNav: NavLink[] = [
   { href: '/privacy', text: 'Privacy' },
   { href: '/terms', text: 'Terms' },
-  { href: '/cookies', text: 'Cookies' },
 ];
 
 export function productLinks(pathname: string): NavLink[] {
@@ -49,6 +53,8 @@ export const companyLinks: NavLink[] = [
   { href: '/support', text: 'Support' },
   { href: '/contact', text: 'Contact us' },
 ];
+
+/** The footer's Legal column — Cookies now lives inside Privacy. */
 
 export const legalLinks: NavLink[] = legalNav;
 

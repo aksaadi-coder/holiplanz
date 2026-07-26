@@ -1,0 +1,91 @@
+---
+import type { ImageMetadata } from 'astro';
+import ScreenshotFrame from './ScreenshotFrame.astro';
+
+/**
+ * The §04 reel: four screens on a horizontal scroll-snap track that runs past
+ * the content box.
+ *
+ * CSS scroll-snap, not a JS carousel. Four of its rules were defects first and
+ * should not be "tidied up":
+ *
+ * 1. Every frame carries a fixed aspect-ratio. The exports aren't all the same
+ *    pixel ratio, so without it the cards end at different heights and the
+ *    captions stop lining up.
+ * 2. `justify-content: safe center` — centred under the centred heading when
+ *    all four fit, falling back to start when they don't. Plain `center` clips
+ *    the first card on overflow instead of letting you scroll to it.
+ * 3. The track is a tab stop with a labelled role, and its scrollbar is left
+ *    visible. There are no arrow buttons — they were removed deliberately — so
+ *    without both of those the overflowing card is unreachable for keyboard and
+ *    mouse-only users. Only drop the tab stop if you put arrows back.
+ * 4. No auto-advance, no parallax, no centre-card scaling. Calm is a brand rule.
+ */
+interface Item {
+  image: ImageMetadata;
+  alt: string;
+  caption: string;
+}
+
+interface Props {
+  items: Item[];
+  label: string;
+}
+
+const { items, label } = Astro.props;
+---
+
+<div class="reel" tabindex="0" role="group" aria-label={label}>
+  {
+    items.map((item) => (
+      <div class="reel__item">
+        <ScreenshotFrame
+          src={item.image}
+          alt={item.alt}
+          maxWidth={null}
+          radius={28}
+          surface="primary"
+          ratio={0.462}
+        />
+        <span class="reel__caption">{item.caption}</span>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .reel {
+    margin-top: 56px;
+    display: flex;
+    gap: 40px;
+    /* `safe` is the whole point — see note 2 above. */
+    justify-content: safe center;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 0 var(--gutter) 8px;
+    /* So the first card snaps flush with the page's content edge rather than
+       hard against the viewport. */
+    scroll-padding-left: var(--gutter);
+  }
+
+  .reel__item {
+    flex: 0 0 clamp(250px, 27vw, 340px);
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .reel__caption {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-muted-strong);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reel {
+      scroll-behavior: auto;
+    }
+  }
+</style>

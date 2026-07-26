@@ -1,0 +1,408 @@
+---
+/**
+ * The live demo — the only place on the site a visitor touches the product,
+ * and the only stateful thing here.
+ *
+ * It is **scripted, not AI**: keyword matching over a three-stop list, no
+ * network calls, no backend. That is deliberate. It also means the copy around
+ * it must never over-promise — an earlier revision described dragging a card by
+ * a handle when neither drag nor handle existed. Do not describe an affordance
+ * this component doesn't render.
+ *
+ * Reorder is ↑/↓ buttons rather than drag: HTML5 drag needs a library to work
+ * on touch and isn't keyboard-reachable, so the arrows demonstrate the same
+ * capability accessibly. If real drag is ever added, keep an equivalent
+ * keyboard path.
+ *
+ * The initial three stops are rendered server-side, so the day is legible
+ * before — or without — the script.
+ */
+
+const stops = [
+  { time: '09:00', title: 'Castelo de São Jorge' },
+  { time: '13:00', title: 'Lunch at Time Out Market' },
+  { time: '19:30', title: 'Fado in Alfama' },
+];
+---
+
+<div class="demo">
+  <div class="demo__head">
+    <span class="demo__day">Day one</span>
+    <span class="demo__meta">Lisbon · 3 stops</span>
+  </div>
+
+  <div class="demo__stops" data-stops>
+    {
+      stops.map((stop) => (
+        <div class="stop">
+          <div class="stop__text">
+            <span class="stop__time">{stop.time}</span>
+            <span class="stop__title">{stop.title}</span>
+          </div>
+          <div class="stop__moves">
+            <button class="stop__move" type="button" data-move="-1" aria-label={`Move ${stop.title} earlier`}>
+              ↑
+            </button>
+            <button class="stop__move" type="button" data-move="1" aria-label={`Move ${stop.title} later`}>
+              ↓
+            </button>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="demo__asks">
+    <button class="ask" type="button" data-ask="swap lunch for something local">
+      Swap lunch for something local
+    </button>
+    <button class="ask" type="button" data-ask="keep the morning free">Keep the morning free</button>
+    <button class="ask ask--quiet" type="button" data-reset>Reset</button>
+  </div>
+
+  <form class="demo__bar" data-form>
+    <input
+      class="demo__input"
+      type="text"
+      name="ask"
+      placeholder="Swap lunch for something local…"
+      aria-label="Ask for a change"
+      autocomplete="off"
+    />
+    <button class="demo__send" type="submit" aria-label="Send">↑</button>
+  </form>
+
+  <p class="demo__reply" data-reply role="status" aria-live="polite" hidden></p>
+</div>
+
+<script>
+  type Stop = { time: string; title: string };
+
+  const BASE: Stop[] = [
+    { time: '09:00', title: 'Castelo de São Jorge' },
+    { time: '13:00', title: 'Lunch at Time Out Market' },
+    { time: '19:30', title: 'Fado in Alfama' },
+  ];
+
+  document.querySelectorAll<HTMLElement>('.demo').forEach((root) => {
+    const list = root.querySelector<HTMLElement>('[data-stops]');
+    const form = root.querySelector<HTMLFormElement>('[data-form]');
+    const input = root.querySelector<HTMLInputElement>('.demo__input');
+    const reply = root.querySelector<HTMLElement>('[data-reply]');
+    if (!list || !form || !input || !reply) return;
+
+    let stops: Stop[] = BASE.map((s) => ({ ...s }));
+
+    // New rows are cloned from a server-rendered one rather than built with
+    // createElement. Astro's scoped styles key off a data-astro-cid attribute
+    // that the compiler stamps onto template markup; elements created from
+    // scratch don't carry it and come out unstyled.
+    const rowTemplate = list.firstElementChild?.cloneNode(true) as HTMLElement | undefined;
+    if (!rowTemplate) return;
+
+    /** Re-render the list, then put focus back on the control that moved. */
+    function render(focus?: { index: number; dir: string }) {
+      list!.replaceChildren(
+        ...stops.map((stop, i) => {
+          const row = rowTemplate!.cloneNode(true) as HTMLElement;
+          row.querySelector('.stop__time')!.textContent = stop.time;
+          row.querySelector('.stop__title')!.textContent = stop.title;
+
+          row.querySelectorAll<HTMLButtonElement>('[data-move]').forEach((button) => {
+            const dir = button.dataset.move!;
+            button.setAttribute(
+              'aria-label',
+              `Move ${stop.title} ${dir === '-1' ? 'earlier' : 'later'}`
+            );
+            // The end stops can't go further; disable rather than fail quietly.
+            button.disabled = (dir === '-1' && i === 0) || (dir === '1' && i === stops.length - 1);
+            if (focus && focus.index === i && focus.dir === dir && !button.disabled) {
+              queueMicrotask(() => button.focus());
+            }
+          });
+
+          return row;
+        })
+      );
+    }
+
+    function say(message: string) {
+      reply!.textContent = message;
+      reply!.hidden = !message;
+    }
+
+    function move(index: number, dir: number) {
+      const target = index + dir;
+      if (target < 0 || target >= stops.length) return;
+      [stops[index], stops[target]] = [stops[target], stops[index]];
+      render({ index: target, dir: String(dir) });
+      say('');
+    }
+
+    /** Keyword matching, not intent parsing — the honest version of an AI demo. */
+    function apply(text: string) {
+      const q = (text || '').toLowerCase();
+      const next = stops.map((s) => ({ ...s }));
+      let message = '';
+
+      if (q.includes('lunch') || q.includes('local') || q.includes('food')) {
+        const i = next.findIndex((s) => s.title.includes('Time Out'));
+        if (i > -1) {
+          next[i] = { time: '13:00', title: 'Tasca lunch in Graça' };
+          message = 'Done — swapped lunch for a neighbourhood tasca.';
+        } else {
+          message = 'Lunch is already somewhere local.';
+        }
+      } else if (q.includes('morning') || q.includes('later') || q.includes('sleep')) {
+        const i = next.findIndex((s) => s.time === '09:00');
+        if (i > -1) {
+          const [moved] = next.splice(i, 1);
+          next.push({ ...moved, time: '16:00' });
+          message = 'Done — your morning is free, the castle moved to 16:00.';
+        } else {
+          message = 'Your morning is already clear.';
+        }
+      } else if (q.includes('outdoor') || q.includes('walk') || q.includes('air')) {
+        if (!next.some((s) => s.title.includes('Miradouro'))) {
+          next.splice(1, 0, { time: '11:00', title: 'Miradouro da Senhora do Monte' });
+          message = 'Added a viewpoint walk before lunch.';
+        } else {
+          message = 'There’s already time outdoors in this day.';
+        }
+      } else if (q.trim()) {
+        // Never pretend to understand. Say what the demo actually covers.
+        message = 'In the app we’d sort that. Here, try “lunch”, “morning” or “outdoors”.';
+      }
+
+      stops = next;
+      render();
+      say(message);
+    }
+
+    list.addEventListener('click', (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-move]');
+      if (!button) return;
+      const row = button.closest('.stop');
+      if (!row) return;
+      move([...list.children].indexOf(row), Number(button.dataset.move));
+    });
+
+    root.querySelectorAll<HTMLButtonElement>('[data-ask]').forEach((button) => {
+      button.addEventListener('click', () => apply(button.dataset.ask ?? ''));
+    });
+
+    root.querySelector<HTMLButtonElement>('[data-reset]')?.addEventListener('click', () => {
+      stops = BASE.map((s) => ({ ...s }));
+      render();
+      say('');
+      input.value = '';
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      apply(input.value);
+      input.value = '';
+    });
+
+    // Re-render once on load so the end stops' arrows start out disabled.
+    render();
+  });
+</script>
+
+<style>
+  /* The mock phone. Interior is panel rather than white so the stop cards
+     inside can be white and still read as cards. */
+  .demo {
+    width: 100%;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-default);
+    border-radius: 45px;
+    padding: 28px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-sizing: border-box;
+  }
+
+  .demo__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 0 6px;
+  }
+
+  .demo__day {
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .demo__meta {
+    font-size: var(--type-caption-size);
+    color: var(--text-secondary);
+  }
+
+  .demo__stops {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--hp-white);
+    border-radius: var(--radius-lg);
+    padding: 18px 12px 18px 20px;
+  }
+
+  .stop__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .stop__time {
+    font-size: 15px;
+    line-height: 1.3;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  /* Bold sans, not the serif — this mirrors the app, which doesn't use
+     Newsreader for stop titles. */
+  .stop__title {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--hp-black);
+    text-wrap: pretty;
+  }
+
+  .stop__moves {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  /* Where the app shows its grip column. Muted and borderless until you
+     reach for them. */
+  .stop__move {
+    width: 26px;
+    height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .stop__move:hover:not(:disabled) {
+    color: var(--hp-black);
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .stop__move:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .demo__asks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 2px;
+  }
+
+  .ask {
+    padding: 9px 16px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-default);
+    background: var(--bg-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .ask:hover {
+    border-color: var(--text-primary);
+  }
+
+  .ask--quiet {
+    border-color: transparent;
+    background: transparent;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  .ask--quiet:hover {
+    border-color: transparent;
+    color: var(--text-primary);
+  }
+
+  .demo__bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--hp-white);
+    border-radius: var(--radius-full);
+    padding: 7px 7px 7px 22px;
+  }
+
+  .demo__input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--hp-black);
+  }
+
+  .demo__input::placeholder {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  /* The send button is coral — this is the product's own accent moment, the
+     same circle the app uses. */
+  .demo__send {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: var(--hp-white);
+    font-family: var(--font-body);
+    font-size: 19px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease;
+  }
+
+  .demo__send:hover {
+    background: color-mix(in srgb, var(--accent) 88%, #000);
+  }
+
+  .demo__reply {
+    margin: 0;
+    padding: 0 8px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--accent);
+  }
+</style>

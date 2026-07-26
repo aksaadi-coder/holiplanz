@@ -1,0 +1,61 @@
+---
+/**
+ * A sticky side rail beside a body column — used by Support and the two legal
+ * pages.
+ *
+ * **The rail must collapse, not compress.** It is a wrapping flex row, not a
+ * grid: `flex: 1 1 200px` on the rail against `flex: 999 1 300px` on the body.
+ * The lopsided grow factor keeps the body wide on desktop, and below roughly
+ * 560px the rail wraps to a full-width row *above* the text.
+ *
+ * An earlier revision used `grid-template-columns: minmax(0,200px) minmax(0,1fr)`
+ * and at 375px the rail plus gap ate 256px, leaving a 119px body column and a
+ * sideways-scrolling page. Don't reintroduce a fixed first track.
+ *
+ * `position: sticky` is harmless once wrapped — it scrolls away cleanly and
+ * never overlaps the body text.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={['rail-layout', className]}>
+  <div class="rail-layout__rail">
+    <slot name="rail" />
+  </div>
+  <div class="rail-layout__body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .rail-layout {
+    max-width: 900px;
+    margin-inline: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(28px, 4vw, 56px);
+    align-items: flex-start;
+  }
+
+  .rail-layout__rail {
+    position: sticky;
+    top: 32px;
+    flex: 1 1 200px;
+    min-width: 200px;
+    max-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* 999 rather than 1: on a wide row the body takes essentially all the free
+     space, so the rail stays at its 200px basis instead of growing with it. */
+  .rail-layout__body {
+    flex: 999 1 300px;
+    max-width: 640px;
+  }
+</style>

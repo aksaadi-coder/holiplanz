@@ -5,15 +5,36 @@
  * The three legal pages share one layout — 720px column, 44px between
  * sections — so a reader who has learned to scan one can scan the others.
  */
+import Ring from './Ring.astro';
+
 interface Props {
   heading: string;
+  /** Anchor target, so the contents rail can link to it. */
+  id?: string;
+  /**
+   * Set apart as a panel card with a dashed-coral `!`. Used once, on Terms'
+   * "Check before you book" — the one clause that stops a traveller acting on
+   * a wrong itinerary, so it must not read like the others.
+   */
+  callout?: boolean;
 }
 
-const { heading } = Astro.props;
+const { heading, id, callout = false } = Astro.props;
 ---
 
-<section class="doc">
-  <h2 class="doc__heading">{heading}</h2>
+<section class:list={['doc', { 'doc--callout': callout }]} id={id}>
+  {
+    callout ? (
+      <div class="doc__head">
+        <Ring size={26} fontSize={14} display={false}>
+          !
+        </Ring>
+        <h2 class="doc__heading">{heading}</h2>
+      </div>
+    ) : (
+      <h2 class="doc__heading">{heading}</h2>
+    )
+  }
   <slot />
 </section>
 
@@ -22,6 +43,19 @@ const { heading } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 14px;
+  }
+
+  .doc--callout {
+    gap: 16px;
+    padding: 26px 28px;
+    background: var(--bg-panel);
+    border-radius: var(--radius-lg);
+  }
+
+  .doc__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   .doc__heading {
@@ -76,6 +110,71 @@ const { heading } = Astro.props;
   }
 
   .doc :global(.doc__listText) {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-body);
+  }
+
+  /* Hairline data rows — the cookie categories on Privacy, and what each plan
+     costs on Terms. Dividers are the 1px gap showing the border through, so
+     nothing doubles up where rows meet. */
+  .doc :global(.doc__rows) {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border-default);
+    border-top: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .doc :global(.doc__row) {
+    background: var(--bg-primary);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* A row that is only a term and its value, with no explanation under it. */
+  .doc :global(.doc__row--tight) {
+    padding: 18px 0;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .doc :global(.doc__rowHead) {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .doc :global(.doc__rowTerm) {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .doc :global(.doc__rowMeta) {
+    font-size: var(--type-caption-size);
+    color: var(--text-secondary);
+  }
+
+  /* "None" is worth the accent — it's the answer people came for. */
+  .doc :global(.doc__rowMeta--accent) {
+    color: var(--accent);
+  }
+
+  .doc :global(.doc__rowValue) {
+    font-size: 16px;
+    color: var(--text-muted-strong);
+  }
+
+  .doc :global(.doc__rowText) {
     font-size: 17px;
     line-height: 1.7;
     color: var(--text-body);
