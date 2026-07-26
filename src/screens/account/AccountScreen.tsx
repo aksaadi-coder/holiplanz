@@ -2,9 +2,11 @@ import { useRef, useState, type ReactNode } from "react";
 import type { useAccountPrefs } from "../../hooks/useAccountPrefs";
 import type { useTravelerProfile } from "../../hooks/useTravelerProfile";
 import { useProfilePhoto } from "../../hooks/useProfilePhoto";
+import type { Membership } from "../../hooks/useMembership";
+import { PREMIUM_PRICE } from "../../data/plans";
 import { PinIcon, PlusCircleIcon } from "../../components/ui/icons";
 import { Sheet } from "../../components/ui/primitives";
-import { UpgradeScreen } from "./UpgradeScreen";
+import { PlansScreen } from "./PlansScreen";
 import { NotificationsScreen } from "./NotificationsScreen";
 import { PaymentsScreen } from "./PaymentsScreen";
 import { LanguageScreen } from "./LanguageScreen";
@@ -17,6 +19,7 @@ interface Props {
   name: string | null;
   setName: (name: string) => void;
   onSignOut: () => void;
+  membership: Membership;
   prefs: ReturnType<typeof useAccountPrefs>["prefs"];
   update: ReturnType<typeof useAccountPrefs>["update"];
   profile: ReturnType<typeof useTravelerProfile>["profile"];
@@ -25,7 +28,7 @@ interface Props {
 
 type View =
   | { name: "root" }
-  | { name: "upgrade" }
+  | { name: "plans" }
   | { name: "notifications" }
   | { name: "payments" }
   | { name: "language" }
@@ -53,6 +56,7 @@ export function AccountScreen({
   name: customName,
   setName,
   onSignOut,
+  membership,
   prefs,
   update,
   profile,
@@ -82,13 +86,20 @@ export function AccountScreen({
 
   let content: ReactNode;
 
-  if (view.name === "upgrade") {
+  if (view.name === "plans") {
     content = (
-      <UpgradeScreen
+      <PlansScreen
+        plan={membership.plan}
+        firstJourneyUsed={membership.firstJourneyUsed}
         onBack={() => setView({ name: "root" })}
-        onStartTrial={() => {
-          showToast("This is a demo — no charge, no subscription");
+        onSubscribePremium={() => {
+          membership.subscribePremium();
+          showToast("Premium unlocked — demo only, nothing was charged");
           setView({ name: "root" });
+        }}
+        onResetDemo={() => {
+          membership.resetMembership();
+          showToast("Plan state reset — back to the first journey");
         }}
       />
     );
@@ -150,17 +161,26 @@ export function AccountScreen({
             </span>
           </div>
 
+          {/* Reads the real plan rather than always pitching: a Premium
+              subscriber gets confirmation, everyone else gets the offer that
+              actually applies to them. */}
           <button
             type="button"
             className="hp-acct-upgrade-banner"
-            onClick={() => setView({ name: "upgrade" })}
+            onClick={() => setView({ name: "plans" })}
           >
             <span className="hp-acct-upgrade-icon">
               <PinIcon size={14} />
             </span>
             <span className="hp-acct-upgrade-text">
-              <b>Upgrade to Premium</b>
-              <span>Unlimited trips, offline itineraries</span>
+              <b>{membership.premium ? "Premium" : "Upgrade to Premium"}</b>
+              <span>
+                {membership.premium
+                  ? "Unlimited trips and your passport collection"
+                  : membership.firstJourneyUsed
+                    ? `Unlimited trips, all year — ${PREMIUM_PRICE}/month`
+                    : "Your first journey is on us — see what's next"}
+              </span>
             </span>
             <span className="hp-acct-upgrade-chevron">›</span>
           </button>

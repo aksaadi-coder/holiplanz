@@ -9,6 +9,7 @@ import { getNextUp } from "../utils/schedule";
 import { formatDateRange, tripRoute } from "../utils/passport";
 import { TrashIcon, ChevronRightIcon } from "../components/ui/icons";
 import { Value } from "../components/ui/primitives";
+import type { Membership } from "../hooks/useMembership";
 import { PassportScreen } from "./PassportScreen";
 import { ChecklistScreen } from "../components/itinerary/ChecklistScreen";
 
@@ -30,6 +31,7 @@ interface Props {
   onDeleteSaved: (tripId: string) => void;
   tripUndoMessage: string | null;
   onUndoDelete: () => void;
+  membership: Membership;
 }
 
 /** How many days out the "prep reminder" banner starts showing. */
@@ -206,6 +208,7 @@ export function TripsScreen({
   onDeleteSaved,
   tripUndoMessage,
   onUndoDelete,
+  membership,
 }: Props) {
   const [openTrip, setOpenTrip] = useState<SavedTrip | null>(null);
   const [checklistOpen, setChecklistOpen] = useState(false);
@@ -217,6 +220,7 @@ export function TripsScreen({
         completedStopIds={new Set(openTrip.completedStopIds ?? [])}
         onBack={() => setOpenTrip(null)}
         backLabel="‹ Your trips"
+        membership={membership}
       />
     );
   }

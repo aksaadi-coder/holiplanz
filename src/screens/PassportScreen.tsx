@@ -5,6 +5,10 @@ import { PassportPage } from "../components/passport/PassportPage";
 import { MiniPassportCard } from "../components/passport/MiniPassportCard";
 import { ShareSheet } from "../components/passport/ShareSheet";
 import { ExportScreen, type PassportExportVariant } from "../components/passport/ExportScreen";
+import { UpgradeSheet } from "../components/membership/UpgradeSheet";
+import type { Membership } from "../hooks/useMembership";
+import type { FeatureKey } from "../data/plans";
+import { cityName } from "../utils/destination";
 import {
   savePassportImage,
   savePassportPdf,
@@ -20,6 +24,7 @@ interface Props {
    *  viewing a past trip's passport from Account. */
   onBack?: () => void;
   backLabel?: string;
+  membership: Membership;
 }
 
 type Overlay = null | "share" | "export";
@@ -32,9 +37,16 @@ type Overlay = null | "share" | "export";
  * ExportScreen) — the off-screen capture target below renders whichever
  * variant is selected, so the PDF/PNG always matches the Export preview.
  */
-export function PassportScreen({ itinerary, completedStopIds, onBack, backLabel = "‹ Back" }: Props) {
+export function PassportScreen({
+  itinerary,
+  completedStopIds,
+  onBack,
+  backLabel = "‹ Back",
+  membership,
+}: Props) {
   const [photo, setPhoto] = useState<string | null>(null);
   const [overlay, setOverlay] = useState<Overlay>(null);
+  const [lockedFeature, setLockedFeature] = useState<FeatureKey | null>(null);
   const [exportVariant, setExportVariant] = useState<PassportExportVariant>("mini");
   const [busy, setBusy] = useState<null | "pdf" | "image">(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -63,6 +75,11 @@ export function PassportScreen({ itinerary, completedStopIds, onBack, backLabel 
   }
 
   const trip = itinerary;
+  // "Trip Passport preview — locked until upgrade": the passport is built and
+  // shown either way, blurred until this trip is paid for, so what's on offer
+  // is visible rather than described. Export rides the same entitlement.
+  const earned = membership.isTripUnlocked(trip.id);
+  const canExport = earned;
 
   // Photo chosen locally for preview only — never uploaded or persisted.
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
@@ -123,15 +140,46 @@ export function PassportScreen({ itinerary, completedStopIds, onBack, backLabel 
             {backLabel}
           </button>
         )}
-        <PassportPage data={data} photo={photo} onPhotoClick={() => fileRef.current?.click()} />
+        {earned ? (
+          <PassportPage data={data} photo={photo} onPhotoClick={() => fileRef.current?.click()} />
+        ) : (
+          <div className="hp-locked-preview">
+            <div className="hp-locked-blur">
+              <PassportPage data={data} photo={photo} />
+            </div>
+            <div className="hp-locked-overlay">
+              <p className="hp-label">Trip Passport</p>
+              <b>Your {cityName(trip.destination)} passport is ready to claim</b>
+              <p>
+                Stamped with everything you confirmed you did. Unlock it to keep it, share it, and
+                export it.
+              </p>
+              <button
+                type="button"
+                className="hp-locked-cta"
+                onClick={() => setLockedFeature("passport")}
+              >
+                Unlock my passport
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={handlePhoto} />
 
       <div className="hp-passport-actions">
-        <button type="button" className="hp-passport-share" onClick={() => setOverlay("share")}>
+        <button
+          type="button"
+          className="hp-passport-share"
+          onClick={() => (canExport ? setOverlay("share") : setLockedFeature("export"))}
+        >
           Share
         </button>
-        <button type="button" className="hp-passport-export" onClick={() => setOverlay("export")}>
+        <button
+          type="button"
+          className="hp-passport-export"
+          onClick={() => (canExport ? setOverlay("export") : setLockedFeature("export"))}
+        >
           Export PDF
         </button>
       </div>
@@ -158,6 +206,22 @@ export function PassportScreen({ itinerary, completedStopIds, onBack, backLabel 
           onSaveImage={handleSaveImage}
         />
       )}
+
+      <UpgradeSheet
+        feature={lockedFeature}
+        tripName={cityName(trip.destination)}
+        onClose={() => setLockedFeature(null)}
+        onBuyTripPass={() => {
+          membership.buyTripPass(trip.id);
+          setLockedFeature(null);
+          showToast("Trip Pass unlocked — demo only, nothing was charged");
+        }}
+        onSubscribePremium={() => {
+          membership.subscribePremium();
+          setLockedFeature(null);
+          showToast("Premium unlocked — demo only, nothing was charged");
+        }}
+      />
 
       {toast && <div className="hp-passport-toast">{toast}</div>}
 

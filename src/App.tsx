@@ -5,6 +5,7 @@ import { useAppNav, type Tab } from "./hooks/useAppNav";
 import { useSession } from "./hooks/useSession";
 import { useAccountPrefs } from "./hooks/useAccountPrefs";
 import { useTravelerProfile, composeProfileNote } from "./hooks/useTravelerProfile";
+import { useMembership } from "./hooks/useMembership";
 import { checkAccess, generateItinerary, sendChatMessage, type AccessState } from "./api/itineraryApi";
 import { setAccessCode } from "./api/accessCode";
 import type { ChatMessage, GenerateItineraryRequest, Itinerary } from "./types";
@@ -67,6 +68,7 @@ function App() {
   const session = useSession();
   const accountPrefs = useAccountPrefs();
   const travelerProfile = useTravelerProfile();
+  const membership = useMembership();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
@@ -93,6 +95,16 @@ function App() {
       .then(setAccess)
       .catch(() => setAccess("ok"));
   }, []);
+
+  // Safety net for the free first journey. runGeneration claims it inline so a
+  // brand-new trip never renders locked for even one frame; this catches the
+  // cases that never pass through generation — a trip already in localStorage
+  // from before the plans existed (which would otherwise open locked, looking
+  // like the app broke), and the demo reset on the Plans screen. Idempotent and
+  // guarded, so the repeat renders an itinerary edit causes cost nothing.
+  useEffect(() => {
+    if (itinerary && !membership.firstJourneyUsed) membership.claimFirstJourney(itinerary.id);
+  }, [itinerary, membership.firstJourneyUsed, membership.claimFirstJourney, membership]);
 
   async function handleAccessSubmit(code: string) {
     setAccessCode(code);
@@ -132,6 +144,11 @@ function App() {
     try {
       const result = await generateItinerary(input);
       if (genRequestRef.current !== requestId) return; // cancelled / superseded
+      // "Your first journey is on us" — the very first trip generated claims
+      // it and stays fully unlocked for good, so nobody meets a lock before
+      // they've had one complete trip to judge the app by. Idempotent, so
+      // every later generation leaves it alone.
+      membership.claimFirstJourney(result.id);
       setItinerary(result);
       setChatHistory([]);
       setCompletedStopIds(new Set());
@@ -339,6 +356,7 @@ function App() {
             checklistDone={checklistDone}
             onToggleChecklistItem={toggleChecklistItem}
             initialConfirmOpen={screen.openConfirm ?? false}
+            membership={membership}
           />
         ) : (
           <HomeScreen loading={loading} onSubmit={handleGenerate} />
@@ -371,6 +389,7 @@ function App() {
                     : null
                 }
                 onUndoDelete={handleUndoTripsDelete}
+                membership={membership}
               />
             );
           case "passport":
@@ -381,6 +400,7 @@ function App() {
                 savedTrips={savedTrips.savedTrips}
                 isActiveSaved={itinerary ? savedTrips.isSaved(itinerary.id) : false}
                 onOpenConfirm={handleOpenConfirm}
+                membership={membership}
               />
             );
           case "account":
@@ -390,6 +410,7 @@ function App() {
                 name={session.name}
                 setName={session.setName}
                 onSignOut={session.signOut}
+                membership={membership}
                 prefs={accountPrefs.prefs}
                 update={accountPrefs.update}
                 profile={travelerProfile.profile}

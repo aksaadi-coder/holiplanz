@@ -17,6 +17,9 @@ import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
 import { cityName, dayLabel, isDuringTrip, isTripOver, tripDayIndex } from "../utils/destination";
 import { convertMoney, currencyCodeFromLabel } from "../utils/currency";
 import { StampRing, Value } from "../components/ui/primitives";
+import type { Membership } from "../hooks/useMembership";
+import { UpgradeSheet } from "../components/membership/UpgradeSheet";
+import type { FeatureKey } from "../data/plans";
 import { DestinationBackground } from "../components/DestinationBackground";
 import { MapView } from "../components/MapPanel/MapView";
 import { CardDetail } from "../components/itinerary/CardDetail";
@@ -68,6 +71,7 @@ interface Props {
   onToggleChecklistItem: (itemId: string) => void;
   /** Opens straight to the Confirm sheet — used by the Trips tab's "Trip over" nudge. */
   initialConfirmOpen?: boolean;
+  membership: Membership;
 }
 
 export function ItineraryScreen({
@@ -91,6 +95,7 @@ export function ItineraryScreen({
   checklistDone,
   onToggleChecklistItem,
   initialConfirmOpen = false,
+  membership,
 }: Props) {
   const duringTrip = isDuringTrip(itinerary.startDate, itinerary.numDays);
   const tripOver = isTripOver(itinerary.startDate, itinerary.numDays);
@@ -113,6 +118,14 @@ export function ItineraryScreen({
   const [openHotel, setOpenHotel] = useState<AccommodationOption | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(initialConfirmOpen);
   const [checklistOpen, setChecklistOpen] = useState(false);
+  // Which locked feature the user just reached for, if any — drives UpgradeSheet.
+  const [lockedFeature, setLockedFeature] = useState<FeatureKey | null>(null);
+
+  // Per the revenue model, this trip needs its own Trip Pass (or Premium)
+  // before AI editing and the budget open. Manual edits — drag to reorder,
+  // swipe to remove — stay on the free plan, so the itinerary is never
+  // read-only; see useMembership.
+  const unlocked = membership.isTripUnlocked(itinerary.id);
 
   const day = useMemo(
     () => itinerary.days.find((d) => d.dayNumber === selectedDay) ?? itinerary.days[0],
@@ -173,6 +186,12 @@ export function ItineraryScreen({
   function handleSend() {
     const message = draft.trim();
     if (!message || chatLoading) return;
+    // The draft is deliberately left in the box: if they unlock, the sentence
+    // they already typed is still there to send.
+    if (!unlocked) {
+      setLockedFeature("aiEditing");
+      return;
+    }
     setDraft("");
     onSendChat(message);
   }
@@ -367,17 +386,34 @@ export function ItineraryScreen({
             <ChevronRightIcon size={18} />
           </button>
         ) : (
-          <button type="button" className="hp-add-accom" onClick={onAddAccommodation}>
+          // Asking for stays is an AI edit under the hood (it sends a chat
+          // instruction), so it sits behind the same gate as the chat bar.
+          <button
+            type="button"
+            className="hp-add-accom"
+            onClick={() => (unlocked ? onAddAccommodation() : setLockedFeature("aiEditing"))}
+          >
             <PlusCircleIcon size={18} />
             Add accommodation
           </button>
         )}
 
-        <button type="button" className="hp-budget-row" onClick={() => setBudgetOpen(true)}>
+        <button
+          type="button"
+          className="hp-budget-row"
+          onClick={() => (unlocked ? setBudgetOpen(true) : setLockedFeature("budget"))}
+        >
           <span>
-            <span className="hp-label">Trip budget</span>
+            <span className="hp-label">
+              Trip budget
+              {!unlocked && <span className="hp-lock-pill">TRIP PASS</span>}
+            </span>
+            {/* The total itself stays behind the gate — showing the number here
+                would give away the thing the budget planner is selling. */}
             <strong>
-              {itinerary.budget ? (
+              {!unlocked ? (
+                "See what this trip costs"
+              ) : itinerary.budget ? (
                 <>
                   <Value>{convertMoney(itinerary.budget.total, currencyCodeFromLabel(currency))}</Value>{" "}
                   estimated
@@ -425,12 +461,21 @@ export function ItineraryScreen({
         </div>
       )}
 
+      {/* Left usable while locked rather than disabled: the user can type what
+          they want, and the upgrade prompt appears on send with their sentence
+          still in the box, ready to go the moment it unlocks. */}
       <div className="hp-chat-bar">
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder={chatLoading ? "Updating your trip…" : "Swap lunch for something local…"}
+          placeholder={
+            chatLoading
+              ? "Updating your trip…"
+              : unlocked
+                ? "Swap lunch for something local…"
+                : "AI editing is on Trip Pass — tap to see"
+          }
           disabled={chatLoading}
           aria-label="Tailor your trip"
         />
@@ -438,8 +483,8 @@ export function ItineraryScreen({
           type="button"
           className="hp-chat-send"
           onClick={handleSend}
-          disabled={chatLoading || !draft.trim()}
-          aria-label="Send"
+          disabled={chatLoading || (unlocked && !draft.trim())}
+          aria-label={unlocked ? "Send" : "Unlock AI editing"}
         >
           <ArrowUpIcon size={18} />
         </button>
@@ -484,13 +529,23 @@ export function ItineraryScreen({
         }}
       />
 
+      {/* Applying preferences regenerates through chat, so it's the same
+          entitlement as the chat bar — gated here rather than inside
+          PreferencesScreen, which stays a dumb form. */}
       <PreferencesScreen
         open={prefsOpen}
         currentPreferences={itinerary.preferences}
         currency={currency}
         onCurrencyChange={onCurrencyChange}
         onClose={() => setPrefsOpen(false)}
-        onApply={onSendChat}
+        onApply={(message) => {
+          if (!unlocked) {
+            setPrefsOpen(false);
+            setLockedFeature("aiEditing");
+            return;
+          }
+          onSendChat(message);
+        }}
       />
 
       <HotelsScreen
@@ -533,6 +588,20 @@ export function ItineraryScreen({
         checklistDone={checklistDone}
         onToggle={onToggleChecklistItem}
         onClose={() => setChecklistOpen(false)}
+      />
+
+      <UpgradeSheet
+        feature={lockedFeature}
+        tripName={cityName(itinerary.destination)}
+        onClose={() => setLockedFeature(null)}
+        onBuyTripPass={() => {
+          membership.buyTripPass(itinerary.id);
+          setLockedFeature(null);
+        }}
+        onSubscribePremium={() => {
+          membership.subscribePremium();
+          setLockedFeature(null);
+        }}
       />
     </div>
   );

@@ -43,7 +43,8 @@ export function PaymentsScreen({ onBack, onAddCard }: Props) {
           </button>
         </div>
         <p className="hp-acct-note">
-          Used for Premium and any bookings you confirm. Nothing is charged without you tapping pay.
+          Used for Trip Passes, Premium, and any bookings you confirm. Nothing is charged without you
+          tapping pay — and in this demo, nothing is charged at all.
         </p>
       </div>
     </div>

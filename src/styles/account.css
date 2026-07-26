@@ -407,6 +407,324 @@
   margin: 20px 4px 0;
 }
 
+/* ---- Plans (Account → Plans) ----
+   The revenue model's three tiers stacked for a phone: the deck lays them out
+   side by side, which at 402px would crush each card to ~120px, so they run
+   vertically and keep the deck's card treatments instead — plain/white for
+   Free, coral wash for Trip Pass, ink for Premium. */
+.hp-plans-first {
+  background: rgba(249, 92, 75, 0.12);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin: 4px 0 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.hp-plans-first b {
+  color: var(--coral);
+  font-weight: 700;
+}
+.hp-plans-first-used {
+  display: block;
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.hp-plan-card {
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 14px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--stone);
+}
+.hp-plan-card.is-pass {
+  background: rgba(249, 92, 75, 0.1);
+  box-shadow: none;
+}
+.hp-plan-card.is-premium {
+  background: var(--ink);
+  box-shadow: none;
+}
+/* The ink card inverts every text colour inside it. */
+.hp-plan-card.is-premium,
+.hp-plan-card.is-premium .hp-plan-price b,
+.hp-plan-card.is-premium .hp-plan-features li {
+  color: var(--paper);
+}
+.hp-plan-card.is-premium .hp-label {
+  color: var(--coral);
+}
+.hp-plan-card.is-premium .hp-plan-price span,
+.hp-plan-card.is-premium .hp-plan-footnote {
+  color: rgba(255, 255, 255, 0.55);
+}
+.hp-plan-card.is-pass .hp-label {
+  color: var(--coral);
+}
+.hp-plan-card.is-current {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+.hp-plan-card.is-premium.is-current {
+  box-shadow: inset 0 0 0 1.5px var(--coral);
+}
+
+.hp-plan-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.hp-plan-card-top .hp-label {
+  margin: 0;
+}
+.hp-plan-new {
+  background: var(--coral);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.hp-plan-current {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  padding: 3px 9px;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--stone);
+}
+.hp-plan-card.is-premium .hp-plan-current {
+  color: var(--paper);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.hp-plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.hp-plan-price b {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+.hp-plan-price span {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.55);
+}
+.hp-plan-price-phrase {
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.hp-plan-features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.hp-plan-features li {
+  display: flex;
+  gap: 12px;
+  font-size: 16px;
+  color: var(--ink);
+}
+.hp-plan-features li > span {
+  color: rgba(0, 0, 0, 0.35);
+}
+.hp-plan-card.is-premium .hp-plan-features li > span {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.hp-plan-footnote {
+  border-top: 1px solid var(--stone);
+  margin: 18px 0 0;
+  padding-top: 14px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14.5px;
+  color: rgba(0, 0, 0, 0.45);
+}
+.hp-plan-card.is-premium .hp-plan-footnote {
+  border-top-color: rgba(255, 255, 255, 0.18);
+}
+
+.hp-plan-cta {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--coral);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 16.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hp-plans-reset {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px 0;
+  border: none;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--stone);
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+/* ---- Upgrade sheet (shown behind every lock) ---- */
+.hp-upsell-pitch {
+  font-size: 15.5px;
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+.hp-upsell-option {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  background: rgba(249, 92, 75, 0.1);
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+.hp-upsell-option.is-premium {
+  background: var(--ink);
+}
+.hp-upsell-option-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hp-upsell-option-head b {
+  font-size: 18px;
+  color: var(--ink);
+}
+.hp-upsell-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.hp-upsell-per {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.5);
+}
+.hp-upsell-option-sub {
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(0, 0, 0, 0.5);
+}
+.hp-upsell-option.is-premium .hp-upsell-option-head b,
+.hp-upsell-option.is-premium .hp-upsell-price {
+  color: var(--paper);
+}
+.hp-upsell-option.is-premium .hp-upsell-per,
+.hp-upsell-option.is-premium .hp-upsell-option-sub {
+  color: rgba(255, 255, 255, 0.6);
+}
+.hp-upsell-demo {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 14px 0 4px;
+  text-align: center;
+}
+.hp-upsell-later {
+  width: 100%;
+}
+
+/* ---- Locked feature states ---- */
+/* Passport on a trip that hasn't been paid for: the design's "Trip Passport
+   preview — locked until upgrade". The passport still renders, blurred, so the
+   user can see exactly what they'd get rather than an empty placeholder. */
+.hp-locked-preview {
+  position: relative;
+}
+.hp-locked-preview > .hp-locked-blur {
+  filter: blur(5px) saturate(0.85);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+}
+.hp-locked-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+.hp-locked-overlay .hp-label {
+  margin: 0;
+  color: var(--coral);
+}
+.hp-locked-overlay b {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 25px;
+  color: var(--ink);
+  max-width: 260px;
+  line-height: 1.2;
+}
+.hp-locked-overlay p {
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.55);
+  margin: 0;
+  max-width: 280px;
+}
+.hp-locked-cta {
+  margin-top: 4px;
+  padding: 14px 26px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+/* A locked row keeps its normal shape and gains a small coral padlock, so the
+   layout doesn't jump when it unlocks. */
+.hp-lock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--coral);
+  border: 1px dashed var(--coral);
+  border-radius: 999px;
+  padding: 3px 9px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
 /* ---- Upgrade screen ---- */
 .hp-acct-upgrade-lead {
   font-size: 16px;

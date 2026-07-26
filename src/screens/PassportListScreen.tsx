@@ -3,8 +3,12 @@ import type { Itinerary } from "../types";
 import type { SavedTrip } from "../hooks/useSavedTrips";
 import { resolveBackground } from "../data/destinationBackgrounds";
 import { formatDateRange } from "../utils/passport";
+import { cityName } from "../utils/destination";
 import { Value } from "../components/ui/primitives";
 import { PassportScreen } from "./PassportScreen";
+import { UpgradeSheet } from "../components/membership/UpgradeSheet";
+import type { Membership } from "../hooks/useMembership";
+import type { FeatureKey } from "../data/plans";
 
 interface Props {
   itinerary: Itinerary | null;
@@ -15,6 +19,7 @@ interface Props {
   /** Sends the active trip to "How was [city]?" so the user decides visited/skipped
    *  before a passport can be generated. */
   onOpenConfirm: () => void;
+  membership: Membership;
 }
 
 /**
@@ -28,8 +33,16 @@ export function PassportListScreen({
   savedTrips,
   isActiveSaved,
   onOpenConfirm,
+  membership,
 }: Props) {
   const [openTrip, setOpenTrip] = useState<"active" | SavedTrip | null>(null);
+  // A locked past passport offers to unlock that trip, not a subscription:
+  // entitlements are per trip throughout, so a passport already paid for can
+  // never become unreadable. Premium's "passport collection" is what you get
+  // when every trip is unlocked at once. See FEATURE_LABELS in data/plans.ts.
+  const [locked, setLocked] = useState<{ feature: FeatureKey; tripName: string; tripId: string } | null>(
+    null,
+  );
 
   if (openTrip === "active" && itinerary) {
     return (
@@ -38,6 +51,7 @@ export function PassportListScreen({
         completedStopIds={completedStopIds}
         onBack={() => setOpenTrip(null)}
         backLabel="‹ Passports"
+        membership={membership}
       />
     );
   }
@@ -48,6 +62,7 @@ export function PassportListScreen({
         completedStopIds={new Set(openTrip.completedStopIds ?? [])}
         onBack={() => setOpenTrip(null)}
         backLabel="‹ Passports"
+        membership={membership}
       />
     );
   }
@@ -99,13 +114,24 @@ export function PassportListScreen({
         {pastTrips.length > 0 && (
           <section className="hp-trips-section">
             <p className="hp-label">Earned passports</p>
+            {/* Kept listed rather than hidden while locked: the user did the
+                trip, so the honest thing is to show the passport exists and
+                what opens it. */}
             <div className="hp-acct-trip-list">
               {pastTrips.map((trip) => (
                 <button
                   key={trip.itinerary.id}
                   type="button"
                   className="hp-acct-trip-row"
-                  onClick={() => setOpenTrip(trip)}
+                  onClick={() =>
+                    membership.isTripUnlocked(trip.itinerary.id)
+                      ? setOpenTrip(trip)
+                      : setLocked({
+                          feature: "passport",
+                          tripName: cityName(trip.itinerary.destination),
+                          tripId: trip.itinerary.id,
+                        })
+                  }
                 >
                   <img src={resolveBackground(trip.itinerary.destination)} alt="" />
                   <span className="hp-acct-trip-info">
@@ -116,6 +142,9 @@ export function PassportListScreen({
                           "Dates tbc"}
                       </Value>{" "}
                       · passport earned
+                      {!membership.isTripUnlocked(trip.itinerary.id) && (
+                        <span className="hp-lock-pill">LOCKED</span>
+                      )}
                     </span>
                   </span>
                   <span className="hp-acct-trip-chevron" aria-hidden>
@@ -127,6 +156,20 @@ export function PassportListScreen({
           </section>
         )}
       </div>
+
+      <UpgradeSheet
+        feature={locked?.feature ?? null}
+        tripName={locked?.tripName}
+        onClose={() => setLocked(null)}
+        onBuyTripPass={() => {
+          if (locked) membership.buyTripPass(locked.tripId);
+          setLocked(null);
+        }}
+        onSubscribePremium={() => {
+          membership.subscribePremium();
+          setLocked(null);
+        }}
+      />
     </div>
   );
 }
