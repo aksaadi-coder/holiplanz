@@ -2,40 +2,128 @@ import {
   FIRST_JOURNEY_HEADLINE,
   FIRST_JOURNEY_SUB,
   PLAN_TIERS,
+  PREMIUM_PERIOD,
+  PREMIUM_PRICE,
+  TRIP_PASS_PRICE,
   type PlanTier,
 } from "../../data/plans";
-import type { PlanKey } from "../../hooks/useMembership";
+import type { Membership } from "../../hooks/useMembership";
+
+/** The trip a Trip Pass would apply to. A pass buys one trip, so the card can
+ *  only offer one when there's a trip in hand to name. */
+export interface PassTarget {
+  id: string;
+  /** City name, for copy that says which trip is being bought. */
+  name: string;
+}
 
 interface Props {
-  /** The account's current plan — marks the card the user is already on. */
-  plan: PlanKey;
-  /** True once the free first journey has been used, which is what moves the
-   *  Free card from a promise to a description of where the user now stands. */
-  firstJourneyUsed: boolean;
+  membership: Membership;
+  activeTrip: PassTarget | null;
   onBack: () => void;
-  onSubscribePremium: () => void;
-  /** DEMO affordance: drop back to Free so the tiers can be walked through
-   *  again. Not a real "cancel subscription" — there's no subscription. */
-  onResetDemo: () => void;
+  /** Confirms each change, since none of them navigate anywhere. */
+  onToast: (message: string) => void;
+}
+
+/** What the button on a card does, resolved per tier. A null action means the
+ *  card has nothing to offer right now and shows `note` instead — better than a
+ *  dead button the user has to guess about. */
+interface CardAction {
+  label: string;
+  run: () => void;
+  /** Leaving a plan is styled as a quiet outline rather than a filled CTA. */
+  leaving?: boolean;
 }
 
 /**
  * Account → Plans: the whole revenue model on one screen, in the order the
- * strategy deck puts it — the first journey free above three tiers you grow
- * into. Copy and prices come from data/plans.ts, the same source the in-context
- * upgrade prompts read, so this screen can't drift from what a lock offers.
+ * strategy deck puts it — the first journey free above three tiers you move
+ * between freely. Every tier can be joined and left from here, so no state is
+ * a dead end.
  *
- * Trip Pass has no button here on purpose: a pass buys one specific trip, so
- * it's sold at the moment a trip needs it (see UpgradeSheet), not from a
- * settings screen with no trip in hand.
+ * Copy and prices come from data/plans.ts, the same source the in-context
+ * upgrade prompts read, so this screen can't drift from what a lock offers.
  */
-export function PlansScreen({
-  plan,
-  firstJourneyUsed,
-  onBack,
-  onSubscribePremium,
-  onResetDemo,
-}: Props) {
+export function PlansScreen({ membership, activeTrip, onBack, onToast }: Props) {
+  // Specifically "owns a pass on this trip", not merely "this trip is open" —
+  // the free first journey and Premium both open a trip without a pass, and
+  // only a pass is a thing you can release.
+  const passOnActiveTrip = membership.hasTripPass(activeTrip?.id);
+  const activeTripIsFree = activeTrip !== null && membership.isFirstJourney(activeTrip.id);
+
+  /** Free is where you land by cancelling Premium; passes are bought outright
+   *  and survive it, so this never takes one away. */
+  function freeAction(): CardAction | null {
+    if (!membership.premium) return null;
+    return {
+      label: "Switch to the free plan",
+      leaving: true,
+      run: () => {
+        membership.cancelPremium();
+        onToast("Premium cancelled — any Trip Passes you own are unaffected");
+      },
+    };
+  }
+
+  function passAction(): CardAction | null {
+    if (membership.premium) return null;
+    if (!activeTrip) return null;
+    if (passOnActiveTrip) {
+      return {
+        label: `Release the ${activeTrip.name} pass`,
+        leaving: true,
+        run: () => {
+          membership.releaseTripPass(activeTrip.id);
+          onToast(`${activeTrip.name} is locked again`);
+        },
+      };
+    }
+    if (activeTripIsFree) return null;
+    return {
+      label: `Get a pass for ${activeTrip.name} — ${TRIP_PASS_PRICE}`,
+      run: () => {
+        membership.buyTripPass(activeTrip.id);
+        onToast(`${activeTrip.name} unlocked — demo only, nothing was charged`);
+      },
+    };
+  }
+
+  function premiumAction(): CardAction {
+    if (membership.premium) {
+      return {
+        label: "Cancel Premium",
+        leaving: true,
+        run: () => {
+          membership.cancelPremium();
+          onToast("Premium cancelled — back to the free plan");
+        },
+      };
+    }
+    return {
+      label: `Go Premium — ${PREMIUM_PRICE}/${PREMIUM_PERIOD}`,
+      run: () => {
+        membership.subscribePremium();
+        onToast("Premium unlocked — demo only, nothing was charged");
+      },
+    };
+  }
+
+  /** Why a card has no button, when that needs saying. */
+  function note(key: PlanTier["key"]): string | null {
+    if (key === "pass") {
+      if (membership.premium) return "Included with Premium — every trip is already unlocked.";
+      if (!activeTrip) return "Plan a trip first, then a pass can be bought for it.";
+      if (activeTripIsFree) return `${activeTrip.name} is your free first journey — already unlocked.`;
+    }
+    return null;
+  }
+
+  const actions: Record<PlanTier["key"], CardAction | null> = {
+    free: freeAction(),
+    pass: passAction(),
+    premium: premiumAction(),
+  };
+
   return (
     <div className="hp-fullscreen hp-acct-sub hp-plans">
       <div className="hp-acct-sub-scroll">
@@ -47,7 +135,7 @@ export function PlansScreen({
 
         <div className="hp-plans-first">
           <b>{FIRST_JOURNEY_HEADLINE}</b> — {FIRST_JOURNEY_SUB}
-          {firstJourneyUsed && (
+          {membership.firstJourneyUsed && (
             <span className="hp-plans-first-used">Used — thanks for taking the first one.</span>
           )}
         </div>
@@ -56,18 +144,29 @@ export function PlansScreen({
           <PlanCard
             key={tier.key}
             tier={tier}
-            current={plan === tier.key}
-            onSubscribePremium={onSubscribePremium}
+            current={
+              tier.key === "pass" ? passOnActiveTrip : membership.plan === tier.key
+            }
+            currentLabel={tier.key === "pass" ? "ON THIS TRIP" : "CURRENT"}
+            action={actions[tier.key]}
+            note={note(tier.key)}
           />
         ))}
 
         <p className="hp-acct-note">
-          A Trip Pass is bought on the trip that needs it — open a locked feature on any trip and
-          it's offered there. Nothing in this demo takes payment or asks for a card.
+          Nothing here takes payment or asks for a card. Switching plans is instant and can be
+          undone from this screen at any time.
         </p>
 
-        <button type="button" className="hp-plans-reset" onClick={onResetDemo}>
-          Reset demo plan state
+        <button
+          type="button"
+          className="hp-plans-reset"
+          onClick={() => {
+            membership.resetMembership();
+            onToast("Plan state reset — the free first journey is available again");
+          }}
+        >
+          Reset all plan state
         </button>
       </div>
     </div>
@@ -77,18 +176,21 @@ export function PlansScreen({
 function PlanCard({
   tier,
   current,
-  onSubscribePremium,
+  currentLabel,
+  action,
+  note,
 }: {
   tier: PlanTier;
   current: boolean;
-  onSubscribePremium: () => void;
+  currentLabel: string;
+  action: CardAction | null;
+  note: string | null;
 }) {
   return (
     <div className={`hp-plan-card is-${tier.key} ${current ? "is-current" : ""}`.trim()}>
       <div className="hp-plan-card-top">
         <p className="hp-label">{tier.name}</p>
-        {tier.isNew && <span className="hp-plan-new">NEW</span>}
-        {current && <span className="hp-plan-current">CURRENT</span>}
+        {current && <span className="hp-plan-current">{currentLabel}</span>}
       </div>
 
       <div className="hp-plan-price">
@@ -113,11 +215,16 @@ function PlanCard({
 
       <p className="hp-plan-footnote">{tier.footnote}</p>
 
-      {tier.key === "premium" && !current && (
-        <button type="button" className="hp-plan-cta" onClick={onSubscribePremium}>
-          Go Premium
+      {action && (
+        <button
+          type="button"
+          className={`hp-plan-cta ${action.leaving ? "is-leaving" : ""}`.trim()}
+          onClick={action.run}
+        >
+          {action.label}
         </button>
       )}
+      {!action && note && <p className="hp-plan-note">{note}</p>}
     </div>
   );
 }

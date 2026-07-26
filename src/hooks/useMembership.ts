@@ -51,6 +51,11 @@ export interface Membership {
   firstJourneyUsed: boolean;
   /** Is this specific trip paid for (or the free first journey)? */
   isTripUnlocked: (tripId: string | null | undefined) => boolean;
+  /** Does this trip have a Trip Pass of its own? Distinct from isTripUnlocked,
+   *  which is also true for the free first journey and for anything under
+   *  Premium — only a pass can be released, so the Plans screen has to ask
+   *  this rather than infer a pass from the trip being open. */
+  hasTripPass: (tripId: string | null | undefined) => boolean;
   /** True when this trip is unlocked *because* it was the free one — the UI
    *  says so rather than letting the user assume they've already paid. */
   isFirstJourney: (tripId: string | null | undefined) => boolean;
@@ -59,8 +64,16 @@ export interface Membership {
   claimFirstJourney: (tripId: string) => void;
   /** DEMO purchase — no charge, no card, just an unlock. */
   buyTripPass: (tripId: string) => void;
-  /** DEMO subscribe — no charge, no card, no auto-renewal to cancel. */
+  /** Give up a pass, re-locking that trip. A real pass is a one-time purchase
+   *  with nothing to cancel, so this exists to make the plans screen navigable
+   *  in both directions — it's how you get back to a locked trip to see the
+   *  gates again. Named "release" rather than "cancel" for that reason. */
+  releaseTripPass: (tripId: string) => void;
+  /** DEMO subscribe — no charge, no card. */
   subscribePremium: () => void;
+  /** Drop back to the free plan. Trip Passes survive: they were bought
+   *  outright, and Premium ending is not a reason to lose them. */
+  cancelPremium: () => void;
   /** Lets the demo be reset without clearing trips (Account → Plans). */
   resetMembership: () => void;
 }
@@ -97,6 +110,12 @@ export function useMembership(): Membership {
     [state],
   );
 
+  const hasTripPass = useCallback(
+    (tripId: string | null | undefined) =>
+      Boolean(tripId) && state.tripPassTripIds.includes(tripId as string),
+    [state.tripPassTripIds],
+  );
+
   const isFirstJourney = useCallback(
     (tripId: string | null | undefined) =>
       Boolean(tripId) &&
@@ -123,8 +142,22 @@ export function useMembership(): Membership {
     [update],
   );
 
+  const releaseTripPass = useCallback(
+    (tripId: string) => {
+      update((prev) => ({
+        ...prev,
+        tripPassTripIds: prev.tripPassTripIds.filter((id) => id !== tripId),
+      }));
+    },
+    [update],
+  );
+
   const subscribePremium = useCallback(() => {
     update((prev) => ({ ...prev, premium: true }));
+  }, [update]);
+
+  const cancelPremium = useCallback(() => {
+    update((prev) => ({ ...prev, premium: false }));
   }, [update]);
 
   const resetMembership = useCallback(() => {
@@ -141,10 +174,13 @@ export function useMembership(): Membership {
     premium: state.premium,
     firstJourneyUsed: state.firstJourneyTripId !== null,
     isTripUnlocked,
+    hasTripPass,
     isFirstJourney,
     claimFirstJourney,
     buyTripPass,
+    releaseTripPass,
     subscribePremium,
+    cancelPremium,
     resetMembership,
   };
 }

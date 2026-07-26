@@ -6,7 +6,7 @@ import type { Membership } from "../../hooks/useMembership";
 import { PREMIUM_PERIOD, PREMIUM_PRICE } from "../../data/plans";
 import { PinIcon, PlusCircleIcon } from "../../components/ui/icons";
 import { Sheet } from "../../components/ui/primitives";
-import { PlansScreen } from "./PlansScreen";
+import { PlansScreen, type PassTarget } from "./PlansScreen";
 import { NotificationsScreen } from "./NotificationsScreen";
 import { PaymentsScreen } from "./PaymentsScreen";
 import { LanguageScreen } from "./LanguageScreen";
@@ -20,6 +20,9 @@ interface Props {
   setName: (name: string) => void;
   onSignOut: () => void;
   membership: Membership;
+  /** The trip a Trip Pass would apply to on the Plans screen, or null with no
+   *  trip planned yet — a pass buys one specific trip, so it needs a target. */
+  activeTrip: PassTarget | null;
   prefs: ReturnType<typeof useAccountPrefs>["prefs"];
   update: ReturnType<typeof useAccountPrefs>["update"];
   profile: ReturnType<typeof useTravelerProfile>["profile"];
@@ -57,6 +60,7 @@ export function AccountScreen({
   setName,
   onSignOut,
   membership,
+  activeTrip,
   prefs,
   update,
   profile,
@@ -89,18 +93,10 @@ export function AccountScreen({
   if (view.name === "plans") {
     content = (
       <PlansScreen
-        plan={membership.plan}
-        firstJourneyUsed={membership.firstJourneyUsed}
+        membership={membership}
+        activeTrip={activeTrip}
         onBack={() => setView({ name: "root" })}
-        onSubscribePremium={() => {
-          membership.subscribePremium();
-          showToast("Premium unlocked — demo only, nothing was charged");
-          setView({ name: "root" });
-        }}
-        onResetDemo={() => {
-          membership.resetMembership();
-          showToast("Plan state reset — back to the first journey");
-        }}
+        onToast={showToast}
       />
     );
   } else if (view.name === "notifications") {

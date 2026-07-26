@@ -69,8 +69,6 @@ export interface PlanTier {
   features: string[];
   /** Italic line under the divider at the foot of the card. */
   footnote: string;
-  /** The coral NEW pill on the Trip Pass card. */
-  isNew?: boolean;
 }
 
 export const PLAN_TIERS: PlanTier[] = [
@@ -99,7 +97,6 @@ export const PLAN_TIERS: PlanTier[] = [
       FEATURE_LABELS.budget,
     ],
     footnote: "No subscription. No auto-renewal.",
-    isNew: true,
   },
   {
     key: "premium",

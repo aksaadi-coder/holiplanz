@@ -411,6 +411,11 @@ function App() {
                 setName={session.setName}
                 onSignOut={session.signOut}
                 membership={membership}
+                activeTrip={
+                  itinerary
+                    ? { id: itinerary.id, name: cityName(itinerary.destination) }
+                    : null
+                }
                 prefs={accountPrefs.prefs}
                 update={accountPrefs.update}
                 profile={travelerProfile.profile}
