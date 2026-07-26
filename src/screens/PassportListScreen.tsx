@@ -3,6 +3,7 @@ import type { Itinerary } from "../types";
 import type { SavedTrip } from "../hooks/useSavedTrips";
 import { resolveBackground } from "../data/destinationBackgrounds";
 import { formatDateRange } from "../utils/passport";
+import { Value } from "../components/ui/primitives";
 import { PassportScreen } from "./PassportScreen";
 
 interface Props {
@@ -75,7 +76,10 @@ export function PassportListScreen({
                 <span className="hp-acct-trip-info">
                   <b>{itinerary.tripTitle}</b>
                   <span>
-                    {formatDateRange(itinerary.startDate, itinerary.numDays) ?? "Dates tbc"} · passport earned
+                    <Value>
+                      {formatDateRange(itinerary.startDate, itinerary.numDays) ?? "Dates tbc"}
+                    </Value>{" "}
+                    · passport earned
                   </span>
                 </span>
                 <span className="hp-acct-trip-chevron" aria-hidden>
@@ -107,8 +111,11 @@ export function PassportListScreen({
                   <span className="hp-acct-trip-info">
                     <b>{trip.itinerary.tripTitle}</b>
                     <span>
-                      {formatDateRange(trip.itinerary.startDate, trip.itinerary.numDays) ?? "Dates tbc"} · passport
-                      earned
+                      <Value>
+                        {formatDateRange(trip.itinerary.startDate, trip.itinerary.numDays) ??
+                          "Dates tbc"}
+                      </Value>{" "}
+                      · passport earned
                     </span>
                   </span>
                   <span className="hp-acct-trip-chevron" aria-hidden>

@@ -27,15 +27,22 @@ export function BudgetScreen({ open, budget, currency, onClose, onOpenPreference
 
         {budget ? (
           <>
-            <div className="hp-budget-total">{convertMoney(budget.total, code)}</div>
-            <p className="hp-budget-summary">{budget.summary}</p>
+            {/* Money figures change in place — a chat estimate arriving, or a
+                different account currency converting them — so they're kept out
+                of a translator's hands. See Value in ui/primitives. */}
+            <div className="hp-budget-total" translate="no">
+              {convertMoney(budget.total, code)}
+            </div>
+            <p className="hp-budget-summary" key={budget.summary}>
+              {budget.summary}
+            </p>
 
             <div className="hp-budget-lines">
               {budget.lines.map((line) => (
                 <div key={line.label}>
                   <div className="hp-budget-line-head">
                     <b>{line.label}</b>
-                    <span>{convertMoney(line.amount, code)}</span>
+                    <span translate="no">{convertMoney(line.amount, code)}</span>
                   </div>
                   <div className="hp-budget-track">
                     <div

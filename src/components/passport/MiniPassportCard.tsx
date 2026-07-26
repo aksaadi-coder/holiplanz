@@ -38,21 +38,30 @@ export function MiniPassportCard({ data, photo, onPhotoClick }: Props) {
       <div className="hp-mini-info">
         <div className="hp-mini-head">
           <span>HOLIPLANZ · TRIP PASSPORT</span>
-          <span>{data.number}</span>
+          <span translate="no">{data.number}</span>
         </div>
-        <b className="hp-mini-title">{data.tripTitle}</b>
-        <p className="hp-mini-meta">
-          {data.datesWithYear ? `${data.datesWithYear} · ` : ""}
-          {data.duration}
-          {data.routeTitleCase.length > 0 ? ` · ${data.routeTitleCase.join(" → ")}` : ""}
+        {/* Trip values, joined into single strings rather than left as adjacent
+            expressions — and kept out of a translator's hands, since these same
+            nodes are what html2canvas captures for the export. See Value in
+            ui/primitives. */}
+        <b className="hp-mini-title" translate="no">
+          {data.tripTitle}
+        </b>
+        <p className="hp-mini-meta" translate="no">
+          {`${data.datesWithYear ? `${data.datesWithYear} · ` : ""}${data.duration}${
+            data.routeTitleCase.length > 0 ? ` · ${data.routeTitleCase.join(" → ")}` : ""
+          }`}
         </p>
         <div className="hp-mini-stamp">
           <span className="hp-mini-stamp-top">ADMITTED · HOLIPLANZ</span>
           <StampName className="hp-mini-stamp-name" text={data.stampLabel} max={26} min={14} maxWidth={160} />
-          <span className="hp-mini-stamp-date">✈ {data.stampDate}</span>
+          <span className="hp-mini-stamp-date" translate="no">
+            ✈ {data.stampDate}
+          </span>
         </div>
 
-        <div className="hp-mini-mrz">
+        {/* Machine-readable zone — deliberately not language at all. */}
+        <div className="hp-mini-mrz" translate="no">
           {data.mrz[0]}
           <br />
           {data.mrz[1]}

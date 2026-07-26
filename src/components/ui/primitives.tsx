@@ -99,6 +99,40 @@ export function Label({ children }: { children: ReactNode }) {
   return <p className="hp-label">{children}</p>;
 }
 
+/**
+ * A value a page translator must leave alone — a time, a date, a count, a
+ * price, a place name. Anything that can change while the app is open.
+ *
+ * Chrome on Android offers to translate this app, and a translator replaces
+ * every text node it touches with one of its own. React still holds the
+ * originals, so from that point on each update writes to a node no longer in
+ * the document and the value on screen freezes at whatever it said when the
+ * page was translated. That's how the home screen came to show "Dates · 1 day"
+ * over fields reading 17/09/2026 and 10 days. `translate="no"` keeps the
+ * translator out, so React keeps ownership and the value stays true.
+ *
+ * Two rules for using it:
+ *
+ * - Wrap the **varying part only**, and leave the words around it as ordinary
+ *   text — those get translated once and never need updating, so they're safe.
+ *   Reach for a whole-string Value only when the wording itself varies with the
+ *   value ("1 day" / "10 days"), where a half-translated result would be worse.
+ * - For **prose** that changes — a chat reply, an undo message — don't use this
+ *   at all. Give the element a `key` derived from the text instead: React then
+ *   mounts a fresh element the translator is free to translate, so the reader
+ *   gets it in their own language AND up to date.
+ *
+ * Where the value already sits alone in an element, put `translate="no"` on
+ * that element rather than nesting another span inside it.
+ */
+export function Value({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <span translate="no" className={className}>
+      {children}
+    </span>
+  );
+}
+
 interface FloatingCardProps {
   open: boolean;
   onClose: () => void;

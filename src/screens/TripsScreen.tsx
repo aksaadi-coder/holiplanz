@@ -8,6 +8,7 @@ import { cityName, dayLabel, daysUntilTrip, isDuringTrip, isTripOver, startsInLa
 import { getNextUp } from "../utils/schedule";
 import { formatDateRange, tripRoute } from "../utils/passport";
 import { TrashIcon, ChevronRightIcon } from "../components/ui/icons";
+import { Value } from "../components/ui/primitives";
 import { PassportScreen } from "./PassportScreen";
 import { ChecklistScreen } from "../components/itinerary/ChecklistScreen";
 
@@ -87,8 +88,17 @@ function ActiveTripCard({
         <img src={resolveBackground(itinerary.destination)} alt="" className="hp-trips-hero-photo" />
         <span className="hp-trips-hero-body">
           <b>{itinerary.tripTitle}</b>
-          <span className="hp-trips-hero-meta">{meta}</span>
-          {countdown && <span className="hp-trips-countdown">{countdown}</span>}
+          {/* Dates, day count and route in one string; the countdown carries a
+              number too. Both change as the trip is edited or the date nears.
+              See Value in ui/primitives. */}
+          <span className="hp-trips-hero-meta" translate="no">
+            {meta}
+          </span>
+          {countdown && (
+            <span className="hp-trips-countdown" translate="no">
+              {countdown}
+            </span>
+          )}
         </span>
       </button>
       {duringTrip && nextUp && (
@@ -101,8 +111,10 @@ function ActiveTripCard({
           }}
         >
           <span>
-            <span className="hp-label">Happening next{nextUp.time ? ` · ${nextUp.time}` : ""}</span>
-            <strong>{nextUp.stop.name}</strong>
+            <span className="hp-label">
+              Happening next<Value>{nextUp.time ? ` · ${nextUp.time}` : ""}</Value>
+            </span>
+            <strong translate="no">{nextUp.stop.name}</strong>
           </span>
           <ChevronRightIcon size={18} />
         </button>
@@ -163,7 +175,12 @@ function FinishedTripRow({
         <img src={resolveBackground(trip.itinerary.destination)} alt="" />
         <span className="hp-acct-trip-info">
           <b>{trip.itinerary.tripTitle}</b>
-          <span>{formatDateRange(trip.itinerary.startDate, trip.itinerary.numDays) ?? "Dates tbc"} · passport earned</span>
+          <span>
+            <Value>
+              {formatDateRange(trip.itinerary.startDate, trip.itinerary.numDays) ?? "Dates tbc"}
+            </Value>{" "}
+            · passport earned
+          </span>
         </span>
         <span className="hp-acct-trip-chevron" aria-hidden>
           ›
@@ -228,12 +245,18 @@ export function TripsScreen({
 
         {showPrepBanner && itinerary && (
           <button type="button" className="hp-trips-prep-banner" onClick={() => setChecklistOpen(true)}>
+            {/* The city, the day count and the number of things left all change
+                as the trip nears and the checklist gets ticked off — and the
+                wording around each varies with it (today / in 1 day / in 3
+                days), so each is protected whole. See Value in ui/primitives. */}
             <span>
-              {daysOut === 0
-                ? `Your ${cityName(itinerary.destination)} trip starts today`
-                : `Your ${cityName(itinerary.destination)} trip starts in ${daysOut} day${daysOut === 1 ? "" : "s"}`}
+              <Value>
+                {daysOut === 0
+                  ? `Your ${cityName(itinerary.destination)} trip starts today`
+                  : `Your ${cityName(itinerary.destination)} trip starts in ${daysOut} day${daysOut === 1 ? "" : "s"}`}
+              </Value>
               {" — "}
-              {prepRemaining} thing{prepRemaining === 1 ? "" : "s"} left to prepare
+              <Value>{`${prepRemaining} thing${prepRemaining === 1 ? "" : "s"}`}</Value> left to prepare
             </span>
             <span aria-hidden>→</span>
           </button>
@@ -272,7 +295,9 @@ export function TripsScreen({
 
       {tripUndoMessage && (
         <div className="hp-undo" role="status">
-          <span>{tripUndoMessage}</span>
+          {/* Keyed, not no-translate — prose that must stay current. See Value
+              in ui/primitives. */}
+          <span key={tripUndoMessage}>{tripUndoMessage}</span>
           <button type="button" onClick={onUndoDelete}>
             Undo
           </button>

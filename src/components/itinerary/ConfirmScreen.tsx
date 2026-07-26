@@ -58,7 +58,9 @@ export function ConfirmScreen({
             const chosen = decided.has(stop.id);
             return (
               <div key={stop.id} className="hp-confirm-item">
-                <b>{stop.name}</b>
+                {/* A place name, which shouldn't be translated in the first
+                    place. See Value in ui/primitives. */}
+                <b translate="no">{stop.name}</b>
                 <div className="hp-confirm-choices">
                   <button
                     type="button"

@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { GenerateItineraryRequest } from "../types";
 import type { ReelFeature } from "../hooks/useAppNav";
 import { DestinationBackground } from "../components/DestinationBackground";
-import { Chip, Label, BottomCta } from "../components/ui/primitives";
+import { Chip, Label, BottomCta, Value } from "../components/ui/primitives";
 import { PlanReel } from "../components/reels/PlanReel";
 import { StayReel } from "../components/reels/StayReel";
 import { PersonaliseReel } from "../components/reels/PersonaliseReel";
@@ -115,19 +115,11 @@ export function HomeScreen({ loading, onSubmit }: Props) {
             >
               <span aria-hidden>▦</span>
               {datesSet ? (
-                /* translate="no" keeps a page translator (Chrome/Android
-                   offers this automatically) out of this one element.
-                   A translator replaces the text nodes it translates with
-                   its own; React still holds the originals, so every later
-                   update writes to a node that's no longer in the document
-                   and the summary freezes at whatever it said when the page
-                   was translated — showing "Dates · 1 day" while the fields
-                   below read 17/09/2026 and 10. One element with one
-                   pre-joined string (never two adjacent expressions, which a
-                   translator merges) keeps React's node its own. The date and
-                   day count are near enough language-neutral to be worth the
-                   trade. */
-                <span translate="no">{dateSummary}</span>
+                /* One pre-joined string, never two adjacent expressions (a
+                   translator merges those). Whole-string rather than
+                   number-only because dayLabel's own wording varies —
+                   "1 day" / "10 days". See Value in ui/primitives. */
+                <Value>{dateSummary}</Value>
               ) : (
                 <span>Add your dates</span>
               )}

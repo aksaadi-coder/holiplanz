@@ -1,5 +1,6 @@
 import type { PassportData } from "../../utils/passport";
 import { PinIcon } from "../ui/icons";
+import { Value } from "../ui/primitives";
 import { StampName } from "./StampName";
 
 interface Props {
@@ -24,7 +25,7 @@ export function PassportPage({ data, photo, onPhotoClick }: Props) {
           <PinIcon size={14} className="hp-passport-pin" />
           HOLIPLANZ · TRIP PASSPORT
         </b>
-        <span>{data.number}</span>
+        <span translate="no">{data.number}</span>
       </div>
 
       <div className="hp-passport-stamps">
@@ -37,7 +38,12 @@ export function PassportPage({ data, photo, onPhotoClick }: Props) {
               style={{ top: p.top, left: p.left, right: p.right, transform: `rotate(${p.rotate}deg)` }}
             >
               <b>{cat.label.toUpperCase()}</b>
-              <span>× {cat.count} visited</span>
+              {/* The count changes every time a stop is confirmed; "visited"
+                  never does, so only the number needs protecting. See Value in
+                  ui/primitives. */}
+              <span>
+                × <Value>{cat.count}</Value> visited
+              </span>
             </div>
           );
         })}
@@ -48,7 +54,9 @@ export function PassportPage({ data, photo, onPhotoClick }: Props) {
           <div className="hp-dest-stamp">
             <span className="hp-dest-top">ADMITTED · HOLIPLANZ</span>
             <StampName className="hp-dest-name" text={data.stampLabel} />
-            <span className="hp-dest-date">✈ {data.stampDate}</span>
+            <span className="hp-dest-date" translate="no">
+              ✈ {data.stampDate}
+            </span>
           </div>
         </div>
       </div>
@@ -77,28 +85,39 @@ export function PassportPage({ data, photo, onPhotoClick }: Props) {
         </button>
 
         <div className="hp-passport-fields">
+          {/* Field labels stay translatable; the filled-in values don't, since
+              they're rewritten whenever the trip changes — and these same nodes
+              are what html2canvas captures for the PDF/PNG, so the souvenir
+              should carry the trip's real dates. See Value in ui/primitives. */}
           <p className="hp-label">Trip</p>
-          <b className="hp-passport-trip">{data.tripTitle}</b>
+          <b className="hp-passport-trip" translate="no">
+            {data.tripTitle}
+          </b>
           <p className="hp-label">Type</p>
-          <b className="hp-passport-type">{data.tripType}</b>
+          <b className="hp-passport-type" translate="no">
+            {data.tripType}
+          </b>
           <div className="hp-passport-durrow">
             <span>
               <span className="hp-label">Duration</span>
-              <b>{data.duration}</b>
+              <b translate="no">{data.duration}</b>
             </span>
             {data.dates && (
               <span>
                 <span className="hp-label">Dates</span>
-                <b>{data.dates}</b>
+                <b translate="no">{data.dates}</b>
               </span>
             )}
           </div>
         </div>
       </div>
 
-      <div className="hp-passport-route">{data.route.join(" → ")}</div>
+      <div className="hp-passport-route" translate="no">
+        {data.route.join(" → ")}
+      </div>
 
-      <div className="hp-passport-mrz">
+      {/* Machine-readable zone — deliberately not language at all. */}
+      <div className="hp-passport-mrz" translate="no">
         {data.mrz[0]}
         <br />
         {data.mrz[1]}

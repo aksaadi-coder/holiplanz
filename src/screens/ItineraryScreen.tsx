@@ -16,7 +16,7 @@ import { scheduleForDay, getNextUp } from "../utils/schedule";
 import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
 import { cityName, dayLabel, isDuringTrip, isTripOver, tripDayIndex } from "../utils/destination";
 import { convertMoney, currencyCodeFromLabel } from "../utils/currency";
-import { StampRing } from "../components/ui/primitives";
+import { StampRing, Value } from "../components/ui/primitives";
 import { DestinationBackground } from "../components/DestinationBackground";
 import { MapView } from "../components/MapPanel/MapView";
 import { CardDetail } from "../components/itinerary/CardDetail";
@@ -190,9 +190,10 @@ export function ItineraryScreen({
       <DestinationBackground destination={itinerary.destination} intensity={0.72} />
 
       <header className="hp-itin-head">
-        <h1>
-          {cityName(itinerary.destination)} · {dayLabel(itinerary.numDays)}
-        </h1>
+        {/* A place name and a day count, joined into one string: two adjacent
+            expressions are exactly what a translator merges into a node React
+            can no longer update. See Value in ui/primitives. */}
+        <h1 translate="no">{`${cityName(itinerary.destination)} · ${dayLabel(itinerary.numDays)}`}</h1>
         <div className="hp-itin-head-actions">
           <button
             type="button"
@@ -245,10 +246,14 @@ export function ItineraryScreen({
           >
             <span>
               <span className="hp-label">
-                Happening next{nextUp.time ? ` · ${nextUp.time}` : ""}
-                {nextUp.dayNumber !== selectedDay ? ` · Day ${nextUp.dayNumber}` : ""}
+                Happening next
+                <Value>
+                  {`${nextUp.time ? ` · ${nextUp.time}` : ""}${
+                    nextUp.dayNumber !== selectedDay ? ` · Day ${nextUp.dayNumber}` : ""
+                  }`}
+                </Value>
               </span>
-              <strong>{nextUp.stop.name}</strong>
+              <strong translate="no">{nextUp.stop.name}</strong>
             </span>
             <span aria-hidden>→</span>
           </button>
@@ -258,9 +263,11 @@ export function ItineraryScreen({
           <button type="button" className="hp-itin-next-banner" onClick={() => setChecklistOpen(true)}>
             <span>
               <span className="hp-label">Before you go</span>
+              {/* Only the counts are protected — "of" and "ready" never change,
+                  so a translator can own those safely. */}
               <strong>
-                {CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length} of{" "}
-                {CHECKLIST_ITEMS.length} ready
+                <Value>{CHECKLIST_ITEMS.filter((item) => checklistDone.has(item.id)).length}</Value> of{" "}
+                <Value>{CHECKLIST_ITEMS.length}</Value> ready
               </strong>
             </span>
             <span aria-hidden>→</span>
@@ -336,8 +343,10 @@ export function ItineraryScreen({
             {draggingStop && (
               <div className="hp-stop-row hp-stop-row-overlay">
                 <div className="hp-stop-row-text">
-                  <span className="hp-stop-row-time">{times.get(draggingStop.id) ?? ""}</span>
-                  <strong>{draggingStop.name}</strong>
+                  <span className="hp-stop-row-time" translate="no">
+                    {times.get(draggingStop.id) ?? ""}
+                  </span>
+                  <strong translate="no">{draggingStop.name}</strong>
                 </div>
                 <span className="hp-grip">
                   <GripIcon size={20} />
@@ -351,7 +360,9 @@ export function ItineraryScreen({
           <button type="button" className="hp-budget-row" onClick={() => setHotelsOpen(true)}>
             <span>
               <span className="hp-label">Where you'll stay</span>
-              <strong>{stayLabel}</strong>
+              {/* Either a hotel name or "3 options" — the wording varies with
+                  the value, so the whole thing is protected. */}
+              <strong translate="no">{stayLabel}</strong>
             </span>
             <ChevronRightIcon size={18} />
           </button>
@@ -366,9 +377,14 @@ export function ItineraryScreen({
           <span>
             <span className="hp-label">Trip budget</span>
             <strong>
-              {itinerary.budget
-                ? `${convertMoney(itinerary.budget.total, currencyCodeFromLabel(currency))} estimated`
-                : "Tap to estimate"}
+              {itinerary.budget ? (
+                <>
+                  <Value>{convertMoney(itinerary.budget.total, currencyCodeFromLabel(currency))}</Value>{" "}
+                  estimated
+                </>
+              ) : (
+                "Tap to estimate"
+              )}
             </strong>
           </span>
           <ChevronRightIcon size={18} />
@@ -381,7 +397,11 @@ export function ItineraryScreen({
 
       {undoMessage && (
         <div className="hp-undo" role="status">
-          <span>{undoMessage}</span>
+          {/* Prose, so it's keyed rather than marked no-translate: a fresh
+              element per message stays both translated and current. Frozen, it
+              would name the wrong stop while Undo reverses a different edit.
+              See Value in ui/primitives. */}
+          <span key={undoMessage}>{undoMessage}</span>
           <button type="button" onClick={onUndo}>
             Undo
           </button>
@@ -396,7 +416,13 @@ export function ItineraryScreen({
       )}
 
       {lastAssistant && !chatLoading && noteVisible && (
-        <div className="hp-assistant-note">{lastAssistant.content}</div>
+        // Keyed on the reply id so each new one mounts a fresh element — this is
+        // Claude's account of what it just changed, the one thing here that most
+        // wants to be readable in the reader's own language and most misleads if
+        // it goes stale. See Value in ui/primitives.
+        <div className="hp-assistant-note" key={lastAssistant.id}>
+          {lastAssistant.content}
+        </div>
       )}
 
       <div className="hp-chat-bar">
@@ -554,13 +580,17 @@ function StopRow({
         }}
         {...handlers}
       >
+        {/* The time and the stop name both change in place when a chat edit
+            rewrites the day — the same stop id keeps the same DOM nodes — so
+            these are the two most important values in the app to keep out of a
+            translator's hands. See Value in ui/primitives. */}
         <div className="hp-stop-row-text">
           <span className="hp-stop-row-time">
-            {time}
+            <Value>{time}</Value>
             {updated && <span className="hp-updated-tag"> · UPDATED</span>}
             {!updated && next && <span className="hp-next-tag"> · NEXT</span>}
           </span>
-          <strong>{stop.name}</strong>
+          <strong translate="no">{stop.name}</strong>
         </div>
         <button
           type="button"
