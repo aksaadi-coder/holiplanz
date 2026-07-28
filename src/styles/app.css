@@ -22,23 +22,19 @@
    a stale value after Safari's toolbar collapsed, shoving the TabBar out of
    place until a full reload.
 
-   `svh` rather than `dvh`, which is the fix for a second bug with the same
-   symptom. `dvh` follows anything that dynamically resizes the viewport — and
-   on Android that includes the keyboard and the date picker. Opening the date
-   field shrank the shell, and when the picker closed the shell stayed short,
-   leaving a dead strip of paper below the tab bar until the app was reopened.
-   `svh` is the *smallest* viewport height: a stable number that no transient
-   UA chrome can move.
+   `dvh`, and not `svh` — this was tried and reverted, so it's worth writing
+   down. `svh` is the height with the browser's toolbars *shown*. On iPhone,
+   Safari's bottom toolbar collapses as soon as you interact, so `svh` left the
+   shell around 85px short of the visible area permanently, with a strip of
+   paper under the tab bar. `dvh` is the only unit that tracks what is actually
+   visible.
 
-   Nothing is lost by giving up `dvh` here, because the dynamic part never
-   applied: body sets `overflow: hidden` and every screen scrolls inside its
-   own container, so the page itself never scrolls and the browser toolbar
-   never retracts. dvh and svh are therefore the same value in practice — svh
-   just can't be shrunk by a keyboard. See also interactive-widget in
-   index.html, which stops the resize at source. */
+   The keyboard problem that `svh` was meant to solve is not a units problem at
+   all: iOS scrolls the document to reveal a focused input and doesn't always
+   scroll back. That's handled in utils/viewportPin.ts. */
 .app {
   position: relative;
-  height: 100svh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
