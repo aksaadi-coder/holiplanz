@@ -433,7 +433,8 @@ function App() {
   return (
     <div className="app">
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
-      <div className="hp-app-body">{renderScreen()}</div>
+      {/* has-tabbar pads the body by the fixed bar's height — see .hp-tabbar. */}
+      <div className={`hp-app-body ${showTabBar ? "has-tabbar" : ""}`.trim()}>{renderScreen()}</div>
       {showTabBar && <TabBar active={activeTab} onSelect={handleTabSelect} />}
     </div>
   );

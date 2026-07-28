@@ -22,17 +22,23 @@
    a stale value after Safari's toolbar collapsed, shoving the TabBar out of
    place until a full reload.
 
-   The height comes from `--app-h`, measured in JS — no viewport unit is right
-   in every mode this app runs in, and all three were tried on a real iPhone:
-   `vh` sits behind Safari's toolbar, `svh` reserves room for a toolbar that has
-   collapsed (~85px short in Safari), and `dvh` — correct in Safari and on
-   Android — comes up ~60px short when the app is installed to the home screen
-   and launched full-screen. `100dvh` remains the fallback here for the first
-   paint, before the script runs. See utils/viewportPin.ts, which also explains
-   why the keyboard is deliberately excluded from the measurement. */
+   `dvh` — which is correct in Safari and on Android, and is the one value here
+   confirmed on a real device. It is NOT correct when the app is installed to
+   the iPhone home screen and launched full-screen: there it comes up short and
+   leaves a strip of paper under the tab bar. That is a known open bug.
+
+   Three other things have been tried and are ruled out, so don't repeat them:
+   `vh` sits behind Safari's toolbar; `svh` reserves room for a toolbar that has
+   collapsed, leaving ~85px short in Safari; and a JS measurement of
+   `visualViewport.height` (see utils/viewportPin.ts, which still publishes it
+   as `--app-h` for diagnosis) made standalone *worse*, not better — so
+   whatever standalone is short by, the visual viewport is short by it too.
+   The remaining candidate is that iOS reports a reduced viewport under a
+   translucent status bar, which needs a measurement from the device to
+   confirm before another change lands here. */
 .app {
   position: relative;
-  height: var(--app-h, 100dvh);
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -53,6 +59,13 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+/* The tab bar is fixed, so it no longer reserves its own space — the body has
+   to leave room for it. --tabbar-h is published by TabBar from its own measured
+   height (including the safe-area cushion), so the two cannot drift apart; the
+   fallback only covers the frame before that first measurement lands. */
+.hp-app-body.has-tabbar {
+  padding-bottom: var(--tabbar-h, 78px);
 }
 
 .hp-screen {
@@ -693,7 +706,24 @@
    shell height was unbounded, and it papered over that bug rather than
    fixing it. Keep .app's height definite and this stays put on its own. */
 .hp-tabbar {
-  flex: none;
+  /* Pinned to the bottom of the viewport rather than sitting at the end of the
+     shell, and this is the point: it no longer depends on the shell resolving
+     to exactly the right height. Every attempt to get that height right from
+     CSS was correct in one mode and wrong in another — Safari vs. the installed
+     full-screen app — and a bar anchored to `bottom: 0` is at the bottom of the
+     screen in both, whatever the shell does.
+
+     z-index 10 keeps today's layering exactly: above ordinary content, below
+     the card/hotel detail backdrop (20) and the bottom sheets (50), so a modal
+     still covers it. Matches .app's own width so it stays a phone-width column
+     centred on a wide screen. */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  max-width: 430px;
+  z-index: 10;
   display: flex;
   border-top: 1px solid var(--stone);
   background: var(--paper);

@@ -33,12 +33,12 @@
    that sliver even though every screen scrolls internally. overflow: hidden on
    body makes that structural — page-level scroll is never the mechanism here.
 
-   Must match .app exactly — including the JS-measured --app-h it now uses. See
-   the note there for why no CSS viewport unit is correct in every mode. */
+   Must match .app exactly. See the note there for what has been tried, what is
+   ruled out, and why the full-screen home-screen app is still short. */
 html,
 body,
 #root {
-  height: var(--app-h, 100dvh);
+  height: 100dvh;
   margin: 0;
   overscroll-behavior-y: none;
 }
