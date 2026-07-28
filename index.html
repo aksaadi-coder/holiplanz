@@ -6,7 +6,17 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <!-- interactive-widget=resizes-visual: when the on-screen keyboard or a
+         native picker opens, shrink only the visual viewport and leave the
+         layout alone. Without it Android shrinks the layout viewport, the app
+         shell resizes with it, and after the date picker closes the shell can
+         stay at the smaller height — leaving a dead strip below the tab bar
+         until the app is reopened. The browser still scrolls a focused field
+         into view, so nothing is hidden behind the keyboard. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual"
+    />
     <meta name="theme-color" content="#ff4c3f" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

@@ -17,16 +17,28 @@
    scrolls instead, dragging fixed-position furniture (the header, day chips,
    tab bar) out of view and leaking scroll position between screens.
 
-   It must also be `dvh`, not `%`. A percentage chain (html/body/#root/.app)
-   resolves against the *layout* viewport, which doesn't track Safari's
-   dynamic toolbar; that's what let the shell's height get stuck at a stale
-   value after the toolbar collapsed/expanded (e.g. during the full-bleed
-   GenerationScreen) and shoved the TabBar out of place until a full reload.
-   `dvh` tracks the visual viewport, so it stays correct through those
-   transitions. Definite + dvh is what satisfies both constraints. */
+   It must also be a viewport unit, not `%`. A percentage chain
+   (html/body/#root/.app) resolves against the layout viewport and got stuck at
+   a stale value after Safari's toolbar collapsed, shoving the TabBar out of
+   place until a full reload.
+
+   `svh` rather than `dvh`, which is the fix for a second bug with the same
+   symptom. `dvh` follows anything that dynamically resizes the viewport — and
+   on Android that includes the keyboard and the date picker. Opening the date
+   field shrank the shell, and when the picker closed the shell stayed short,
+   leaving a dead strip of paper below the tab bar until the app was reopened.
+   `svh` is the *smallest* viewport height: a stable number that no transient
+   UA chrome can move.
+
+   Nothing is lost by giving up `dvh` here, because the dynamic part never
+   applied: body sets `overflow: hidden` and every screen scrolls inside its
+   own container, so the page itself never scrolls and the browser toolbar
+   never retracts. dvh and svh are therefore the same value in practice — svh
+   just can't be shrunk by a keyboard. See also interactive-widget in
+   index.html, which stops the resize at source. */
 .app {
   position: relative;
-  height: 100dvh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   overflow: hidden;

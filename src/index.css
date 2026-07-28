@@ -27,16 +27,19 @@
   box-sizing: border-box;
 }
 
-/* dvh, not %, all the way down: a percentage chain resolves against the
-   layout viewport, which on iOS Safari stays at its toolbar-hidden size. That
-   left the chain up to ~toolbar-height taller than .app's 100dvh, so the page
-   itself could still scroll by that sliver even though every screen scrolls
-   internally. overflow: hidden on body makes that structural — page-level
-   scroll is never the mechanism here; see .app in styles/app.css. */
+/* A viewport unit, not %, all the way down: a percentage chain resolves
+   against the layout viewport, which on iOS Safari stays at its toolbar-hidden
+   size. That left the chain taller than .app, so the page could still scroll by
+   that sliver even though every screen scrolls internally. overflow: hidden on
+   body makes that structural — page-level scroll is never the mechanism here.
+
+   svh must match .app exactly; see the long note there for why it's svh and not
+   dvh (short version: dvh follows the Android keyboard and the date picker, and
+   didn't recover when they closed). */
 html,
 body,
 #root {
-  height: 100dvh;
+  height: 100svh;
   margin: 0;
   overscroll-behavior-y: none;
 }
@@ -195,7 +198,9 @@ body {
 }
 
 .access-gate {
-  min-height: 100vh;
+  /* svh, matching the app shell — plain vh is the *largest* viewport, which
+     puts the bottom of this screen behind the browser toolbar. */
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
