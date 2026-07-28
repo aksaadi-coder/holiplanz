@@ -27,14 +27,12 @@
   box-sizing: border-box;
 }
 
-/* A viewport unit, not %, all the way down: a percentage chain resolves
-   against the layout viewport, which on iOS Safari stays at its toolbar-hidden
-   size. That left the chain taller than .app, so the page could still scroll by
-   that sliver even though every screen scrolls internally. overflow: hidden on
-   body makes that structural — page-level scroll is never the mechanism here.
-
-   Must match .app exactly. See the note there for what has been tried, what is
-   ruled out, and why the full-screen home-screen app is still short. */
+/* dvh, not %, all the way down: a percentage chain resolves against the
+   layout viewport, which on iOS Safari stays at its toolbar-hidden size. That
+   left the chain up to ~toolbar-height taller than .app's 100dvh, so the page
+   itself could still scroll by that sliver even though every screen scrolls
+   internally. overflow: hidden on body makes that structural — page-level
+   scroll is never the mechanism here; see .app in styles/app.css. */
 html,
 body,
 #root {
@@ -197,9 +195,7 @@ body {
 }
 
 .access-gate {
-  /* dvh, matching the app shell — plain vh is the *largest* viewport, which
-     puts the bottom of this screen behind the browser toolbar. */
-  min-height: 100dvh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
