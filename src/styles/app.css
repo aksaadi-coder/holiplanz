@@ -727,12 +727,22 @@
   display: flex;
   border-top: 1px solid var(--stone);
   background: var(--paper);
-  /* max() keeps a minimum cushion even on devices/browsers that report 0 for
-     the safe-area inset, so the bar never sits flush against a home
-     indicator or on-screen gesture bar. Everything below the icon/label
-     (this padding + .hp-tab's own bottom padding) should be just that
-     cushion — no extra dead space above it. */
-  padding-bottom: max(env(safe-area-inset-bottom), 6px);
+  /* This padding — not the bar's position — is what made the bar look like it
+     was "sitting high" in the installed full-screen app, and it survived every
+     fix aimed at the shell height because the bar's box was already on the
+     bottom edge.
+
+     In Safari the inset reads 0 (the browser's own toolbar occupies that strip)
+     so the cushion is 6px and the bar looks right. Installed to the home
+     screen it reads the full 34pt reserved for the home indicator, which put
+     the labels ~41px up with paper below them.
+
+     Reserving the whole inset is more than the bar needs: it is fixed to
+     `bottom: 0`, so its background already runs to the physical edge and under
+     the indicator — only the labels need to clear it. Subtracting 20px keeps a
+     14pt cushion there while leaving Safari untouched, since max() floors both
+     at 6px. */
+  padding-bottom: max(calc(env(safe-area-inset-bottom) - 20px), 6px);
 }
 .hp-tab {
   flex: 1;
