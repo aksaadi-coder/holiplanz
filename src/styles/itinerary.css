@@ -313,18 +313,35 @@
 }
 
 /* ---- Assistant note above the chat bar ---- */
+/* Stays until dismissed — see the note in ItineraryScreen for why it can't
+   simply follow chatHistory. The close button is aligned to the first line
+   rather than centred, so it doesn't drift down the card as the reply runs to
+   two or three lines. */
 .hp-assistant-note {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   margin: 0 22px 10px;
   background: #fff;
   border-radius: 16px;
-  padding: 16px 18px;
+  padding: 16px 14px 16px 18px;
   font-family: var(--font-ui);
   font-size: 17px;
+  line-height: 1.45;
   color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--stone);
   animation: hp-up 0.2s ease;
+}
+.hp-assistant-note > span {
+  flex: 1;
+  min-width: 0;
+}
+.hp-assistant-note-close {
+  flex: none;
+  margin-top: -2px;
+  color: rgba(0, 0, 0, 0.4);
 }
 
 /* ---- "Updating your trip…" progress note — same slot as the assistant

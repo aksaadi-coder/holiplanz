@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -34,6 +34,7 @@ import { ChecklistScreen } from "../components/itinerary/ChecklistScreen";
 import { CHECKLIST_ITEMS } from "../data/checklistItems";
 import {
   InfoIcon,
+  CloseIcon,
   GripIcon,
   MapTargetIcon,
   ChevronDownIcon,
@@ -151,17 +152,25 @@ export function ItineraryScreen({
         : "";
   const lastAssistant = [...chatHistory].reverse().find((m) => m.role === "assistant");
 
-  // The assistant's reply note is a transient confirmation, not a permanent
-  // fixture — it used to stick around forever (persisted chatHistory never
-  // clears it) and sit over the itinerary. Auto-hide it a few seconds after
-  // each new reply; a newer reply resets the timer.
-  const [noteVisible, setNoteVisible] = useState(false);
+  // The assistant's reply stays until it's dismissed — it's an account of what
+  // just changed on screen, and six seconds wasn't long enough to read it
+  // against the itinerary it describes.
+  //
+  // Which means it can't simply render whenever chatHistory has a reply in it:
+  // that history is persisted, so the last reply would greet you again on every
+  // reload and every return to this tab, with nothing to explain it. So the
+  // note is tied to a reply *arriving* while the screen is open. The ref starts
+  // at whatever was already in history at mount, and only an id different from
+  // that counts as new.
+  const [openNoteId, setOpenNoteId] = useState<string | null>(null);
+  const seenNoteRef = useRef<string | undefined>(lastAssistant?.id);
   useEffect(() => {
-    if (!lastAssistant) return;
-    setNoteVisible(true);
-    const timer = setTimeout(() => setNoteVisible(false), 6000);
-    return () => clearTimeout(timer);
+    const id = lastAssistant?.id;
+    if (!id || id === seenNoteRef.current) return;
+    seenNoteRef.current = id;
+    setOpenNoteId(id);
   }, [lastAssistant?.id]);
+  const noteVisible = Boolean(openNoteId) && openNoteId === lastAssistant?.id;
 
   function handleDragStart(event: DragStartEvent) {
     const stop = day?.stops.find((s) => s.id === event.active.id);
@@ -456,8 +465,16 @@ export function ItineraryScreen({
         // Claude's account of what it just changed, the one thing here that most
         // wants to be readable in the reader's own language and most misleads if
         // it goes stale. See Value in ui/primitives.
-        <div className="hp-assistant-note" key={lastAssistant.id}>
-          {lastAssistant.content}
+        <div className="hp-assistant-note" key={lastAssistant.id} role="status">
+          <span>{lastAssistant.content}</span>
+          <button
+            type="button"
+            className="hp-icon-btn hp-assistant-note-close"
+            aria-label="Dismiss"
+            onClick={() => setOpenNoteId(null)}
+          >
+            <CloseIcon size={18} />
+          </button>
         </div>
       )}
 
