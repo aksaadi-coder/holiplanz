@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Chip, Toggle } from "../ui/primitives";
 import { CURRENCY_OPTIONS } from "../../hooks/useAccountPrefs";
-import { convertMoney, currencyCodeFromLabel, parseMoney } from "../../utils/currency";
+import { convertMoney, currencyCodeFromLabel, formatMoney, parseMoney } from "../../utils/currency";
 
 interface Props {
   open: boolean;
@@ -19,6 +19,32 @@ interface Props {
   onBudgetTargetChange: (target: string | null) => void;
   /** Sends the rewritten preferences to the planner as a chat instruction. */
   onApply: (message: string) => void;
+}
+
+/** Rounds up to the nearest 1, 2 or 5 × a power of ten — so a slider's step is
+ *  always a number a person would pick, in yen as readily as in euros. */
+function niceStep(raw: number): number {
+  const magnitude = 10 ** Math.floor(Math.log10(Math.max(raw, 1)));
+  const normalised = raw / magnitude;
+  const stepped = normalised <= 1 ? 1 : normalised <= 2 ? 2 : normalised <= 5 ? 5 : 10;
+  return stepped * magnitude;
+}
+
+/**
+ * A range around the trip's own estimate — roughly a third of it up to two and
+ * a half times — so the slider lands where this particular trip actually sits
+ * instead of on some fixed scale. With no estimate yet it anchors on a
+ * mid-range trip converted into the display currency, which keeps it sane in
+ * yen and rupees without a second rate table here.
+ */
+function budgetRange(estimate: number | null, code: string) {
+  const anchor = estimate ?? parseMoney(convertMoney("USD 2000", code))?.amount ?? 2000;
+  const step = niceStep((anchor * 2.2) / 40);
+  return {
+    step,
+    min: Math.max(step, Math.floor((anchor * 0.3) / step) * step),
+    max: Math.ceil((anchor * 2.5) / step) * step,
+  };
 }
 
 const STYLE_OPTIONS = ["Family getaway", "Adventurous", "Romantic", "Relaxed", "Cultural", "Foodie"];
@@ -61,13 +87,32 @@ export function PreferencesScreen({
   );
   const [kidFriendly, setKidFriendly] = useState(() => /kid|child|family/.test(seed));
   const [avoidWalks, setAvoidWalks] = useState(false);
-  // Digits only. The currency is shown beside the field rather than typed, so
-  // there's no parsing a mixed "€1,200" out of user input, and the number the
-  // planner is told matches the number on screen.
-  const [budget, setBudget] = useState(() => {
-    const existing = budgetTarget ?? (currentBudgetTotal ? convertMoney(currentBudgetTotal, code) : "");
-    return existing ? String(parseMoney(existing)?.amount ?? "") : "";
+  // The slider carries a number, not text — nothing to parse, nothing to
+  // mistype, and the figure shown is exactly what the planner is told. The
+  // currency it's counted in rides along, because the chips at the bottom of
+  // this screen can change it while the slider is sitting there.
+  const estimate = currentBudgetTotal
+    ? parseMoney(convertMoney(currentBudgetTotal, code))?.amount ?? null
+    : null;
+  const range = budgetRange(estimate, code);
+  const snap = (amount: number) => Math.round(amount / range.step) * range.step;
+  const [budget, setBudget] = useState<{ amount: number | null; code: string }>(() => {
+    const existing = budgetTarget
+      ? parseMoney(convertMoney(budgetTarget, code))?.amount ?? null
+      : estimate;
+    return { amount: existing === null ? null : snap(existing), code };
   });
+
+  // Switching currency has to move the figure, not just its symbol — a €1,200
+  // target is $1,300, and leaving "1,200" on screen under a dollar sign would
+  // quietly change what the user is asking for.
+  if (budget.code !== code) {
+    const converted =
+      budget.amount === null
+        ? null
+        : parseMoney(convertMoney(`${budget.code} ${budget.amount}`, code))?.amount ?? null;
+    setBudget({ amount: converted === null ? null : snap(converted), code });
+  }
 
   // Only a field the user actually interacted with this session gets sent —
   // separate from the value itself, since a seed-matched value is "true but
@@ -86,14 +131,14 @@ export function PreferencesScreen({
 
   if (!open) return null;
 
-  const budgetAmount = budget.trim() ? Number(budget.replace(/[^\d.]/g, "")) : null;
-  const budgetValid = budgetAmount !== null && Number.isFinite(budgetAmount) && budgetAmount > 0;
+  const amount = budget.amount;
+  const budgetValid = amount !== null && Number.isFinite(amount) && amount > 0;
 
   function handleApply() {
     // The target is remembered whether or not it changed anything else, so the
     // Budget screen can keep showing "against your target" afterwards.
     if (touched.budget) {
-      onBudgetTargetChange(budgetValid ? `${code} ${Math.round(budgetAmount!)}` : null);
+      onBudgetTargetChange(budgetValid ? `${code} ${Math.round(amount!)}` : null);
     }
 
     const changes = [
@@ -103,7 +148,7 @@ export function PreferencesScreen({
       touched.kidFriendly && kidFriendly ? "favour kid-friendly picks" : null,
       touched.avoidWalks && avoidWalks ? "avoid long walks between stops" : null,
       touched.budget && budgetValid
-        ? `a total trip budget of about ${code} ${Math.round(budgetAmount!).toLocaleString("en-US")} ` +
+        ? `a total trip budget of about ${code} ${Math.round(amount!).toLocaleString("en-US")} ` +
           `— choose stops, food and stays that fit it, and return an updated budget breakdown`
         : null,
     ].filter((c): c is string => Boolean(c));
@@ -202,30 +247,42 @@ export function PreferencesScreen({
 
         <p className="hp-label hp-prefs-gap">Budget</p>
         <div className="hp-prefs-budget">
-          <span className="hp-prefs-budget-code" translate="no">{code}</span>
+          <div className="hp-prefs-budget-value">
+            {amount === null ? (
+              <span className="hp-prefs-budget-none">No target set</span>
+            ) : (
+              <b translate="no">{formatMoney(amount, code)}</b>
+            )}
+            {amount !== null && (
+              <button
+                type="button"
+                className="hp-prefs-budget-clear"
+                onClick={() => {
+                  setBudget({ amount: null, code });
+                  markTouched("budget");
+                }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
           <input
-            type="text"
-            inputMode="numeric"
-            value={budget}
+            className="hp-prefs-budget-slider"
+            type="range"
+            min={range.min}
+            max={range.max}
+            step={range.step}
+            value={amount ?? estimate ?? range.min}
             onChange={(e) => {
-              setBudget(e.target.value.replace(/[^\d]/g, ""));
+              setBudget({ amount: Number(e.target.value), code });
               markTouched("budget");
             }}
-            placeholder="No target set"
             aria-label={`Total trip budget in ${code}`}
           />
-          {budget && (
-            <button
-              type="button"
-              className="hp-prefs-budget-clear"
-              onClick={() => {
-                setBudget("");
-                markTouched("budget");
-              }}
-            >
-              Clear
-            </button>
-          )}
+          <div className="hp-prefs-budget-ends" translate="no">
+            <span>{formatMoney(range.min, code)}</span>
+            <span>{formatMoney(range.max, code)}</span>
+          </div>
         </div>
         <p className="hp-acct-note">
           What you'd like the whole trip to cost. The planner will pick stops, food and stays to fit,

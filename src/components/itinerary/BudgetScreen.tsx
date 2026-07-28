@@ -122,13 +122,20 @@ export function BudgetScreen({
                 const before = previousLines.get(line.label);
                 const delta = before ? diffMoney(before.amount, line.amount, code) : null;
                 const shifted = delta && delta.direction !== "same";
-                // The marker answers a different question from the figure beside
-                // it: the figure says what this category now costs, the marker
-                // says whether its share of the trip moved. Trimming everything
-                // by a quarter changes every amount and no share — drawing a
-                // marker on top of the fill edge there would look like a glitch
-                // and claim a change in the mix that didn't happen.
+                // The coloured band answers a different question from the
+                // figure beside it: the figure says what this category now
+                // costs, the band says whether its share of the trip moved and
+                // by how much. Trimming everything by a quarter changes every
+                // amount and no share — painting a band there would claim a
+                // change in the mix that didn't happen.
                 const mixMoved = before !== undefined && Math.abs(before.share - line.share) >= 1;
+                const band = mixMoved && before
+                  ? {
+                      grew: line.share > before.share,
+                      from: Math.max(0, Math.min(100, Math.min(before.share, line.share))),
+                      width: Math.min(100, Math.abs(line.share - before.share)),
+                    }
+                  : null;
                 return (
                   <div key={line.label}>
                     <div className="hp-budget-line-head">
@@ -144,14 +151,21 @@ export function BudgetScreen({
                     </div>
                     <div className="hp-budget-track">
                       <div
-                        className="hp-budget-fill"
+                        // A shrunk category's band starts exactly where the ink
+                        // now ends, so the ink drops its rounded cap there and
+                        // the two meet on one straight seam.
+                        className={`hp-budget-fill${band && !band.grew ? " is-butted" : ""}`}
                         style={{ width: `${Math.max(0, Math.min(100, line.share))}%` }}
                       />
-                      {/* Where this category's share sat before the edit. */}
-                      {mixMoved && before && (
+                      {/* The slice of the bar that changed. Growth is painted
+                          inside the new fill, so coral reads as "this took more
+                          of the trip"; a reduction is painted beyond it, on the
+                          empty track, reading as "this gave that back". Either
+                          way the band's own width is the size of the change. */}
+                      {band && (
                         <span
-                          className="hp-budget-was"
-                          style={{ left: `${Math.max(0, Math.min(100, before.share))}%` }}
+                          className={`hp-budget-band ${band.grew ? "is-added" : "is-removed"}`}
+                          style={{ left: `${band.from}%`, width: `${band.width}%` }}
                           aria-hidden
                         />
                       )}
@@ -163,7 +177,8 @@ export function BudgetScreen({
 
             {anyMixMoved && (
               <p className="hp-budget-legend">
-                The line marks where a category's share of the trip sat before your last change.
+                Coral marks how a category's share of the trip changed — filled where it took more,
+                outlined where it gave some back.
               </p>
             )}
 

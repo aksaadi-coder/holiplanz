@@ -445,6 +445,7 @@
 }
 .hp-budget-track {
   position: relative;
+  overflow: hidden;
   height: 8px;
   border-radius: 4px;
   background: var(--stone);
@@ -453,6 +454,9 @@
   height: 8px;
   border-radius: 4px;
   background: var(--ink);
+}
+.hp-budget-fill.is-butted {
+  border-radius: 4px 0 0 4px;
 }
 /* ---- Before/after layer, shown only once an edit has moved the numbers ----
    Direction is never carried by colour alone: every figure is signed, the
@@ -496,16 +500,29 @@
 .hp-budget-line-delta.is-down {
   color: var(--ink);
 }
-/* Where the category sat before the edit — a 2px tick straddling the track, so
-   the distance it moved is readable at a glance. */
-.hp-budget-was {
+/* The changed slice of the bar, sized to the change itself.
+
+   Growth sits *inside* the new ink fill, so solid coral reads as "this took
+   more of the trip". A reduction sits *beyond* the fill on the empty track, so
+   it's outlined rather than solid — the space is no longer spent, and filling
+   it solidly would read as though it still were. Both are coral because both
+   are the same story: this is what your edit moved. */
+.hp-budget-band {
   position: absolute;
-  top: -3px;
-  bottom: -3px;
-  width: 2px;
-  margin-left: -1px;
-  border-radius: 1px;
-  background: rgba(0, 0, 0, 0.55);
+  top: 0;
+  bottom: 0;
+  /* A band always begins at a fill edge — the old one when the share grew, the
+     new one when it shrank — so the left side stays square; a rounded corner
+     there pinches away from the ink it is measured against. The right side
+     keeps the track's radius, which is the only side that reaches a bar end. */
+  border-radius: 0 4px 4px 0;
+}
+.hp-budget-band.is-added {
+  background: var(--coral);
+}
+.hp-budget-band.is-removed {
+  background: rgba(249, 92, 75, 0.16);
+  box-shadow: inset 0 0 0 1.5px var(--coral);
 }
 .hp-budget-legend {
   margin: 18px 0 0;
@@ -565,54 +582,111 @@
 .hp-prefs-row:first-of-type {
   margin-top: 12px;
 }
-/* ---- Budget target field ----
-   The currency sits beside the field rather than inside it, so what the user
-   types is only digits — nothing to parse a symbol out of, and the number sent
-   to the planner is exactly the number on screen. */
+/* ---- Budget target slider ----
+   A slider rather than a field: the number is a rough intention, not an exact
+   figure, and dragging says that better than typing does. The range is derived
+   from the trip's own estimate (see budgetRange) so the useful values sit in
+   the middle of the travel rather than at one end. */
 .hp-prefs-budget {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
   background: var(--panel);
   box-shadow: inset 0 0 0 1px var(--stone);
   border-radius: 14px;
-  padding: 4px 14px 4px 16px;
+  padding: 16px 18px 12px;
 }
-.hp-prefs-budget-code {
-  flex: none;
-  font-family: var(--font-ui);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: rgba(0, 0, 0, 0.45);
+.hp-prefs-budget-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
 }
-.hp-prefs-budget input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  padding: 14px 0;
+.hp-prefs-budget-value b {
   font-family: var(--font-ui);
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--ink);
 }
-.hp-prefs-budget input::placeholder {
-  font-size: 17px;
+.hp-prefs-budget-none {
+  font-family: var(--font-ui);
+  font-size: 19px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.35);
 }
 .hp-prefs-budget-clear {
-  flex: none;
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 8px 2px;
+  padding: 4px 2px;
   font-family: var(--font-ui);
   font-size: 14px;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.4);
+}
+.hp-prefs-budget-ends {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+/* The track and thumb need styling per engine — an unstyled range control
+   brings its own blue and its own proportions, neither of which belong here. */
+.hp-prefs-budget-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.hp-prefs-budget-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--stone);
+}
+.hp-prefs-budget-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--stone);
+}
+.hp-prefs-budget-slider::-moz-range-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ink);
+}
+.hp-prefs-budget-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -10px;
+  border: none;
+  border-radius: 50%;
+  background: var(--ink);
+  /* The one shadow in the app: a control you drag needs to sit above the
+     surface it moves along, and a hairline can't say that. */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.hp-prefs-budget-slider::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.hp-prefs-budget-slider:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+}
+.hp-prefs-budget-slider:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
 }
 
 .hp-prefs-apply {
