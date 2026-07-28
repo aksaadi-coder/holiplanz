@@ -108,9 +108,48 @@ export function parseMoney(raw: string): ParsedMoney | null {
   return null;
 }
 
-function formatMoney(amount: number, code: string): string {
+/** Renders a bare number as money in the given currency: 1200, "EUR" → "€1,200".
+ *  convertMoney returns its input untouched when no conversion is needed, so
+ *  anything built from a raw amount has to come through here to get a symbol
+ *  and thousands separators. */
+export function formatMoney(amount: number, code: string): string {
   const symbol = CODE_TO_SYMBOL[code] ?? `${code} `;
   return `${symbol}${Math.round(amount).toLocaleString("en-US")}`;
+}
+
+export interface MoneyDelta {
+  /** Signed difference, in the target currency's units. */
+  amount: number;
+  /** "+€140" / "−€60", already converted and symbolised. Uses a real minus
+   *  sign rather than a hyphen so it lines up with the digits. */
+  label: string;
+  direction: "up" | "down" | "same";
+  /** Percentage of the earlier figure, for "12% more" style copy. Null when
+   *  the earlier figure was zero or unparseable. */
+  percent: number | null;
+}
+
+/**
+ * What changed between two formatted figures, for showing a before/after on
+ * the budget. Returns null when either side can't be parsed — the figures come
+ * from the model as free text, so that has to be survivable rather than thrown.
+ */
+export function diffMoney(before: string, after: string, toCode: string): MoneyDelta | null {
+  const a = parseMoney(convertMoney(before, toCode));
+  const b = parseMoney(convertMoney(after, toCode));
+  if (!a || !b) return null;
+
+  const amount = b.amount - a.amount;
+  const rounded = Math.round(amount);
+  const symbol = CODE_TO_SYMBOL[toCode] ?? `${toCode} `;
+  const magnitude = `${symbol}${Math.abs(rounded).toLocaleString("en-US")}`;
+
+  return {
+    amount: rounded,
+    label: rounded === 0 ? "no change" : `${rounded > 0 ? "+" : "−"}${magnitude}`,
+    direction: rounded === 0 ? "same" : rounded > 0 ? "up" : "down",
+    percent: a.amount ? Math.round((amount / a.amount) * 100) : null,
+  };
 }
 
 /**

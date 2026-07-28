@@ -444,16 +444,76 @@
   color: rgba(0, 0, 0, 0.5);
 }
 .hp-budget-track {
+  position: relative;
   height: 8px;
   border-radius: 4px;
   background: var(--stone);
-  overflow: hidden;
 }
 .hp-budget-fill {
   height: 8px;
   border-radius: 4px;
   background: var(--ink);
 }
+/* ---- Before/after layer, shown only once an edit has moved the numbers ----
+   Direction is never carried by colour alone: every figure is signed, the
+   marker is visible either way, and the words say "over"/"under". Coral is the
+   app's attention colour, so it takes "up"; a decrease is ink, which reads as
+   settled rather than alarming. */
+.hp-budget-delta {
+  margin: 0 0 4px;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.5);
+}
+.hp-budget-delta.is-up {
+  color: var(--coral);
+}
+.hp-budget-delta.is-down {
+  color: var(--ink);
+}
+.hp-budget-target {
+  margin: 0 0 18px;
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.5);
+}
+.hp-budget-target.is-up {
+  color: var(--coral);
+}
+.hp-budget-line-figures {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.hp-budget-line-delta {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: rgba(0, 0, 0, 0.45);
+}
+.hp-budget-line-delta.is-up {
+  color: var(--coral);
+}
+.hp-budget-line-delta.is-down {
+  color: var(--ink);
+}
+/* Where the category sat before the edit — a 2px tick straddling the track, so
+   the distance it moved is readable at a glance. */
+.hp-budget-was {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: rgba(0, 0, 0, 0.55);
+}
+.hp-budget-legend {
+  margin: 18px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.4);
+}
+
 .hp-budget-note {
   border-top: 1px solid var(--stone);
   margin-top: 26px;
@@ -505,6 +565,56 @@
 .hp-prefs-row:first-of-type {
   margin-top: 12px;
 }
+/* ---- Budget target field ----
+   The currency sits beside the field rather than inside it, so what the user
+   types is only digits — nothing to parse a symbol out of, and the number sent
+   to the planner is exactly the number on screen. */
+.hp-prefs-budget {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--stone);
+  border-radius: 14px;
+  padding: 4px 14px 4px 16px;
+}
+.hp-prefs-budget-code {
+  flex: none;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(0, 0, 0, 0.45);
+}
+.hp-prefs-budget input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 14px 0;
+  font-family: var(--font-ui);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.hp-prefs-budget input::placeholder {
+  font-size: 17px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.35);
+}
+.hp-prefs-budget-clear {
+  flex: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px 2px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.4);
+}
+
 .hp-prefs-apply {
   flex-shrink: 0;
   margin: 0 24px 24px;

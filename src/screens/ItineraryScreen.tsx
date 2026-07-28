@@ -10,7 +10,7 @@ import {
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { AccommodationOption, ChatMessage, Itinerary, Stop } from "../types";
+import type { AccommodationOption, ChatMessage, Itinerary, Stop, TripBudget } from "../types";
 import { reorderStopWithinDay, deleteStop } from "../utils/itineraryEdit";
 import { scheduleForDay, getNextUp } from "../utils/schedule";
 import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
@@ -65,6 +65,11 @@ interface Props {
   onCurrencyChange: (currency: string) => void;
   checklistDone: Set<string>;
   onToggleChecklistItem: (itemId: string) => void;
+  /** What the user wants the trip to cost, and the budget as it was before the
+   *  last edit — both client-side only; see useActiveTrip. */
+  budgetTarget: string | null;
+  onBudgetTargetChange: (target: string | null) => void;
+  previousBudget?: TripBudget | null;
   /** Opens straight to the Confirm sheet — used by the Trips tab's "Trip over" nudge. */
   initialConfirmOpen?: boolean;
   membership: Membership;
@@ -88,6 +93,9 @@ export function ItineraryScreen({
   onCurrencyChange,
   checklistDone,
   onToggleChecklistItem,
+  budgetTarget,
+  onBudgetTargetChange,
+  previousBudget,
   initialConfirmOpen = false,
   membership,
 }: Props) {
@@ -541,6 +549,8 @@ export function ItineraryScreen({
       <BudgetScreen
         open={budgetOpen}
         budget={itinerary.budget}
+        previousBudget={previousBudget}
+        target={budgetTarget}
         currency={currency}
         onClose={() => setBudgetOpen(false)}
         onOpenPreferences={() => {
@@ -557,6 +567,9 @@ export function ItineraryScreen({
         currentPreferences={itinerary.preferences}
         currency={currency}
         onCurrencyChange={onCurrencyChange}
+        currentBudgetTotal={itinerary.budget?.total}
+        budgetTarget={budgetTarget}
+        onBudgetTargetChange={onBudgetTargetChange}
         onClose={() => setPrefsOpen(false)}
         onApply={(message) => {
           if (!unlocked) {

@@ -62,6 +62,10 @@ function App() {
     toggleStopDone,
     checklistDone,
     toggleChecklistItem,
+    budgetTarget,
+    setBudgetTarget,
+    previousBudget,
+    setPreviousBudget,
   } = useActiveTrip();
   const savedTrips = useSavedTrips();
   const nav = useAppNav();
@@ -205,6 +209,12 @@ function App() {
     if (!itinerary) return;
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
     setUndo({ snapshot: itinerary, message });
+    // Remember the figures this edit replaced, so the Budget screen can show
+    // what it did. Only when they actually moved — a reorder shouldn't make the
+    // budget claim a change it didn't cause.
+    if (itinerary.budget && next.budget && itinerary.budget.total !== next.budget.total) {
+      setPreviousBudget(itinerary.budget);
+    }
     setItinerary(next);
     setUpdatedStopIds(new Set(changedIds));
     undoTimerRef.current = setTimeout(() => setUndo(null), 8000);
@@ -213,6 +223,10 @@ function App() {
   function handleUndo() {
     if (!undo) return;
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    // The change is being taken back, so there's no longer a "before" to
+    // compare against — leaving one would have the budget describe an edit
+    // that no longer exists.
+    setPreviousBudget(null);
     setItinerary(undo.snapshot);
     setUpdatedStopIds(new Set());
     setUndo(null);
@@ -342,6 +356,9 @@ function App() {
             onCurrencyChange={(currency) => accountPrefs.update({ currency })}
             checklistDone={checklistDone}
             onToggleChecklistItem={toggleChecklistItem}
+            budgetTarget={budgetTarget}
+            onBudgetTargetChange={setBudgetTarget}
+            previousBudget={previousBudget}
             initialConfirmOpen={screen.openConfirm ?? false}
             membership={membership}
           />

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Chip, Toggle } from "../ui/primitives";
 import { CURRENCY_OPTIONS } from "../../hooks/useAccountPrefs";
+import { convertMoney, currencyCodeFromLabel, parseMoney } from "../../utils/currency";
 
 interface Props {
   open: boolean;
@@ -10,6 +11,12 @@ interface Props {
   currency: string;
   onCurrencyChange: (currency: string) => void;
   onClose: () => void;
+  /** The trip's current estimate, used to seed the budget field so the user
+   *  edits a real number rather than guessing at one. */
+  currentBudgetTotal?: string;
+  /** A target the user has already set, if any. */
+  budgetTarget: string | null;
+  onBudgetTargetChange: (target: string | null) => void;
   /** Sends the rewritten preferences to the planner as a chat instruction. */
   onApply: (message: string) => void;
 }
@@ -30,9 +37,13 @@ export function PreferencesScreen({
   currentPreferences,
   currency,
   onCurrencyChange,
+  currentBudgetTotal,
+  budgetTarget,
+  onBudgetTargetChange,
   onClose,
   onApply,
 }: Props) {
+  const code = currencyCodeFromLabel(currency);
   // Chips reflect the trip's current preferences where we can detect them
   // (so the screen shows the truth), but nothing is pre-selected as a
   // fallback guess — an untouched field must stay untouched, otherwise
@@ -50,6 +61,13 @@ export function PreferencesScreen({
   );
   const [kidFriendly, setKidFriendly] = useState(() => /kid|child|family/.test(seed));
   const [avoidWalks, setAvoidWalks] = useState(false);
+  // Digits only. The currency is shown beside the field rather than typed, so
+  // there's no parsing a mixed "€1,200" out of user input, and the number the
+  // planner is told matches the number on screen.
+  const [budget, setBudget] = useState(() => {
+    const existing = budgetTarget ?? (currentBudgetTotal ? convertMoney(currentBudgetTotal, code) : "");
+    return existing ? String(parseMoney(existing)?.amount ?? "") : "";
+  });
 
   // Only a field the user actually interacted with this session gets sent —
   // separate from the value itself, since a seed-matched value is "true but
@@ -60,6 +78,7 @@ export function PreferencesScreen({
     spend: false,
     kidFriendly: false,
     avoidWalks: false,
+    budget: false,
   });
   function markTouched(key: keyof typeof touched) {
     setTouched((t) => ({ ...t, [key]: true }));
@@ -67,13 +86,26 @@ export function PreferencesScreen({
 
   if (!open) return null;
 
+  const budgetAmount = budget.trim() ? Number(budget.replace(/[^\d.]/g, "")) : null;
+  const budgetValid = budgetAmount !== null && Number.isFinite(budgetAmount) && budgetAmount > 0;
+
   function handleApply() {
+    // The target is remembered whether or not it changed anything else, so the
+    // Budget screen can keep showing "against your target" afterwards.
+    if (touched.budget) {
+      onBudgetTargetChange(budgetValid ? `${code} ${Math.round(budgetAmount!)}` : null);
+    }
+
     const changes = [
       touched.style && style ? `trip style "${style}"` : null,
       touched.pace && pace ? `pace "${pace}"` : null,
       touched.spend && spend ? `spending level "${spend}"` : null,
       touched.kidFriendly && kidFriendly ? "favour kid-friendly picks" : null,
       touched.avoidWalks && avoidWalks ? "avoid long walks between stops" : null,
+      touched.budget && budgetValid
+        ? `a total trip budget of about ${code} ${Math.round(budgetAmount!).toLocaleString("en-US")} ` +
+          `— choose stops, food and stays that fit it, and return an updated budget breakdown`
+        : null,
     ].filter((c): c is string => Boolean(c));
 
     // Nothing but currency (already applied live) changed — no itinerary
@@ -167,6 +199,38 @@ export function PreferencesScreen({
             label="Avoid long walks"
           />
         </div>
+
+        <p className="hp-label hp-prefs-gap">Budget</p>
+        <div className="hp-prefs-budget">
+          <span className="hp-prefs-budget-code" translate="no">{code}</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={budget}
+            onChange={(e) => {
+              setBudget(e.target.value.replace(/[^\d]/g, ""));
+              markTouched("budget");
+            }}
+            placeholder="No target set"
+            aria-label={`Total trip budget in ${code}`}
+          />
+          {budget && (
+            <button
+              type="button"
+              className="hp-prefs-budget-clear"
+              onClick={() => {
+                setBudget("");
+                markTouched("budget");
+              }}
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <p className="hp-acct-note">
+          What you'd like the whole trip to cost. The planner will pick stops, food and stays to fit,
+          and the trip budget will show how the new plan compares.
+        </p>
 
         <p className="hp-label hp-prefs-gap">Currency</p>
         <div className="hp-chip-group">
