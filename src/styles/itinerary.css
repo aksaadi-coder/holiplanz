@@ -6,7 +6,7 @@
   overflow: hidden;
 }
 
-/* ---- Header: "Japan · 7 days"  +  ⓘ Trip info ---- */
+/* ---- Header: just the trip name, e.g. "Japan · 7 days" ---- */
 .hp-itin-head {
   position: relative;
   z-index: 1;
@@ -28,39 +28,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.hp-itin-head-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-shrink: 0;
-}
-.hp-itin-info {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 4px;
-  font-family: var(--font-ui);
-  font-size: 15px;
-  color: rgba(0, 0, 0, 0.45);
-  flex-shrink: 0;
-}
-.hp-itin-save {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 4px;
-  color: rgba(0, 0, 0, 0.45);
-  flex-shrink: 0;
-}
-.hp-itin-save.is-saved {
-  color: var(--coral);
 }
 
 /* ---- Day chips ---- */
@@ -310,6 +277,15 @@
   font-size: 19px;
   font-weight: 700;
   color: var(--ink);
+}
+/* "Good to know" reuses this row, but its second line is a description of
+   what's inside rather than a value like the budget's money figure — so it
+   takes the row's shape without its weight. Selector is specific enough to win
+   over the rule above without !important. */
+.hp-budget-row strong.hp-goodtoknow-sub {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
 }
 
 /* ---- Assistant note above the chat bar ---- */

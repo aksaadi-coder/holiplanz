@@ -33,7 +33,6 @@ import { ConfirmScreen } from "../components/itinerary/ConfirmScreen";
 import { ChecklistScreen } from "../components/itinerary/ChecklistScreen";
 import { CHECKLIST_ITEMS } from "../data/checklistItems";
 import {
-  InfoIcon,
   CloseIcon,
   GripIcon,
   MapTargetIcon,
@@ -41,7 +40,6 @@ import {
   ChevronRightIcon,
   PlusCircleIcon,
   ArrowUpIcon,
-  BookmarkIcon,
   TrashIcon,
 } from "../components/ui/icons";
 
@@ -62,9 +60,6 @@ interface Props {
   completedStopIds: Set<string>;
   onToggleStopVisited: (stopId: string, visited: boolean) => void;
   onShowPassport: () => void;
-  /** Whether this trip is bookmarked in Account → Past trips. */
-  isSaved: boolean;
-  onToggleSave: () => void;
   /** Account currency preference, e.g. "USD ($)" — drives the trip budget display. */
   currency: string;
   onCurrencyChange: (currency: string) => void;
@@ -89,8 +84,6 @@ export function ItineraryScreen({
   completedStopIds,
   onToggleStopVisited,
   onShowPassport,
-  isSaved,
-  onToggleSave,
   currency,
   onCurrencyChange,
   checklistDone,
@@ -221,22 +214,11 @@ export function ItineraryScreen({
         {/* A place name and a day count, joined into one string: two adjacent
             expressions are exactly what a translator merges into a node React
             can no longer update. See Value in ui/primitives. */}
+        {/* The header is the trip name and nothing else now. The bookmark went
+            because saving already happens on its own when a passport is
+            generated, and "Trip info" moved into the list below, where it reads
+            as something you can open. */}
         <h1 translate="no">{`${cityName(itinerary.destination)} · ${dayLabel(itinerary.numDays)}`}</h1>
-        <div className="hp-itin-head-actions">
-          <button
-            type="button"
-            className={`hp-itin-save ${isSaved ? "is-saved" : ""}`.trim()}
-            onClick={onToggleSave}
-            aria-label={isSaved ? "Remove from saved trips" : "Save trip"}
-            aria-pressed={isSaved}
-          >
-            <BookmarkIcon size={18} fill={isSaved ? "currentColor" : "none"} />
-          </button>
-          <button type="button" className="hp-itin-info" onClick={() => setTripInfoOpen(true)}>
-            <InfoIcon size={18} />
-            Trip info
-          </button>
-        </div>
       </header>
 
       <div className="hp-itin-days">
@@ -301,6 +283,27 @@ export function ItineraryScreen({
             <span aria-hidden>→</span>
           </button>
         )}
+
+        {/* What used to be the header's "Trip info". Same row pattern as Trip
+            budget and Where you'll stay below, because it is the same kind of
+            thing — a labelled row that opens a detail — and matching two
+            neighbours the user has already learned is what makes it read as
+            tappable. The subtitle does the other half of the work: "Trip info"
+            sounded like the dates and stops already on screen, when what's
+            actually inside is the destination's practicalities.
+
+            Sits above the map rather than down with the other rows because the
+            problem being fixed is that nobody found it; below the stop list is
+            below the fold. The subtitle is deliberately static — showing live
+            values here would mean paying for a destination-info call on every
+            itinerary view, tapped or not. */}
+        <button type="button" className="hp-budget-row" onClick={() => setTripInfoOpen(true)}>
+          <span>
+            <span className="hp-label">Good to know</span>
+            <strong className="hp-goodtoknow-sub">Local time, currency, plugs and tips</strong>
+          </span>
+          <ChevronRightIcon size={18} />
+        </button>
 
         {/* Collapsed map card — expands in place */}
         <div className={`hp-map-card ${mapOpen ? "is-open" : ""}`.trim()}>

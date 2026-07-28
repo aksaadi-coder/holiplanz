@@ -261,17 +261,6 @@ function App() {
     nav.navigate({ name: "itinerary", openConfirm: true });
   }
 
-  // Manual bookmark toggle on the itinerary header — lets the user save a
-  // trip as soon as it's generated, without waiting to confirm/complete it.
-  function handleToggleSaveTrip() {
-    if (!itinerary) return;
-    if (savedTrips.isSaved(itinerary.id)) {
-      savedTrips.deleteTrip(itinerary.id);
-    } else {
-      savedTrips.saveTrip(itinerary, chatHistory, [...completedStopIds]);
-    }
-  }
-
   function scheduleTripsUndo(next: NonNullable<typeof tripsUndo>) {
     if (tripsUndoTimerRef.current) clearTimeout(tripsUndoTimerRef.current);
     setTripsUndo(next);
@@ -349,8 +338,6 @@ function App() {
             completedStopIds={completedStopIds}
             onToggleStopVisited={handleToggleStopVisited}
             onShowPassport={handleShowPassport}
-            isSaved={savedTrips.isSaved(itinerary.id)}
-            onToggleSave={handleToggleSaveTrip}
             currency={accountPrefs.prefs.currency}
             onCurrencyChange={(currency) => accountPrefs.update({ currency })}
             checklistDone={checklistDone}
