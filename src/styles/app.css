@@ -22,19 +22,17 @@
    a stale value after Safari's toolbar collapsed, shoving the TabBar out of
    place until a full reload.
 
-   `dvh`, and not `svh` — this was tried and reverted, so it's worth writing
-   down. `svh` is the height with the browser's toolbars *shown*. On iPhone,
-   Safari's bottom toolbar collapses as soon as you interact, so `svh` left the
-   shell around 85px short of the visible area permanently, with a strip of
-   paper under the tab bar. `dvh` is the only unit that tracks what is actually
-   visible.
-
-   The keyboard problem that `svh` was meant to solve is not a units problem at
-   all: iOS scrolls the document to reveal a focused input and doesn't always
-   scroll back. That's handled in utils/viewportPin.ts. */
+   The height comes from `--app-h`, measured in JS — no viewport unit is right
+   in every mode this app runs in, and all three were tried on a real iPhone:
+   `vh` sits behind Safari's toolbar, `svh` reserves room for a toolbar that has
+   collapsed (~85px short in Safari), and `dvh` — correct in Safari and on
+   Android — comes up ~60px short when the app is installed to the home screen
+   and launched full-screen. `100dvh` remains the fallback here for the first
+   paint, before the script runs. See utils/viewportPin.ts, which also explains
+   why the keyboard is deliberately excluded from the measurement. */
 .app {
   position: relative;
-  height: 100dvh;
+  height: var(--app-h, 100dvh);
   display: flex;
   flex-direction: column;
   overflow: hidden;

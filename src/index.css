@@ -33,13 +33,12 @@
    that sliver even though every screen scrolls internally. overflow: hidden on
    body makes that structural — page-level scroll is never the mechanism here.
 
-   Must match .app exactly; see the note there for why this is dvh and not svh
-   (short version: svh reserves room for a Safari toolbar that has collapsed,
-   leaving the shell permanently short on iPhone). */
+   Must match .app exactly — including the JS-measured --app-h it now uses. See
+   the note there for why no CSS viewport unit is correct in every mode. */
 html,
 body,
 #root {
-  height: 100dvh;
+  height: var(--app-h, 100dvh);
   margin: 0;
   overscroll-behavior-y: none;
 }

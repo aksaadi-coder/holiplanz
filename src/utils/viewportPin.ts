@@ -1,22 +1,31 @@
 /**
- * Keeps the app shell pinned to the viewport after the on-screen keyboard.
+ * Publishes the real height of the visible area as `--app-h`, and undoes the
+ * stray document scroll iOS leaves behind after the keyboard.
  *
- * The bug this exists for, on iPhone: focusing a field — the start-date and
- * days inputs on Home are the ones that trigger it — makes Safari scroll the
- * document to reveal the input above the keyboard. It does that even here,
- * where `body` is `overflow: hidden` and there is nothing to scroll. When the
- * keyboard closes, that scroll is not always undone. The shell is exactly one
- * viewport tall, so a document scrolled down by N pixels leaves it sitting N
- * pixels high, with a strip of body background showing under the tab bar — and
- * it stays that way on every screen after, until the app is reopened.
+ * Why a JS measurement rather than a CSS unit. The shell has to be exactly as
+ * tall as what the user can see, and no viewport unit gets that right in every
+ * mode this app runs in:
  *
- * Resetting the scroll puts it back. Two rules make that safe:
+ * - `100vh`  — the *largest* viewport. Correct only while Safari's toolbar is
+ *              hidden; the bottom sits behind the toolbar the rest of the time.
+ * - `100svh` — the *smallest*. Reserves room for a toolbar that has collapsed,
+ *              so the shell sits ~85px short in Safari. Tried; reverted.
+ * - `100dvh` — correct in Safari, and correct on Android. But installed to the
+ *              iPhone home screen and launched full-screen, with a translucent
+ *              status bar, it comes up around 60px short of the screen, leaving
+ *              a strip of paper under the tab bar. That was the last symptom
+ *              standing.
  *
- * - Only when the keyboard is *closed*. Resetting while it's open would undo
- *   the scroll Safari performed to keep the focused field visible, and hide
- *   what the user is typing behind the keyboard.
- * - Only when there is actually a stray offset, so this is a no-op on every
- *   platform that doesn't have the problem.
+ * `visualViewport.height` is what all three of those units are approximating,
+ * and it is right in all of them — browser, standalone, either orientation. So
+ * measure it and let CSS use the number. `100dvh` stays as the fallback for the
+ * first paint before this runs.
+ *
+ * The keyboard is deliberately excluded. iOS shrinks the visual viewport while
+ * it's open; shrinking the shell to match would slide the tab bar up mid-typing
+ * and reflow the screen underneath. Holding the full height instead lets the
+ * keyboard overlay the app, which is how a native app behaves, and the browser
+ * still scrolls the focused field into view.
  *
  * Deliberately not a React effect: it's a property of the document, it must
  * outlive any particular screen, and there is nothing to re-run on a re-render.
@@ -31,20 +40,38 @@ function keyboardIsOpen(): boolean {
   return Boolean(vv) && window.innerHeight - vv!.height > KEYBOARD_THRESHOLD_PX;
 }
 
+function visibleHeight(): number {
+  const vv = window.visualViewport;
+  return Math.round(vv ? vv.height : window.innerHeight);
+}
+
 export function pinShellToViewport(): void {
-  const reset = () => {
+  const apply = () => {
+    // While the keyboard is up, keep the last full-height value.
     if (keyboardIsOpen()) return;
+    document.documentElement.style.setProperty("--app-h", `${visibleHeight()}px`);
+
+    // iOS scrolls the document to lift a focused input above the keyboard —
+    // it does that even here, where body is overflow:hidden and there is
+    // nothing to scroll — and doesn't always scroll back. Left alone, the whole
+    // shell sits that far up with background showing beneath it.
     if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
   };
 
-  // Safari does its scrolling *after* the blur, and again when the keyboard
-  // finishes animating out — so check on the next frame and once more after.
-  window.addEventListener("focusout", () => {
-    requestAnimationFrame(reset);
-    setTimeout(reset, 350);
-  });
+  apply();
 
-  // Fires as the keyboard opens and closes; the guard above ignores the open.
-  window.visualViewport?.addEventListener("resize", reset);
-  window.addEventListener("orientationchange", () => setTimeout(reset, 350));
+  const vv = window.visualViewport;
+  window.addEventListener("resize", apply);
+  vv?.addEventListener("resize", apply);
+  // Safari settles both the toolbar and the keyboard over an animation that
+  // fires no final event, so re-check once it has finished.
+  window.addEventListener("orientationchange", () => setTimeout(apply, 350));
+  window.addEventListener("focusout", () => {
+    requestAnimationFrame(apply);
+    setTimeout(apply, 350);
+  });
+  // Returning from the background can restore a different chrome state.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) setTimeout(apply, 100);
+  });
 }
