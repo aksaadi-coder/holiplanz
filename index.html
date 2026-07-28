@@ -18,6 +18,15 @@
       rel="stylesheet"
     />
     <title>Holiplanz</title>
+    <script>
+      // Marks the launched-from-home-screen case before first paint, so the
+      // standalone-only height rule in app.css applies without a flash.
+      // `navigator.standalone` is iOS's own signal and is the dependable one
+      // there; the CSS honours the `display-mode` media query too.
+      if (window.navigator.standalone === true) {
+        document.documentElement.classList.add("is-standalone");
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

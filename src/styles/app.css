@@ -42,6 +42,37 @@
     border-right: 1px solid var(--stone);
   }
 }
+/* Installed to the iPhone home screen, iOS hands the app a layout viewport
+   shorter than the web view it actually draws into. Measured on the device
+   (Safari Web Inspector, iPhone, standalone):
+
+     screen.height 852    lvh 852        <- the real web view
+     innerHeight   793    dvh 793        <- what the app was sizing to
+     svh           793    safeTop 59px
+
+   793 is exactly 852 − 59, the status bar. So the shell filled its viewport
+   perfectly — appGap and barGap both measured 0 — and still left a 59px strip
+   of paper along the bottom of the screen, because the viewport it was filling
+   stopped short of the glass. `lvh` is the one unit that reports the true 852.
+
+   Scoped to standalone deliberately: in Safari `lvh` is the toolbar-*hidden*
+   height, so using it there would put the tab bar behind the toolbar. Safari
+   is correct on dvh today and this cannot reach it. */
+@media (display-mode: standalone) {
+  html,
+  body,
+  #root,
+  .app {
+    height: 100lvh;
+  }
+}
+html.is-standalone,
+html.is-standalone body,
+html.is-standalone #root,
+html.is-standalone .app {
+  height: 100lvh;
+}
+
 .hp-app-body {
   flex: 1;
   display: flex;
