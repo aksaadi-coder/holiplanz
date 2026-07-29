@@ -1,14 +1,14 @@
 import { useState } from "react";
 import type { Itinerary } from "../types";
 import type { SavedTrip } from "../hooks/useSavedTrips";
-import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
+import { useSwipeToReveal } from "../hooks/useSwipeToReveal";
 import { resolveBackground } from "../data/destinationBackgrounds";
 import { CHECKLIST_ITEMS } from "../data/checklistItems";
 import { cityName, dayLabel, daysUntilTrip, isDuringTrip, isTripOver, startsInLabel } from "../utils/destination";
 import { getNextUp } from "../utils/schedule";
 import { formatDateRange, tripRoute } from "../utils/passport";
-import { TrashIcon, ChevronRightIcon } from "../components/ui/icons";
-import { Value } from "../components/ui/primitives";
+import { ChevronRightIcon } from "../components/ui/icons";
+import { SwipeDeleteButton, Value } from "../components/ui/primitives";
 import type { Membership } from "../hooks/useMembership";
 import { PassportScreen } from "./PassportScreen";
 import { ChecklistScreen } from "../components/itinerary/ChecklistScreen";
@@ -38,12 +38,14 @@ interface Props {
 const PREP_REMINDER_WINDOW_DAYS = 3;
 
 /** "Coming up" hero card — photo up top, title + dates/route below, with a
- *  countdown pill. Swipe left to remove the active trip (see useSwipeToDelete
- *  and handleDeleteActiveTrip's undo, owned by App). */
+ *  countdown pill. Swipe left to uncover Delete (see useSwipeToReveal and
+ *  handleDeleteActiveTrip's undo, owned by App). */
 function ActiveTripCard({
   itinerary,
   completedStopIds,
   notifyWrapUp,
+  swipedOpen,
+  onSwipedOpenChange,
   onOpen,
   onOpenConfirm,
   onDelete,
@@ -51,11 +53,16 @@ function ActiveTripCard({
   itinerary: Itinerary;
   completedStopIds: Set<string>;
   notifyWrapUp: boolean;
+  swipedOpen: boolean;
+  onSwipedOpenChange: (open: boolean) => void;
   onOpen: () => void;
   onOpenConfirm: () => void;
   onDelete: () => void;
 }) {
-  const { swipeX, swiping, suppressClickRef, handlers } = useSwipeToDelete({ onDelete });
+  const { offset, swiping, shouldIgnoreClick, handlers } = useSwipeToReveal({
+    open: swipedOpen,
+    onOpenChange: onSwipedOpenChange,
+  });
   const meta = [
     formatDateRange(itinerary.startDate, itinerary.numDays),
     dayLabel(itinerary.numDays),
@@ -69,40 +76,55 @@ function ActiveTripCard({
   const nextUp = duringTrip ? getNextUp(itinerary, completedStopIds) : null;
 
   return (
-    <div className="hp-swipe-wrap hp-trips-hero-wrap">
-      <div className="hp-swipe-remove-bg" aria-hidden="true">
-        <TrashIcon size={18} />
-        Remove
-      </div>
-      <button
-        type="button"
-        className="hp-trips-hero"
-        style={{
-          transform: `translateX(${swipeX}px)`,
-          transition: swiping ? "none" : "transform 0.2s ease",
-          touchAction: "pan-y",
-        }}
-        onClick={() => {
-          if (!suppressClickRef.current) onOpen();
-        }}
-        {...handlers}
-      >
-        <img src={resolveBackground(itinerary.destination)} alt="" className="hp-trips-hero-photo" />
-        <span className="hp-trips-hero-body">
-          <b>{itinerary.tripTitle}</b>
-          {/* Dates, day count and route in one string; the countdown carries a
-              number too. Both change as the trip is edited or the date nears.
-              See Value in ui/primitives. */}
-          <span className="hp-trips-hero-meta" translate="no">
-            {meta}
-          </span>
-          {countdown && (
-            <span className="hp-trips-countdown" translate="no">
-              {countdown}
+    /* The wrap holds only the hero card, so the Delete button behind it is the
+       height of the card and not of the prep rows that follow. */
+    <>
+      <div className={`hp-swipe-wrap hp-trips-hero-wrap ${swipedOpen ? "is-open" : ""}`.trim()}>
+        <SwipeDeleteButton
+          open={swipedOpen}
+          onDelete={onDelete}
+          label={`Delete ${itinerary.tripTitle}`}
+        />
+        <button
+          type="button"
+          className="hp-trips-hero"
+          style={{
+            transform: `translateX(${offset}px)`,
+            transition: swiping ? "none" : "transform 0.2s ease",
+            touchAction: "pan-y",
+          }}
+          onClick={() => {
+            if (shouldIgnoreClick()) return;
+            if (swipedOpen) {
+              onSwipedOpenChange(false);
+              return;
+            }
+            onOpen();
+          }}
+          {...handlers}
+        >
+          <img
+            src={resolveBackground(itinerary.destination)}
+            alt=""
+            className="hp-trips-hero-photo"
+          />
+          <span className="hp-trips-hero-body">
+            <b>{itinerary.tripTitle}</b>
+            {/* Dates, day count and route in one string; the countdown carries
+                a number too. Both change as the trip is edited or the date
+                nears. See Value in ui/primitives. */}
+            <span className="hp-trips-hero-meta" translate="no">
+              {meta}
             </span>
-          )}
-        </span>
-      </button>
+            {countdown && (
+              <span className="hp-trips-countdown" translate="no">
+                {countdown}
+              </span>
+            )}
+          </span>
+        </button>
+      </div>
+
       {duringTrip && nextUp && (
         <button
           type="button"
@@ -138,39 +160,52 @@ function ActiveTripCard({
           <ChevronRightIcon size={18} />
         </button>
       )}
-    </div>
+    </>
   );
 }
 
-/** Swipe left to remove a finished trip (see useSwipeToDelete and
+/** Swipe left to uncover Delete on a finished trip (see useSwipeToReveal and
  *  handleDeleteSavedTrip's undo, owned by App). */
 function FinishedTripRow({
   trip,
+  swipedOpen,
+  onSwipedOpenChange,
   onOpen,
   onDelete,
 }: {
   trip: SavedTrip;
+  swipedOpen: boolean;
+  onSwipedOpenChange: (open: boolean) => void;
   onOpen: () => void;
   onDelete: () => void;
 }) {
-  const { swipeX, swiping, suppressClickRef, handlers } = useSwipeToDelete({ onDelete });
+  const { offset, swiping, shouldIgnoreClick, handlers } = useSwipeToReveal({
+    open: swipedOpen,
+    onOpenChange: onSwipedOpenChange,
+  });
 
   return (
-    <div className="hp-swipe-wrap hp-acct-trip-row-wrap">
-      <div className="hp-swipe-remove-bg" aria-hidden="true">
-        <TrashIcon size={18} />
-        Remove
-      </div>
+    <div className={`hp-swipe-wrap hp-acct-trip-row-wrap ${swipedOpen ? "is-open" : ""}`.trim()}>
+      <SwipeDeleteButton
+        open={swipedOpen}
+        onDelete={onDelete}
+        label={`Delete ${trip.itinerary.tripTitle}`}
+      />
       <button
         type="button"
         className="hp-acct-trip-row"
         style={{
-          transform: `translateX(${swipeX}px)`,
+          transform: `translateX(${offset}px)`,
           transition: swiping ? "none" : "transform 0.2s ease",
           touchAction: "pan-y",
         }}
         onClick={() => {
-          if (!suppressClickRef.current) onOpen();
+          if (shouldIgnoreClick()) return;
+          if (swipedOpen) {
+            onSwipedOpenChange(false);
+            return;
+          }
+          onOpen();
         }}
         {...handlers}
       >
@@ -212,6 +247,9 @@ export function TripsScreen({
 }: Props) {
   const [openTrip, setOpenTrip] = useState<SavedTrip | null>(null);
   const [checklistOpen, setChecklistOpen] = useState(false);
+  // Which card, if any, is swiped open showing its Delete button — one id for
+  // both lists, so only ever one Delete is exposed on the screen at a time.
+  const [swipedTripId, setSwipedTripId] = useState<string | null>(null);
 
   if (openTrip) {
     return (
@@ -273,9 +311,14 @@ export function TripsScreen({
               itinerary={itinerary}
               completedStopIds={completedStopIds}
               notifyWrapUp={notifyWrapUp}
+              swipedOpen={swipedTripId === itinerary.id}
+              onSwipedOpenChange={(open) => setSwipedTripId(open ? itinerary.id : null)}
               onOpen={onOpenActive}
               onOpenConfirm={onOpenConfirm}
-              onDelete={onDeleteActive}
+              onDelete={() => {
+                setSwipedTripId(null);
+                onDeleteActive();
+              }}
             />
           </section>
         )}
@@ -288,8 +331,13 @@ export function TripsScreen({
                 <FinishedTripRow
                   key={trip.itinerary.id}
                   trip={trip}
+                  swipedOpen={swipedTripId === trip.itinerary.id}
+                  onSwipedOpenChange={(open) => setSwipedTripId(open ? trip.itinerary.id : null)}
                   onOpen={() => setOpenTrip(trip)}
-                  onDelete={() => onDeleteSaved(trip.itinerary.id)}
+                  onDelete={() => {
+                    setSwipedTripId(null);
+                    onDeleteSaved(trip.itinerary.id);
+                  }}
                 />
               ))}
             </div>

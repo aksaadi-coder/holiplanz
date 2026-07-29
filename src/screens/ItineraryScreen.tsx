@@ -7,16 +7,16 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import type { DragEndEvent, DragStartEvent, Modifier } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { AccommodationOption, ChatMessage, Itinerary, Stop, TripBudget } from "../types";
 import { reorderStopWithinDay, deleteStop } from "../utils/itineraryEdit";
 import { scheduleForDay, getNextUp } from "../utils/schedule";
-import { useSwipeToDelete } from "../hooks/useSwipeToDelete";
+import { useSwipeToReveal } from "../hooks/useSwipeToReveal";
 import { cityName, dayLabel, isDuringTrip, isTripOver, tripDayIndex } from "../utils/destination";
 import { convertMoney, currencyCodeFromLabel } from "../utils/currency";
-import { StampRing, Value } from "../components/ui/primitives";
+import { StampRing, SwipeDeleteButton, Value } from "../components/ui/primitives";
 import type { Membership } from "../hooks/useMembership";
 import { UpgradeSheet } from "../components/membership/UpgradeSheet";
 import type { FeatureKey } from "../data/plans";
@@ -40,8 +40,20 @@ import {
   ChevronRightIcon,
   PlusCircleIcon,
   ArrowUpIcon,
-  TrashIcon,
 } from "../components/ui/icons";
+
+/** A stop can only move up and down its day. Reordering a vertical list has no
+ *  horizontal meaning, and letting the card wander sideways under the finger
+ *  reads as a swipe that isn't going to do anything. */
+const verticalOnly: Modifier = ({ transform }) => ({ ...transform, x: 0 });
+
+/** How long a press has to be held before the card lifts, in ms, and how far
+ *  the finger may stray in that time. Below the tolerance the press is a hold;
+ *  above it the movement belongs to the list's scroll or a swipe, and no drag
+ *  starts. Kept under the swipe gesture's own 8px slop so the two can't both
+ *  claim the same movement. */
+const HOLD_TO_LIFT_MS = 220;
+const HOLD_TOLERANCE_PX = 6;
 
 interface Props {
   itinerary: Itinerary;
@@ -139,9 +151,19 @@ export function ItineraryScreen({
     [duringTrip, itinerary, completedStopIds],
   );
 
-  // One pointer sensor covers mouse, touch and pen. Listeners live on the grip
-  // handle only, so vertical scrolling of the list still works on touch.
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  // One pointer sensor covers mouse, touch and pen. The whole card is the
+  // handle now, so the drag can't start on movement alone — that would fight
+  // both the list's scrolling and the swipe gesture. It starts on a held
+  // press instead, which is what picking something up feels like.
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { delay: HOLD_TO_LIFT_MS, tolerance: HOLD_TOLERANCE_PX },
+    }),
+  );
+
+  // Which stop row, if any, is swiped open showing its Delete button. Held
+  // here rather than in the row so that opening one closes the last.
+  const [swipedStopId, setSwipedStopId] = useState<string | null>(null);
 
   const firstStay = itinerary.accommodations?.[0];
   const hasAccommodation = (itinerary.accommodations?.length ?? 0) > 0;
@@ -176,6 +198,9 @@ export function ItineraryScreen({
   function handleDragStart(event: DragStartEvent) {
     const stop = day?.stops.find((s) => s.id === event.active.id);
     setDraggingStop(stop ?? null);
+    // A card that's about to be carried shouldn't still be holding a Delete
+    // button open behind it.
+    setSwipedStopId(null);
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -206,9 +231,11 @@ export function ItineraryScreen({
     onSendChat(message);
   }
 
-  // Swipe-left-to-delete on a stop card — routed through the same undo
-  // pipeline as every other edit (reorder, chat), so it's reversible for 8s.
+  // Pressing the Delete button a swipe uncovered — still routed through the
+  // same undo pipeline as every other edit (reorder, chat), so it stays
+  // reversible for 8s even though it now takes a deliberate press to get here.
   function handleRemoveStop(stopId: string) {
+    setSwipedStopId(null);
     const result = deleteStop(itinerary, stopId);
     if (!result) return;
     onItineraryChange(result.itinerary, `Removed — ${result.removed.name}`, []);
@@ -356,6 +383,7 @@ export function ItineraryScreen({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          modifiers={[verticalOnly]}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={() => setDraggingStop(null)}
@@ -371,6 +399,8 @@ export function ItineraryScreen({
                 time={times.get(stop.id) ?? ""}
                 updated={updatedStopIds.has(stop.id)}
                 next={nextUp?.dayNumber === day.dayNumber && nextUp.stop.id === stop.id}
+                swipedOpen={swipedStopId === stop.id}
+                onSwipedOpenChange={(open) => setSwipedStopId(open ? stop.id : null)}
                 onOpen={() => setOpenStop(stop)}
                 onRemove={() => handleRemoveStop(stop.id)}
               />
@@ -645,6 +675,8 @@ function StopRow({
   time,
   updated,
   next,
+  swipedOpen,
+  onSwipedOpenChange,
   onOpen,
   onRemove,
 }: {
@@ -652,35 +684,58 @@ function StopRow({
   time: string;
   updated: boolean;
   next: boolean;
+  swipedOpen: boolean;
+  onSwipedOpenChange: (open: boolean) => void;
   onOpen: () => void;
   onRemove: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: stop.id,
   });
-  const { swipeX, swiping, suppressClickRef, handlers } = useSwipeToDelete({ onDelete: onRemove });
+  const { offset, swiping, shouldIgnoreClick, handlers } = useSwipeToReveal({
+    open: swipedOpen,
+    onOpenChange: onSwipedOpenChange,
+    disabled: isDragging,
+  });
 
   return (
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className="hp-swipe-wrap hp-stop-row-wrap"
+      className={`hp-swipe-wrap hp-stop-row-wrap ${swipedOpen ? "is-open" : ""}`.trim()}
     >
-      <div className="hp-swipe-remove-bg" aria-hidden="true">
-        <TrashIcon size={18} />
-        Remove
-      </div>
+      <SwipeDeleteButton open={swipedOpen} onDelete={onRemove} label={`Delete ${stop.name}`} />
+      {/* The card is its own drag handle: the sensor's hold delay is what
+          separates picking it up from tapping it or swiping it. */}
       <div
         className={`hp-stop-row ${updated ? "is-updated" : ""} ${next ? "is-next" : ""} ${isDragging ? "is-dragging" : ""}`.trim()}
         style={{
-          transform: `translateX(${swipeX}px)`,
+          transform: `translateX(${offset}px)`,
           transition: swiping ? "none" : "transform 0.2s ease",
-          touchAction: "pan-y",
+          // pan-y while resting so the list still scrolls off a card; once the
+          // card is lifted nothing else may claim the gesture.
+          touchAction: isDragging ? "none" : "pan-y",
         }}
         onClick={() => {
-          if (!suppressClickRef.current) onOpen();
+          if (shouldIgnoreClick()) return;
+          // While the Delete button is showing, a tap on the card puts it away
+          // rather than opening the stop — the same escape as tapping outside.
+          if (swipedOpen) {
+            onSwipedOpenChange(false);
+            return;
+          }
+          onOpen();
         }}
+        {...attributes}
         {...handlers}
+        // Both gestures begin on the same press, so this one handler feeds
+        // both: dnd-kit starts counting out its hold, the swipe hook records
+        // where the finger landed. Spreading them would have let the second
+        // spread quietly drop the first one's onPointerDown.
+        onPointerDown={(e) => {
+          handlers.onPointerDown(e);
+          listeners?.onPointerDown?.(e);
+        }}
       >
         {/* The time and the stop name both change in place when a chat edit
             rewrites the day — the same stop id keeps the same DOM nodes — so
@@ -694,16 +749,11 @@ function StopRow({
           </span>
           <strong translate="no">{stop.name}</strong>
         </div>
-        <button
-          type="button"
-          className="hp-grip"
-          aria-label={`Reorder ${stop.name}`}
-          onClick={(e) => e.stopPropagation()}
-          {...attributes}
-          {...listeners}
-        >
+        {/* Not a control any more — the whole card is the handle. It stays as
+            the mark that says this card can be moved. */}
+        <span className="hp-grip" aria-hidden="true">
           <GripIcon size={20} />
-        </button>
+        </span>
       </div>
     </div>
   );

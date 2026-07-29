@@ -798,25 +798,37 @@ html.is-standalone .app {
   gap: 8px;
 }
 
-/* ---- Swipe-to-delete reveal — shared by itinerary stop rows and trip
-   cards (see useSwipeToDelete). Each use site adds its own border-radius
-   modifier class so the clip matches its row's own corners. ---- */
+/* ---- Swipe-to-reveal — shared by itinerary stop rows and trip cards (see
+   useSwipeToReveal). The row slides aside to uncover a real Delete button
+   sitting behind it; nothing is destroyed until that button is pressed. Each
+   use site adds its own border-radius modifier class so the clip matches its
+   row's own corners. ---- */
 .hp-swipe-wrap {
   position: relative;
   flex-shrink: 0;
   overflow: hidden;
 }
-.hp-swipe-remove-bg {
+.hp-swipe-delete {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding-right: 20px;
-  color: var(--coral);
+  justify-content: center;
+  gap: 5px;
+  border: none;
+  background: var(--coral);
+  color: #fff;
   font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  /* Closed, it is scenery behind the row: no taps through the card, and no
+     stray target for a finger that lands near the right edge. */
   pointer-events: none;
+}
+.hp-swipe-wrap.is-open .hp-swipe-delete {
+  pointer-events: auto;
 }

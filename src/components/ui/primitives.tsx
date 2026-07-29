@@ -1,7 +1,8 @@
 // Shared UI primitives for the Holiplanz design system.
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { useEffect } from "react";
-import { CloseIcon } from "./icons";
+import { CloseIcon, TrashIcon } from "./icons";
+import { REVEAL_WIDTH } from "../../hooks/useSwipeToReveal";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost" | "coral";
@@ -191,6 +192,28 @@ export function CloseCircle({ onClose, label = "Close" }: { onClose: () => void;
   return (
     <button type="button" className="hp-close-circle" onClick={onClose} aria-label={label}>
       <CloseIcon size={17} />
+    </button>
+  );
+}
+
+/**
+ * The Delete button a swiped-open row exposes underneath itself. It sits in
+ * the row's wrapper, behind the row, and only becomes pressable — and
+ * reachable by a screen reader — once the row has actually slid aside.
+ */
+export function SwipeDeleteButton({ open, onDelete, label }: { open: boolean; onDelete: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      className="hp-swipe-delete"
+      style={{ width: REVEAL_WIDTH }}
+      onClick={onDelete}
+      tabIndex={open ? 0 : -1}
+      aria-hidden={!open}
+      aria-label={label}
+    >
+      <TrashIcon size={18} />
+      Delete
     </button>
   );
 }

@@ -218,17 +218,15 @@
   font-weight: 700;
   color: var(--ink);
 }
+/* The mark that says a card can be moved. It stopped being the handle when
+   the whole card became one, so it takes no pointer events of its own — the
+   press has to reach the card underneath to start its hold. */
 .hp-grip {
   flex-shrink: 0;
-  border: none;
-  background: transparent;
+  display: inline-flex;
   padding: 4px;
-  cursor: grab;
   color: rgba(0, 0, 0, 0.3);
-  touch-action: none;
-}
-.hp-grip:active {
-  cursor: grabbing;
+  pointer-events: none;
 }
 
 /* ---- Add accommodation (dashed) ---- */
