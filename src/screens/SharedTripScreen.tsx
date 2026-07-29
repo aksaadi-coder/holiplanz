@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { decodeShare, sharePayloadFromLocation, type SharedTrip } from "../utils/shareLink";
 import { resolveBackground } from "../data/destinationBackgrounds";
 import { DayMiniMap } from "../components/shared/DayMiniMap";
@@ -30,6 +30,15 @@ export function SharedTripScreen() {
     const onHashChange = () => setPayload(sharePayloadFromLocation());
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  // Hand the page back to the document. The app pins html/body/#root to one
+  // screen and hides body overflow, because every screen in it scrolls
+  // internally; this page is a long document and has to scroll as one. See
+  // hp-doc-scroll in styles/shared.css.
+  useLayoutEffect(() => {
+    document.documentElement.classList.add("hp-doc-scroll");
+    return () => document.documentElement.classList.remove("hp-doc-scroll");
   }, []);
 
   useEffect(() => {

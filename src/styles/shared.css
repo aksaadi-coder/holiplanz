@@ -4,6 +4,22 @@
    who has never used Holiplanz sees the product. Everything here is its own
    namespace so the app's screens can move without dragging it along. */
 
+/* The app is a fixed-height shell that scrolls inside itself, so index.css
+   pins html/body/#root to 100dvh and hides body overflow. This page is the
+   opposite: an ordinary document, longer than the screen, that scrolls the
+   way any web page does. The class is put on <html> while it's showing (see
+   SharedTripScreen) and lets the page grow again — without it the trip is
+   clipped at one screenful with no way down. */
+html.hp-doc-scroll,
+html.hp-doc-scroll body,
+html.hp-doc-scroll #root {
+  height: auto;
+  min-height: 100%;
+}
+html.hp-doc-scroll body {
+  overflow: visible;
+}
+
 .hp-shared {
   min-height: 100vh;
   background: var(--paper);
@@ -78,38 +94,28 @@
   margin: 0 0 12px;
 }
 
-/* ---- The drawn map (see DayMiniMap) ---- */
+/* ---- The day's map (see DayMiniMap) ----
+   Sized here rather than by the map: Leaflet needs a box with a height before
+   it will draw anything into it. The stone fill is what shows while tiles are
+   still on their way. */
 .hp-shared-map {
-  display: block;
-  width: 100%;
-  height: auto;
+  height: 168px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #e6e0d6;
 }
-.hp-shared-map-bg {
-  fill: #e6e0d6;
-}
-.hp-shared-map-route {
-  stroke: rgba(22, 20, 16, 0.32);
-  stroke-width: 1.2;
-  stroke-dasharray: 4 4;
-  stroke-linecap: round;
-}
-.hp-shared-map-dot {
-  fill: var(--ink);
-}
-.hp-shared-map-dot.is-stay {
-  fill: var(--coral);
-}
-.hp-shared-map-pill {
-  fill: var(--paper);
-}
-.hp-shared-map-text {
-  fill: var(--ink);
+.hp-shared-map .leaflet-container {
+  background: #e6e0d6;
   font-family: var(--font-ui);
-  font-weight: 500;
 }
-.hp-shared-map-text.is-stay {
-  fill: var(--coral);
-  font-weight: 700;
+/* Attribution stays — CARTO and OpenStreetMap require it, and this page is
+   public. Toned down to sit under the trip rather than compete with it. */
+.hp-shared-map .leaflet-control-attribution {
+  background: rgba(246, 244, 241, 0.8);
+  font-size: 9.5px;
+}
+.hp-shared-map .leaflet-control-attribution a {
+  color: rgba(0, 0, 0, 0.5);
 }
 
 /* ---- The day's stops ---- */
