@@ -704,7 +704,13 @@ function StopRow({
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={`hp-swipe-wrap hp-stop-row-wrap ${swipedOpen ? "is-open" : ""}`.trim()}
     >
-      <SwipeDeleteButton open={swipedOpen} onDelete={onRemove} label={`Delete ${stop.name}`} />
+      {/* The button lives behind the card, which normally hides it completely.
+          A lifted card is translucent, though, so it would show through as a
+          coral panel on a card that was never swiped — and a drag has already
+          closed any open row, so there is nothing for it to be doing here. */}
+      {!isDragging && (
+        <SwipeDeleteButton open={swipedOpen} onDelete={onRemove} label={`Delete ${stop.name}`} />
+      )}
       {/* The card is its own drag handle: the sensor's hold delay is what
           separates picking it up from tapping it or swiping it. */}
       <div
