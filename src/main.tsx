@@ -6,6 +6,7 @@ import './styles/itinerary.css'
 import './styles/entry.css'
 import './styles/account.css'
 import './styles/trips.css'
+import './styles/shared.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

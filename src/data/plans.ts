@@ -45,6 +45,7 @@ export const FEATURE_LABELS = {
   export: "Offline & PDF export",
   passport: "Your Trip Passport",
   budget: "Budget planner & tips",
+  share: "Share a trip with anyone",
 } as const;
 
 export type FeatureKey = keyof typeof FEATURE_LABELS;
@@ -57,6 +58,8 @@ export const FEATURE_PITCH: Record<FeatureKey, string> = {
   export: "Take the whole trip with you: a PDF for the road, and every card offline.",
   passport: "Stamp what you actually did and keep the passport to prove it.",
   budget: "See what the trip costs before you go, broken down by category.",
+  share:
+    "Send the whole plan to whoever's coming — a page they can read without the app, or an account.",
 };
 
 export interface PlanTier {
@@ -95,6 +98,7 @@ export const PLAN_TIERS: PlanTier[] = [
       FEATURE_LABELS.export,
       "Earn your Trip Passport",
       FEATURE_LABELS.budget,
+      FEATURE_LABELS.share,
     ],
     footnote: "No subscription. No auto-renewal.",
   },

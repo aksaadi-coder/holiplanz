@@ -12,6 +12,7 @@ import { PaymentsScreen } from "./PaymentsScreen";
 import { LanguageScreen } from "./LanguageScreen";
 import { HelpScreen } from "./HelpScreen";
 import { ProfileScreen } from "./ProfileScreen";
+import { displayName, nameFromEmail } from "../../utils/profile";
 
 interface Props {
   email: string | null;
@@ -37,14 +38,6 @@ type View =
   | { name: "language" }
   | { name: "help" }
   | { name: "profile" };
-
-/** Friendly first name from the demo session email, e.g. "ak.saadi@gmail.com" → "Ak". */
-function nameFromEmail(email: string | null): string {
-  if (!email) return "Traveller";
-  const local = email.split("@")[0] ?? "";
-  const first = local.split(/[.+_-]/)[0] ?? local;
-  return first ? first[0].toUpperCase() + first.slice(1) : "Traveller";
-}
 
 /**
  * Account tab — profile summary, Premium upsell, and settings (Profile,
@@ -126,7 +119,7 @@ export function AccountScreen({
       />
     );
   } else {
-    const name = customName ?? nameFromEmail(email);
+    const name = displayName(customName, email);
 
     content = (
       <div className="hp-account">

@@ -3,7 +3,7 @@ import type { Itinerary } from "../types";
 import { buildPassport } from "../utils/passport";
 import { PassportPage } from "../components/passport/PassportPage";
 import { MiniPassportCard } from "../components/passport/MiniPassportCard";
-import { ShareSheet } from "../components/passport/ShareSheet";
+import { ShareSheet } from "../components/ui/ShareSheet";
 import { ExportScreen, type PassportExportVariant } from "../components/passport/ExportScreen";
 import { UpgradeSheet } from "../components/membership/UpgradeSheet";
 import type { Membership } from "../hooks/useMembership";
@@ -186,11 +186,15 @@ export function PassportScreen({
 
       {overlay === "share" && (
         <ShareSheet
+          title="Share your passport"
+          subtitle="A stamped page anyone can open — no app needed."
           onClose={() => setOverlay(null)}
-          onCopyLink={handleCopyLink}
-          onMessage={handleMessage}
-          onEmail={handleEmail}
-          onExportPdf={() => setOverlay("export")}
+          rows={[
+            { icon: "⧉", label: "Copy link", onClick: handleCopyLink },
+            { icon: "◱", label: "Message it", onClick: handleMessage },
+            { icon: "✉", label: "Email it", onClick: handleEmail },
+            { icon: "↓", label: "Export as PDF →", onClick: () => setOverlay("export"), strong: true },
+          ]}
         />
       )}
 

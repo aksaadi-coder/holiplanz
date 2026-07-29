@@ -19,7 +19,10 @@ import { AccessGate } from "./components/AccessGate";
 import { PassportListScreen } from "./screens/PassportListScreen";
 import { AccountScreen } from "./screens/account/AccountScreen";
 import { EntryFlow } from "./screens/entry/EntryFlow";
+import { SharedTripScreen } from "./screens/SharedTripScreen";
+import { isSharePath } from "./utils/shareLink";
 import { cityName } from "./utils/destination";
+import { displayName } from "./utils/profile";
 import "./index.css";
 
 function newChatMessage(role: ChatMessage["role"], content: string): ChatMessage {
@@ -51,7 +54,20 @@ function diffChangedStops(before: Itinerary, after: Itinerary): Set<string> {
   return changed;
 }
 
+/**
+ * A shared trip is a different product from the app around it: a page for
+ * someone who may have no session, no trip and no account, opening a link a
+ * friend sent. It's chosen here, before any of the planner's state exists, so
+ * that none of it has to run. Which page it is gets decided once, on the way
+ * in; the trip itself is read by the page, which keeps up with the fragment.
+ */
 function App() {
+  const [shared] = useState(isSharePath);
+  if (shared) return <SharedTripScreen />;
+  return <PlannerApp />;
+}
+
+function PlannerApp() {
   const {
     itinerary,
     setItinerary,
@@ -360,6 +376,7 @@ function App() {
             onBudgetTargetChange={setBudgetTarget}
             previousBudget={previousBudget}
             initialConfirmOpen={screen.openConfirm ?? false}
+            sharedBy={displayName(session.name, session.email)}
             membership={membership}
           />
         ) : (

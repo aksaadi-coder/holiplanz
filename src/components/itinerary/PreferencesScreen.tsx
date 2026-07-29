@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Chip, Toggle } from "../ui/primitives";
 import { CURRENCY_OPTIONS } from "../../hooks/useAccountPrefs";
+import { STYLE_OPTIONS } from "../../data/tripStyles";
 import { convertMoney, currencyCodeFromLabel, formatMoney, parseMoney } from "../../utils/currency";
 
 interface Props {
@@ -47,7 +48,6 @@ function budgetRange(estimate: number | null, code: string) {
   };
 }
 
-const STYLE_OPTIONS = ["Family getaway", "Adventurous", "Romantic", "Relaxed", "Cultural", "Foodie"];
 const PACE_OPTIONS = ["Easy", "Balanced", "Packed"];
 const SPEND_OPTIONS = ["Budget", "Mid-range", "Luxury"];
 

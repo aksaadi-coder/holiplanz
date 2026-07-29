@@ -17,6 +17,11 @@ import { useSwipeToReveal } from "../hooks/useSwipeToReveal";
 import { cityName, dayLabel, isDuringTrip, isTripOver, tripDayIndex } from "../utils/destination";
 import { convertMoney, currencyCodeFromLabel } from "../utils/currency";
 import { StampRing, SwipeDeleteButton, Value } from "../components/ui/primitives";
+import { ShareSheet } from "../components/ui/ShareSheet";
+import { fetchDestinationInfo } from "../api/itineraryApi";
+import { buildSharedTrip, encodeShare, shareUrl } from "../utils/shareLink";
+import { tripStyleFrom } from "../data/tripStyles";
+import { stableNumber } from "../utils/passport";
 import type { Membership } from "../hooks/useMembership";
 import { UpgradeSheet } from "../components/membership/UpgradeSheet";
 import type { FeatureKey } from "../data/plans";
@@ -84,6 +89,9 @@ interface Props {
   previousBudget?: TripBudget | null;
   /** Opens straight to the Confirm sheet — used by the Trips tab's "Trip over" nudge. */
   initialConfirmOpen?: boolean;
+  /** Who the trip is shared as — the profile name, or one derived from the
+   *  sign-in email. See displayName in utils/profile. */
+  sharedBy: string;
   membership: Membership;
 }
 
@@ -109,6 +117,7 @@ export function ItineraryScreen({
   onBudgetTargetChange,
   previousBudget,
   initialConfirmOpen = false,
+  sharedBy,
   membership,
 }: Props) {
   const duringTrip = isDuringTrip(itinerary.startDate, itinerary.numDays);
@@ -164,6 +173,14 @@ export function ItineraryScreen({
   // Which stop row, if any, is swiped open showing its Delete button. Held
   // here rather than in the row so that opening one closes the last.
   const [swipedStopId, setSwipedStopId] = useState<string | null>(null);
+
+  // The share link, built on demand: null when the sheet is closed, "" while
+  // the trip is being packed. Rebuilt every time rather than cached, because
+  // the link is a snapshot and a stale one would send yesterday's plan.
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const firstStay = itinerary.accommodations?.[0];
   const hasAccommodation = (itinerary.accommodations?.length ?? 0) > 0;
@@ -229,6 +246,84 @@ export function ItineraryScreen({
     }
     setDraft("");
     onSendChat(message);
+  }
+
+  /**
+   * Packs the trip into a link and opens the share sheet.
+   *
+   * The destination facts on the shared page (currency, plug, language) are
+   * fetched here and carried in the link rather than looked up by whoever
+   * opens it: one lookup when it's sent, instead of one per reader of a link
+   * that might be opened by a whole family. It's a model call, so it gets a
+   * few seconds and no more — those four words are worth a wait, but not a
+   * share that never happens.
+   */
+  async function handleShare() {
+    if (!unlocked) {
+      setLockedFeature("share");
+      return;
+    }
+    setSharing(true);
+    try {
+      const facts = await Promise.race([
+        fetchDestinationInfo(itinerary.destination).catch(() => null),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 6000)),
+      ]);
+      const trip = buildSharedTrip(
+        itinerary,
+        sharedBy,
+        stableNumber(itinerary.id),
+        tripStyleFrom(itinerary.preferences),
+        facts,
+      );
+      setShareLink(shareUrl(await encodeShare(trip)));
+    } catch {
+      showToast("Couldn't prepare the link");
+    } finally {
+      setSharing(false);
+    }
+  }
+
+  function showToast(message: string) {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(message);
+    toastTimer.current = setTimeout(() => setToast(null), 2600);
+  }
+
+  async function handleCopyShareLink() {
+    if (!shareLink) return;
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      showToast("Link copied");
+    } catch {
+      showToast("Couldn't copy the link");
+    }
+    setShareLink(null);
+  }
+
+  async function handleSendShareLink() {
+    if (!shareLink) return;
+    const text = `${itinerary.tripTitle || cityName(itinerary.destination)} — my trip plan`;
+    try {
+      // The native sheet is the good path on a phone, which is where this
+      // gets used. A desktop browser without it falls back to the clipboard
+      // rather than telling the user their browser can't share.
+      if (navigator.share) await navigator.share({ title: text, text, url: shareLink });
+      else await handleCopyShareLink();
+    } catch {
+      /* dismissed the system sheet — nothing to report */
+    }
+    setShareLink(null);
+  }
+
+  function handleEmailShareLink() {
+    if (!shareLink) return;
+    const subject = encodeURIComponent(
+      `${itinerary.tripTitle || cityName(itinerary.destination)} — trip plan`,
+    );
+    const body = encodeURIComponent(`Here's the plan:\n\n${shareLink}\n`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    setShareLink(null);
   }
 
   // Pressing the Delete button a swipe uncovered — still routed through the
@@ -476,10 +571,46 @@ export function ItineraryScreen({
           <ChevronRightIcon size={18} />
         </button>
 
+        {/* Sharing sits in the list with the other things you can open, rather
+            than as an icon in the header: it reads as an action with a
+            consequence, it has room to say what it does, and — being gated —
+            it needs somewhere to carry the same lock pill the budget does. */}
+        <button type="button" className="hp-budget-row" onClick={handleShare} disabled={sharing}>
+          <span>
+            <span className="hp-label">
+              Share this trip
+              {!unlocked && <span className="hp-lock-pill">TRIP PASS</span>}
+            </span>
+            <strong>
+              {sharing
+                ? "Preparing the link…"
+                : unlocked
+                  ? "Send the plan to whoever's coming"
+                  : "Send the plan to a friend"}
+            </strong>
+          </span>
+          <ChevronRightIcon size={18} />
+        </button>
+
         <button type="button" className="hp-trip-over" onClick={() => setConfirmOpen(true)}>
           Trip over? Generate your passport →
         </button>
       </div>
+
+      {shareLink && (
+        <ShareSheet
+          title="Share this trip"
+          subtitle="A page they can read straight away — no app, no account."
+          onClose={() => setShareLink(null)}
+          rows={[
+            { icon: "⧉", label: "Copy link", onClick: handleCopyShareLink },
+            { icon: "◱", label: "Send it", onClick: handleSendShareLink },
+            { icon: "✉", label: "Email it", onClick: handleEmailShareLink },
+          ]}
+        />
+      )}
+
+      {toast && <div className="hp-passport-toast">{toast}</div>}
 
       {undoMessage && (
         <div className="hp-undo" role="status">
