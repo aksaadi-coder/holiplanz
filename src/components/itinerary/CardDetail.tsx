@@ -3,7 +3,7 @@ import type { Stop, StopDetails } from "../../types";
 import { fetchStopDetails } from "../../api/itineraryApi";
 import { fetchPlaceInfo, type PlaceInfo } from "../../api/wikipediaApi";
 import { directionsUrl, googleMapsUrl, tripAdvisorSearchUrl } from "../../utils/geo";
-import { FloatingCard, CloseCircle } from "../ui/primitives";
+import { FloatingCard, CloseCircle, StampRing } from "../ui/primitives";
 import { TransitIcon } from "../ui/icons";
 
 interface Props {
@@ -91,7 +91,23 @@ export function CardDetail({ stop, index, time, destination, onClose }: Props) {
             </>
           )}
 
-          {loading && <p className="hp-muted hp-cd-loading">Gathering more info…</p>}
+          {/* The card opens on what the itinerary already knows and fills in
+              the rest from a second request. That wait used to be one line of
+              grey text, easily read as the end of the card — so it now says so
+              with a moving ring, and stands in for the sections on their way at
+              roughly the height they'll take, which also keeps the card from
+              lurching when they land. */}
+          {loading && (
+            <div className="hp-cd-loading" role="status">
+              <span className="hp-cd-loading-head">
+                <StampRing size={17} spinning />
+                Gathering more info…
+              </span>
+              <span className="hp-cd-skeleton" style={{ width: "42%" }} />
+              <span className="hp-cd-skeleton" style={{ width: "88%" }} />
+              <span className="hp-cd-skeleton" style={{ width: "72%" }} />
+            </div>
+          )}
 
           {details && (
             <>

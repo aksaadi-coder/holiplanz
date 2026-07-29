@@ -1188,9 +1188,41 @@
 .hp-cd-list li {
   margin-bottom: 6px;
 }
+/* Waiting state for the second request — a moving ring so it reads as work in
+   progress, over bars standing in for the sections still to come. */
 .hp-cd-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 18px;
+}
+.hp-cd-loading-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3px;
   font-size: 15px;
-  margin-top: 14px;
+  color: rgba(0, 0, 0, 0.45);
+}
+.hp-cd-skeleton {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--stone) 20%,
+    rgba(228, 222, 210, 0.4) 50%,
+    var(--stone) 80%
+  );
+  background-size: 220% 100%;
+  animation: hp-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes hp-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
 }
 .hp-cd-error {
   color: var(--coral);
