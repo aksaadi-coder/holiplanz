@@ -813,6 +813,7 @@ html.is-standalone .app {
   top: 0;
   right: 0;
   bottom: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -831,4 +832,14 @@ html.is-standalone .app {
 }
 .hp-swipe-wrap.is-open .hp-swipe-delete {
   pointer-events: auto;
+}
+/* Carried by whichever element is sliding, for as long as it is off home: a
+   rounded corner against the panel's straight edge reads as an unfinished
+   join, so the trailing corners square off and the two meet on one seam.
+   Stated as corner overrides rather than a radius, so each row keeps its own,
+   and scoped to the wrap because the rows set that radius in later
+   stylesheets — a bare class would tie on specificity and lose on order. */
+.hp-swipe-wrap > .hp-swipe-open-edge {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }

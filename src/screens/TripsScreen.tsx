@@ -87,7 +87,7 @@ function ActiveTripCard({
         />
         <button
           type="button"
-          className="hp-trips-hero"
+          className={`hp-trips-hero ${offset !== 0 ? "hp-swipe-open-edge" : ""}`.trim()}
           style={{
             transform: `translateX(${offset}px)`,
             transition: swiping ? "none" : "transform 0.2s ease",
@@ -193,7 +193,7 @@ function FinishedTripRow({
       />
       <button
         type="button"
-        className="hp-acct-trip-row"
+        className={`hp-acct-trip-row ${offset !== 0 ? "hp-swipe-open-edge" : ""}`.trim()}
         style={{
           transform: `translateX(${offset}px)`,
           transition: swiping ? "none" : "transform 0.2s ease",

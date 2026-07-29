@@ -196,6 +196,13 @@ export function CloseCircle({ onClose, label = "Close" }: { onClose: () => void;
   );
 }
 
+/** How far the panel reaches back underneath the row. Cards have rounded
+ *  corners, so a panel that stopped exactly at the row's edge would let the
+ *  paper show through the curve; running it under the card means whatever the
+ *  corner exposes is coral. The label still centres in the exposed part, since
+ *  the overlap is padding rather than width. */
+const DELETE_UNDERLAP = 22;
+
 /**
  * The Delete button a swiped-open row exposes underneath itself. It sits in
  * the row's wrapper, behind the row, and only becomes pressable — and
@@ -206,7 +213,7 @@ export function SwipeDeleteButton({ open, onDelete, label }: { open: boolean; on
     <button
       type="button"
       className="hp-swipe-delete"
-      style={{ width: REVEAL_WIDTH }}
+      style={{ width: REVEAL_WIDTH + DELETE_UNDERLAP, paddingLeft: DELETE_UNDERLAP }}
       onClick={onDelete}
       tabIndex={open ? 0 : -1}
       aria-hidden={!open}

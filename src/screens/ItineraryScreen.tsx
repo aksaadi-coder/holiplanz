@@ -714,7 +714,7 @@ function StopRow({
       {/* The card is its own drag handle: the sensor's hold delay is what
           separates picking it up from tapping it or swiping it. */}
       <div
-        className={`hp-stop-row ${updated ? "is-updated" : ""} ${next ? "is-next" : ""} ${isDragging ? "is-dragging" : ""}`.trim()}
+        className={`hp-stop-row ${updated ? "is-updated" : ""} ${next ? "is-next" : ""} ${isDragging ? "is-dragging" : ""} ${offset !== 0 ? "hp-swipe-open-edge" : ""}`.trim()}
         style={{
           transform: `translateX(${offset}px)`,
           transition: swiping ? "none" : "transform 0.2s ease",
